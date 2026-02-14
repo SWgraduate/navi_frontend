@@ -96,14 +96,14 @@ function Modal({
         <div className="flex flex-col gap-1">
           <h2
             id="modal-title"
-            className="text-left text-ds-title font-semibold leading-none text-[#17191C]"
+            className="text-left text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary"
           >
             {title}
           </h2>
           {caption != null && (
             <p
               id="modal-caption"
-              className="text-left text-[var(--ds-text-body-size)] font-normal leading-normal text-[#67717E]"
+              className="text-left text-ds-body-16-r leading-ds-body-16-r font-normal text-ds-tertiary"
             >
               {caption}
             </p>
@@ -118,7 +118,7 @@ function Modal({
               type="button"
               variant="ghost"
               size="md"
-              className="flex-1 bg-[#F0F0F0] text-[#17191C] hover:bg-[#e5e5e5]"
+              className="flex-1 bg-(--ds-gray-5) text-ds-primary hover:bg-(--ds-gray-10)"
               onClick={handleCancel}
             >
               {cancelLabel}

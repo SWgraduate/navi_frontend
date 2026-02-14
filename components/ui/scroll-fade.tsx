@@ -25,7 +25,7 @@ const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(
       className,
       axis = "both",
       fadeSize = 24,
-      fadeColor = "var(--ds-bg-surface)",
+      fadeColor = "var(--ds-gray-5)",
       children,
       style,
       ...props

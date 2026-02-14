@@ -22,22 +22,22 @@ function ChatInput({
   return (
     <div
       className={cn(
-        "shrink-0 bg-(--ds-bg-default) p-4",
+        "shrink-0 bg-(--ds-gray-0) p-4",
         className
       )}
     >
-      <div className="flex flex-col rounded-xl bg-(--ds-bg-surface) p-4">
+      <div className="flex flex-col rounded-xl bg-(--ds-gray-5) p-4">
         <input
           type="text"
           placeholder="무엇이든 물어보세요."
-          className="w-full bg-transparent pb-4 text-base text-foreground placeholder:text-(--ds-text-subtle) focus:outline-none"
+          className="w-full bg-transparent pb-4 text-base text-foreground placeholder:text-ds-secondary focus:outline-none"
           {...inputProps}
         />
         <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={onAttachClick}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-(--ds-icon-default) hover:bg-(--ds-gray-10)"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ds-tertiary hover:bg-(--ds-gray-10)"
             aria-label="첨부"
           >
             <Image

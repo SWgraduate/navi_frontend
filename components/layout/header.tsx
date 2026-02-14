@@ -71,7 +71,7 @@ function Header({
             aria-label="뒤로"
             className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
           >
-            <span className="text-[var(--ds-icon-default)] [&_svg]:!size-6 [&_svg]:!h-6 [&_svg]:!w-6">
+            <span className="text-ds-tertiary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
               <LeftIcon />
             </span>
           </Button>
@@ -83,7 +83,7 @@ function Header({
       {showCenter ? (
         <h1
           className={cn(
-            "pointer-events-none absolute left-1/2 top-1/2 max-w-[60%] -translate-x-1/2 -translate-y-1/2 truncate text-ds-title font-semibold leading-none text-[#17191C]"
+            "pointer-events-none absolute left-1/2 top-1/2 max-w-[60%] -translate-x-1/2 -translate-y-1/2 truncate text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary"
           )}
         >
           {title}
@@ -105,7 +105,7 @@ function Header({
                 aria-label="히스토리"
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
-                <span className="text-[var(--ds-icon-default)] [&_svg]:!size-6 [&_svg]:!h-6 [&_svg]:!w-6">
+                <span className="text-ds-tertiary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
                   <HistoryIcon />
                 </span>
               </Button>
@@ -118,7 +118,7 @@ function Header({
                 aria-label="추가"
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
-                <span className="text-[var(--ds-icon-default)] [&_svg]:!size-6 [&_svg]:!h-6 [&_svg]:!w-6">
+                <span className="text-ds-tertiary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
                   <NewChatIcon />
                 </span>
               </Button>

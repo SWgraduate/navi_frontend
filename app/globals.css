@@ -232,8 +232,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-size: var(--ds-text-body-size);
-    line-height: var(--ds-text-body-line);
+    font-size: var(--ds-typo-body-16-r-size);
+    line-height: var(--ds-typo-body-16-r-line);
     letter-spacing: var(--ds-letter-spacing);
     -webkit-tap-highlight-color: transparent;
     /* 큰 화면에서 앱 좌우 여백 배경 */

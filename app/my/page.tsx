@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { RightIcon } from "@/components/icons/header-icons";
 import { cn } from "@/lib/utils";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
@@ -24,15 +24,15 @@ const MOCK_VERSION = "1.00";
 /** Figma 1086-8553 마이페이지 */
 export default function MyPage() {
   return (
-    <div className="bg-(--ds-bg-default)">
+    <div className="bg-(--ds-gray-0)">
       {/* 사용자 정보 */}
       <section className="px-4 pb-16">
-        <p className="font-semibold text-ds-display leading-ds-display text-(--ds-text-bolder)">
+        <p className="font-semibold text-ds-title-24-sb leading-ds-title-24-sb text-ds-primary">
           {MOCK_USER.name}님
           <br />
           안녕하세요!
         </p>
-        <p className="mt-1 text-ds-body leading-ds text-(--ds-text-subtle)">
+        <p className="mt-1 text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
           {MOCK_USER.email}
         </p>
       </section>
@@ -44,20 +44,12 @@ export default function MyPage() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center justify-between py-3 text-ds-body text-(--ds-text-bolder) active:opacity-70"
+            className="flex items-center justify-between py-3 text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:opacity-70"
           >
             <span>{item.label}</span>
-            <span className="flex items-center gap-1">
-              {item.rightLabel != null && (
-                <span className="text-(--ds-text-subtle)">{item.rightLabel}</span>
-              )}
-              <Image
-                src="/icons/right.svg"
-                alt=""
-                width={24}
-                height={24}
-                className="shrink-0 opacity-80"
-              />
+            <span className="flex items-center gap-1 text-ds-tertiary">
+              {item.rightLabel != null && <span>{item.rightLabel}</span>}
+              <RightIcon className="text-ds-tertiary" />
             </span>
           </Link>
         ))}
@@ -66,16 +58,16 @@ export default function MyPage() {
 
       {/* 버전 정보 · 로그아웃 */}
       <nav className="px-4" aria-label="버전 및 계정">
-        <div className="flex items-center justify-between py-3 text-ds-body text-(--ds-text-bolder)">
+        <div className="flex items-center justify-between py-3 text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
           <span>버전 정보</span>
-          <span className="text-(--ds-text-subtle)">
+          <span className="text-ds-tertiary">
             현재 버전 {MOCK_VERSION}
           </span>
         </div>
         <button
           type="button"
           className={cn(
-            "flex w-full items-center py-3 text-left text-ds-body text-(--ds-text-subtle) active:opacity-70"
+            "flex w-full items-center py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary active:opacity-70"
           )}
           onClick={() => {}}
         >
