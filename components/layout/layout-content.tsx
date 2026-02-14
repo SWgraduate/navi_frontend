@@ -53,7 +53,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
   const showChatInput = pathname === "/";
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
-  const showHeader = !isSplash && !isMyPage;
+  const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
+  const showHeader = !isSplash && !isMyPage && !isGraduationPage;
   const headerTitle = HEADER_TITLE[pathname] ?? "NAVI";
 
   const mainRef = useRef<HTMLElement>(null);
