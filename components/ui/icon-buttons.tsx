@@ -4,7 +4,8 @@ import { Camera, AudioLines, ChevronUp } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const iconSize = "size-5";
+/** 16×16 (디자인 시스템) */
+const iconSize = "size-4";
 
 /** Btn/VoiceMode - 파란 버튼 + 음파 아이콘 + "말하기" */
 function VoiceModeButton({

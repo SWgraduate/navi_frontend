@@ -127,6 +127,8 @@
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  /* 모바일 전용: 앱 최대 폭 (큰 화면에서는 중앙에 이 폭만 표시) */
+  --app-max-width: 430px;
 }
 
 .dark {
@@ -164,6 +166,16 @@
   --sidebar-ring: #066bf9;
 }
 
+/* 모바일 전용 앱 프레임: 큰 화면에서도 이 폭만 사용, 중앙 정렬 */
+.app-frame {
+  width: 100%;
+  max-width: var(--app-max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--background);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -174,5 +186,7 @@
     line-height: var(--ds-text-body-line);
     letter-spacing: var(--ds-letter-spacing);
     -webkit-tap-highlight-color: transparent;
+    /* 큰 화면에서 앱 좌우 여백 배경 */
+    background: var(--muted);
   }
 }
