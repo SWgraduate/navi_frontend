@@ -1,12 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, RotateCcw, SquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LeftIcon, HistoryIcon, NewChatIcon } from "@/components/icons/header-icons";
 import { cn } from "@/lib/utils";
-
-/** 16×16 (디자인 시스템) */
-const iconSize = "size-4";
 
 export interface HeaderProps {
   /** 중앙 타이틀 (예: 로그인) */
@@ -39,7 +36,7 @@ function Header({
   return (
     <header
       className={cn(
-        "sticky top-0 z-10 flex min-h-12 items-center justify-between gap-2 border-b border-border bg-background px-2",
+        "relative sticky top-0 z-10 flex min-h-12 items-center justify-between gap-2 border-b border-border bg-background px-2",
         className
       )}
       style={{ paddingTop: "calc(0.5rem + var(--safe-area-inset-top))", paddingBottom: "0.5rem" }}
@@ -53,7 +50,9 @@ function Header({
             aria-label="뒤로"
             className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
           >
-            <ArrowLeft className={iconSize} />
+            <span className="text-[var(--ds-icon-default)] [&_svg]:!size-6 [&_svg]:!h-6 [&_svg]:!w-6">
+              <LeftIcon />
+            </span>
           </Button>
         ) : (
           <span className="w-10" aria-hidden />
@@ -62,7 +61,7 @@ function Header({
 
       <h1
         className={cn(
-          "flex-1 truncate text-center text-ds-title font-semibold leading-none text-foreground"
+          "pointer-events-none absolute left-1/2 top-1/2 max-w-[60%] -translate-x-1/2 -translate-y-1/2 truncate text-ds-title font-semibold leading-none text-[#17191C]"
         )}
       >
         {title}
@@ -81,7 +80,9 @@ function Header({
                 aria-label="히스토리"
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
-                <RotateCcw className={iconSize} />
+                <span className="text-[var(--ds-icon-default)] [&_svg]:!size-6 [&_svg]:!h-6 [&_svg]:!w-6">
+                  <HistoryIcon />
+                </span>
               </Button>
             )}
             {onAdd != null && (
@@ -92,7 +93,9 @@ function Header({
                 aria-label="추가"
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
-                <SquarePlus className={iconSize} />
+                <span className="text-[var(--ds-icon-default)] [&_svg]:!size-6 [&_svg]:!h-6 [&_svg]:!w-6">
+                  <NewChatIcon />
+                </span>
               </Button>
             )}
           </>

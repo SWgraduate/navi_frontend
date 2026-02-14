@@ -68,6 +68,8 @@
   --ds-primary-50: #066bf9;
   --ds-text-bolder: #131416;
   --ds-text-subtle: #464c53;
+  /* Figma 헤더 아이콘 (24×24) */
+  --ds-icon-default: #67717E;
   /* Figma 타이포 (Mobile/Pretendard Body 16_R, Title 18_SB) */
   --font-pretendard: "Pretendard", var(--font-geist-sans), sans-serif;
   --ds-text-body-size: 16px;
