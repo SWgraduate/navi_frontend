@@ -4,18 +4,25 @@ import { useRouter } from "next/navigation";
 import { Header } from "./header";
 
 export interface AppHeaderProps {
-  title: string;
-  /** 오른쪽 히스토리 버튼 노출 여부 */
+  /** [중] 타이틀 텍스트 */
+  title?: string;
+  /** [좌] 뒤로가기 노출 */
+  showBack?: boolean;
+  /** [중] 타이틀 영역 노출 */
+  showTitle?: boolean;
+  /** [우] 히스토리 버튼 노출 */
   showHistory?: boolean;
-  /** 오른쪽 추가 버튼 노출 여부 */
+  /** [우] 추가 버튼 노출 */
   showAdd?: boolean;
   onHistory?: () => void;
   onAdd?: () => void;
 }
 
-/** 레이아웃용 헤더 – 뒤로가기는 router.back() 사용 */
+/** 레이아웃용 헤더 – 좌/중/우 각각 on/off, 뒤로가기는 router.back() */
 function AppHeader({
-  title,
+  title = "",
+  showBack = true,
+  showTitle = true,
   showHistory = true,
   showAdd = true,
   onHistory,
@@ -25,9 +32,13 @@ function AppHeader({
 
   return (
     <Header
+      showBack={showBack}
+      onBack={showBack ? () => router.back() : undefined}
+      showTitle={showTitle}
       title={title}
-      onBack={() => router.back()}
+      showHistory={showHistory}
       onHistory={showHistory ? onHistory ?? (() => {}) : undefined}
+      showAdd={showAdd}
       onAdd={showAdd ? onAdd ?? (() => {}) : undefined}
     />
   );

@@ -6,43 +6,60 @@ import { LeftIcon, HistoryIcon, NewChatIcon } from "@/components/icons/header-ic
 import { cn } from "@/lib/utils";
 
 export interface HeaderProps {
-  /** 중앙 타이틀 (예: 로그인) */
-  title: string;
-  /** 뒤로가기 클릭 (없으면 뒤로 버튼 미표시) */
+  /** [좌] 뒤로가기 버튼 노출 */
+  showBack?: boolean;
+  /** [좌] 뒤로가기 클릭 핸들러 (showBack이 true일 때 사용) */
   onBack?: () => void;
-  /** 오른쪽: 히스토리/새로고침 버튼 클릭 */
+  /** [중] 타이틀 영역 노출 */
+  showTitle?: boolean;
+  /** [중] 타이틀 텍스트 */
+  title?: string;
+  /** [우] 히스토리 버튼 노출 */
+  showHistory?: boolean;
+  /** [우] 히스토리 클릭 핸들러 */
   onHistory?: () => void;
-  /** 오른쪽: 추가 버튼 클릭 */
+  /** [우] 추가 버튼 노출 */
+  showAdd?: boolean;
+  /** [우] 추가 클릭 핸들러 */
   onAdd?: () => void;
-  /** 오른쪽 영역 커스텀 (onHistory, onAdd 대신 사용) */
+  /** [우] 커스텀 영역 (지정 시 showHistory/showAdd/onHistory/onAdd 무시) */
   rightSlot?: React.ReactNode;
   className?: string;
 }
 
 /**
  * 06 Header – Navi 디자인 시스템 헤더.
- * 좌: 뒤로가기 | 중앙: 타이틀 | 우: 히스토리, 추가
+ * [좌] 뒤로가기 | [중] 타이틀 | [우] 히스토리, 추가 — 각각 on/off 가능
  */
 function Header({
-  title,
+  showBack = true,
   onBack,
+  showTitle = true,
+  title = "",
+  showHistory = true,
   onHistory,
+  showAdd = true,
   onAdd,
   rightSlot,
   className,
 }: HeaderProps) {
-  const hasRight = rightSlot != null || onHistory != null || onAdd != null;
+  const showLeft = showBack && onBack != null;
+  const showCenter = showTitle && title !== "";
+  const hasRightSlot = rightSlot != null;
+  const showRightFirst = !hasRightSlot && showHistory && onHistory != null;
+  const showRightSecond = !hasRightSlot && showAdd && onAdd != null;
+  const showRight = hasRightSlot || showRightFirst || showRightSecond;
 
   return (
     <header
       className={cn(
-        "relative sticky top-0 z-10 flex min-h-12 items-center justify-between gap-2 border-b border-border bg-background px-2",
+        "relative sticky top-0 z-10 flex min-h-12 items-center justify-between gap-2 bg-background px-2",
         className
       )}
       style={{ paddingTop: "calc(0.5rem + var(--safe-area-inset-top))", paddingBottom: "0.5rem" }}
     >
       <div className="flex min-w-10 items-center justify-start">
-        {onBack != null ? (
+        {showLeft ? (
           <Button
             variant="ghost"
             size="icon"
@@ -59,20 +76,24 @@ function Header({
         )}
       </div>
 
-      <h1
-        className={cn(
-          "pointer-events-none absolute left-1/2 top-1/2 max-w-[60%] -translate-x-1/2 -translate-y-1/2 truncate text-ds-title font-semibold leading-none text-[#17191C]"
-        )}
-      >
-        {title}
-      </h1>
+      {showCenter ? (
+        <h1
+          className={cn(
+            "pointer-events-none absolute left-1/2 top-1/2 max-w-[60%] -translate-x-1/2 -translate-y-1/2 truncate text-ds-title font-semibold leading-none text-[#17191C]"
+          )}
+        >
+          {title}
+        </h1>
+      ) : (
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden />
+      )}
 
       <div className="flex min-w-10 items-center justify-end gap-0">
-        {rightSlot != null ? (
+        {hasRightSlot ? (
           rightSlot
-        ) : hasRight ? (
+        ) : showRight ? (
           <>
-            {onHistory != null && (
+            {showRightFirst && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -85,7 +106,7 @@ function Header({
                 </span>
               </Button>
             )}
-            {onAdd != null && (
+            {showRightSecond && (
               <Button
                 variant="ghost"
                 size="icon"
