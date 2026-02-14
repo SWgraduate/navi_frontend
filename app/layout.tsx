@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AppHeader } from "@/components/layout/app-header";
+import { LayoutContent } from "@/components/layout/layout-content";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,10 +36,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <div className="app-frame">
-          <AppHeader title="로그인" />
-          {children}
-        </div>
+        <LayoutContent>{children}</LayoutContent>
       </body>
     </html>
   );
