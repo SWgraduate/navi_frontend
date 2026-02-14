@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { RightIcon } from "@/components/icons/header-icons";
+import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
@@ -21,8 +23,15 @@ const MOCK_SETTING_ITEMS: Array<{
 
 const MOCK_VERSION = "1.00";
 
-/** Figma 1086-8553 마이페이지 */
+/** Figma 1086-8553 마이페이지. 로그아웃 확인: Figma 1128-8760 */
 export default function MyPage() {
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  const handleLogoutConfirm = () => {
+    setLogoutModalOpen(false);
+    // TODO: 실제 로그아웃 처리 (세션/토큰 제거, 리다이렉트 등)
+  };
+
   return (
     <div className="bg-(--ds-gray-0)">
       {/* 사용자 정보 */}
@@ -69,11 +78,21 @@ export default function MyPage() {
           className={cn(
             "flex w-full items-center py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary active:opacity-70"
           )}
-          onClick={() => {}}
+          onClick={() => setLogoutModalOpen(true)}
         >
           로그아웃
         </button>
       </nav>
+
+      <Modal
+        open={logoutModalOpen}
+        onOpenChange={setLogoutModalOpen}
+        title="로그아웃 하시겠어요?"
+        caption="언제든지 다시 로그인 할 수 있어요"
+        cancelLabel="취소"
+        confirmLabel="로그아웃"
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }

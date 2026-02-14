@@ -221,7 +221,12 @@
   box-shadow: 0 0 0 1px var(--border);
 }
 
-/* Figma 모달: dialog 배경 딤 */
+/* Figma 모달: dialog 배경 딤 및 좌우 가운데 정렬 */
+.modal-dialog {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
 .modal-dialog::backdrop {
   background: rgba(0, 0, 0, 0.5);
 }

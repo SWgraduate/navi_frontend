@@ -45,6 +45,11 @@ function Modal({
   children,
 }: ModalProps) {
   const dialogRef = React.useRef<HTMLDialogElement>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   React.useEffect(() => {
     const el = dialogRef.current;
@@ -61,7 +66,8 @@ function Modal({
   }, [onOpenChange]);
 
   const handleCancel = React.useCallback(() => {
-    onCancel?.() ?? handleClose();
+    if (onCancel) onCancel();
+    else handleClose();
   }, [onCancel, handleClose]);
 
   const handleConfirm = React.useCallback(() => {
@@ -72,14 +78,14 @@ function Modal({
     if (e.target === dialogRef.current) handleClose();
   };
 
-  if (typeof document === "undefined") return null;
+  if (!mounted || typeof document === "undefined" || !open) return null;
 
   const content = (
     <dialog
       ref={dialogRef}
       onClose={handleClose}
       onClick={handleBackdropClick}
-      className="modal-dialog fixed inset-0 z-50 flex h-full w-full items-center justify-center border-none bg-transparent p-4"
+      className="modal-dialog fixed inset-0 z-50 m-0 flex h-full w-full max-w-none items-center justify-center border-none bg-transparent p-4"
       aria-modal
       aria-labelledby="modal-title"
       aria-describedby={caption ? "modal-caption" : undefined}
@@ -87,23 +93,23 @@ function Modal({
       <div
         role="presentation"
         className={cn(
-          "w-full max-w-[320px] rounded-[var(--radius)] bg-white p-5 shadow-ds-soft",
+          "mx-auto w-full max-w-[320px] shrink-0 rounded-(--radius) bg-white p-5 shadow-ds-soft",
           "flex flex-col gap-4",
           className
         )}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col gap-1">
-          <h2
+          <h1
             id="modal-title"
-            className="text-left text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary"
+            className="text-left text-ds-title-20-sb leading-ds-title-18-sb font-semibold text-ds-primary"
           >
             {title}
-          </h2>
+          </h1>
           {caption != null && (
             <p
               id="modal-caption"
-              className="text-left text-ds-body-16-r leading-ds-body-16-r font-normal text-ds-tertiary"
+              className="text-left text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary"
             >
               {caption}
             </p>
@@ -118,7 +124,7 @@ function Modal({
               type="button"
               variant="ghost"
               size="md"
-              className="flex-1 bg-(--ds-gray-5) text-ds-primary hover:bg-(--ds-gray-10)"
+              className="flex-1 bg-(--ds-gray-5) text-ds-tertiary hover:bg-(--ds-gray-10)"
               onClick={handleCancel}
             >
               {cancelLabel}
@@ -129,7 +135,7 @@ function Modal({
               type="button"
               variant="primary"
               size="md"
-              className="flex-1"
+              className="flex-1 text-white"
               onClick={handleConfirm}
               disabled={confirmDisabled}
             >
