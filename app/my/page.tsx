@@ -35,7 +35,7 @@ export default function MyPage() {
   return (
     <div className="bg-(--ds-gray-0)">
       {/* 사용자 정보 */}
-      <section className="px-4 pb-16">
+      <section className="px-4 py-16">
         <p className="font-semibold text-ds-title-24-sb leading-ds-title-24-sb text-ds-primary">
           {MOCK_USER.name}님
           <br />

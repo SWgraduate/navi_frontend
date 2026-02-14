@@ -44,7 +44,10 @@ export default function Home() {
     <>
       {showSplash && <SplashScreen />}
       <main className="min-h-screen bg-background p-4">
-        <p className="text-muted-foreground">내용없음</p>
+        {/* Figma 1136-9535: 메인 빈 영역 환영 문구, 한양대만 브랜드 색 */}
+        <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
+          회원님의 <span className="text-ds-brand">한양대</span> 생활을 더 편하게
+        </p>
       </main>
     </>
   );

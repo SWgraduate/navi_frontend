@@ -22,7 +22,7 @@ export function BottomBar() {
 
   return (
     <nav
-      className="flex shrink-0 flex-col bg-background"
+      className="flex shrink-0 flex-col bg-white"
       style={{ paddingBottom: "calc(var(--safe-area-inset-bottom) + 8px)" }}
       aria-label="하단 메뉴"
     >
