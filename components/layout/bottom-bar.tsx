@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GraduationCapIcon, NaviIcon, MyIcon } from "@/components/icons/bottom-bar-icons";
+import { TransitionLink } from "@/components/layout/transition-link";
 import { cn } from "@/lib/utils";
 
 const TAB_CONFIG = [
@@ -26,7 +26,7 @@ export function BottomBar() {
       style={{ paddingBottom: "calc(var(--safe-area-inset-bottom) + 8px)" }}
       aria-label="하단 메뉴"
     >
-      {/* 상단 한 줄: 구간별로 회색 / 파란색 */}
+      {/* 상단 한 줄: 구간별로 회색 / 파란색 (아이콘·글자와 동일한 ds-brand) */}
       <div className="flex h-0.5 w-full shrink-0">
         {TAB_CONFIG.map(({ href }) => (
           <div
@@ -42,7 +42,7 @@ export function BottomBar() {
         {TAB_CONFIG.map(({ href, label, Icon }) => {
           const isActive = getIsActive(href);
           return (
-            <Link
+            <TransitionLink
               key={href}
               href={href}
               className={cn(
@@ -55,7 +55,7 @@ export function BottomBar() {
               <span className="text-ds-caption-14-m leading-ds-caption-14-m font-medium">
                 {label}
               </span>
-            </Link>
+            </TransitionLink>
           );
         })}
       </div>

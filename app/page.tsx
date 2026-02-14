@@ -5,13 +5,17 @@ import { SplashScreen } from "@/components/splash-screen";
 
 const SPLASH_STORAGE_KEY = "navi_splash_shown";
 const SPLASH_DURATION_MS = 1500;
-const FADEOUT_DURATION_MS = 400;
+
+function hideSplash() {
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem(SPLASH_STORAGE_KEY, "1");
+  }
+}
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
-  const [splashExiting, setSplashExiting] = useState(false);
 
-  // 첫 방문이 아니면 스플래시 건너뜀 (setState는 비동기로 호출해 린트 회피)
+  // 첫 방문이 아니면 스플래시 건너뜀
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem(SPLASH_STORAGE_KEY) === "1") {
@@ -19,24 +23,26 @@ export default function Home() {
     }
   }, []);
 
+  // 스플래시 표시 시간 후 View Transitions로 전환 (페이드아웃 별도 불필요)
   useEffect(() => {
     if (!showSplash) return;
-    const startExit = setTimeout(() => setSplashExiting(true), SPLASH_DURATION_MS);
-    return () => clearTimeout(startExit);
+    const t = setTimeout(() => {
+      const doHide = () => {
+        hideSplash();
+        setShowSplash(false);
+      };
+      if (typeof document !== "undefined" && typeof document.startViewTransition === "function") {
+        document.startViewTransition(doHide);
+      } else {
+        doHide();
+      }
+    }, SPLASH_DURATION_MS);
+    return () => clearTimeout(t);
   }, [showSplash]);
-
-  useEffect(() => {
-    if (!splashExiting) return;
-    const unmount = setTimeout(() => {
-      sessionStorage.setItem(SPLASH_STORAGE_KEY, "1");
-      setShowSplash(false);
-    }, FADEOUT_DURATION_MS);
-    return () => clearTimeout(unmount);
-  }, [splashExiting]);
 
   return (
     <>
-      {showSplash && <SplashScreen exiting={splashExiting} />}
+      {showSplash && <SplashScreen />}
       <main className="min-h-screen bg-background p-4">
         <p className="text-muted-foreground">내용없음</p>
       </main>

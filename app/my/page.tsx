@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { RightIcon } from "@/components/icons/header-icons";
+import { TransitionLink } from "@/components/layout/transition-link";
 import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +50,7 @@ export default function MyPage() {
       {/* 설정 메뉴 */}
       <nav className="px-4" aria-label="설정 메뉴">
         {MOCK_SETTING_ITEMS.map((item) => (
-          <Link
+          <TransitionLink
             key={item.href}
             href={item.href}
             className="flex items-center justify-between py-3 text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:opacity-70"
@@ -60,7 +60,7 @@ export default function MyPage() {
               {item.rightLabel != null && <span>{item.rightLabel}</span>}
               <RightIcon className="text-ds-tertiary" />
             </span>
-          </Link>
+          </TransitionLink>
         ))}
       </nav>
       <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
