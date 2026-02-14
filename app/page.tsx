@@ -6,6 +6,9 @@ import { SplashScreen } from "@/components/splash-screen";
 const SPLASH_STORAGE_KEY = "navi_splash_shown";
 const SPLASH_DURATION_MS = 1500;
 
+/* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
+const MOCK_MAIN_USER = { name: "Navi" } as const;
+
 function hideSplash() {
   if (typeof window !== "undefined") {
     sessionStorage.setItem(SPLASH_STORAGE_KEY, "1");
@@ -43,10 +46,11 @@ export default function Home() {
   return (
     <>
       {showSplash && <SplashScreen />}
-      <main className="min-h-screen bg-background p-4">
+      <main className="bg-background p-4">
         {/* Figma 1136-9535: 메인 빈 영역 환영 문구, 한양대만 브랜드 색 */}
-        <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
-          회원님의 <span className="text-ds-brand">한양대</span> 생활을 더 편하게
+        <p className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
+          {MOCK_MAIN_USER.name}님의 <br/>
+          <span className="text-ds-brand">한양대</span> 생활을 더 편하게
         </p>
       </main>
     </>
