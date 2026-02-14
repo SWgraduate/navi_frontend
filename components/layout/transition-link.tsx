@@ -4,12 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ComponentProps } from "react";
 
-/** View Transitions API 지원 시 라우트 전환을 부드럽게 함. 미지원 브라우저는 일반 이동. */
-declare global {
-  interface Document {
-    startViewTransition?(callback: () => void | Promise<void>): { finished: Promise<void> };
-  }
-}
+type DocumentWithViewTransition = Document & {
+  startViewTransition?(callback: () => void | Promise<void>): { finished: Promise<void> };
+};
 
 type TransitionLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   href: string;
@@ -38,8 +35,9 @@ export function TransitionLink({ href, onClick, children, ...props }: Transition
 
     const navigate = () => router.push(targetHref);
 
-    if (typeof document !== "undefined" && typeof document.startViewTransition === "function") {
-      document.startViewTransition(navigate);
+    const doc = typeof document !== "undefined" ? (document as DocumentWithViewTransition) : null;
+    if (doc?.startViewTransition) {
+      doc.startViewTransition(navigate);
     } else {
       navigate();
     }
