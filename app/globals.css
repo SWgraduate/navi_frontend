@@ -207,13 +207,13 @@
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
-  /* 모바일 전용: 앱 최대 폭 (큰 화면에서는 중앙에 이 폭만 표시) */
+  /* 앱 최대 폭 430px */
   --app-max-width: 430px;
-  /* 큰 화면에서 앱 좌우 여백 배경 (모바일 영역 밖) */
+  /* 큰 화면에서 앱 좌우 여백 배경 (앱 영역 밖) */
   --app-outer-bg: #c7ccd1;
 }
 
-/* 모바일 전용 앱 프레임: 큰 화면에서도 이 폭만 사용, 중앙 정렬 */
+/* 앱 프레임: 최대 폭 430px, 중앙 정렬 */
 .app-frame {
   width: 100%;
   max-width: var(--app-max-width);
