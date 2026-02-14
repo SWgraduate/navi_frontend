@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource/pretendard/400.css";
+@import "@fontsource/pretendard/500.css";
 @import "@fontsource/pretendard/600.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -11,10 +12,31 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-pretendard);
   --font-mono: var(--font-geist-mono);
-  /* Figma DS typography (Mobile/Pretendard Body 16_R, Title 18_SB) */
-  --text-ds-body: var(--ds-text-body-size);
-  --text-ds-title: var(--ds-text-title-size);
-  --leading-ds: var(--ds-text-body-line);
+  /* DS 타이포 (Tailwind 유틸) – title / body / caption */
+  --text-ds-title-24-sb: var(--ds-typo-title-24-sb-size);
+  --text-ds-title-24-m: var(--ds-typo-title-24-m-size);
+  --text-ds-title-20-sb: var(--ds-typo-title-20-sb-size);
+  --text-ds-title-18-sb: var(--ds-typo-title-18-sb-size);
+  --text-ds-body-16-sb: var(--ds-typo-body-16-sb-size);
+  --text-ds-body-16-m: var(--ds-typo-body-16-m-size);
+  --text-ds-body-16-r: var(--ds-typo-body-16-r-size);
+  --text-ds-caption-14-m: var(--ds-typo-caption-14-m-size);
+  --text-ds-caption-14-r: var(--ds-typo-caption-14-r-size);
+  --leading-ds-title-24-sb: var(--ds-typo-title-24-sb-line);
+  --leading-ds-title-24-m: var(--ds-typo-title-24-m-line);
+  --leading-ds-title-20-sb: var(--ds-typo-title-20-sb-line);
+  --leading-ds-title-18-sb: var(--ds-typo-title-18-sb-line);
+  --leading-ds-body-16-sb: var(--ds-typo-body-16-sb-line);
+  --leading-ds-body-16-m: var(--ds-typo-body-16-m-line);
+  --leading-ds-body-16-r: var(--ds-typo-body-16-r-line);
+  --leading-ds-caption-14-m: var(--ds-typo-caption-14-m-line);
+  --leading-ds-caption-14-r: var(--ds-typo-caption-14-r-line);
+  /* 하위 호환 별칭 */
+  --text-ds-body: var(--ds-typo-body-16-r-size);
+  --text-ds-title: var(--ds-typo-title-18-sb-size);
+  --text-ds-display: var(--ds-typo-title-24-sb-size);
+  --leading-ds: var(--ds-typo-body-16-r-line);
+  --leading-ds-display: var(--ds-typo-title-24-sb-line);
   --tracking-ds: var(--ds-letter-spacing);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -55,28 +77,84 @@
   /* Figma DS shadows (node 1126:11558 드롭쉐도우) */
   --shadow-ds-soft: var(--ds-shadow-soft);
   --shadow-ds-glow: var(--ds-shadow-glow);
+  /* DS 색상 (텍스트/UI 시맨틱) */
+  --color-ds-primary: var(--ds-color-primary);
+  --color-ds-secondary: var(--ds-color-secondary);
+  --color-ds-tertiary: var(--ds-color-tertiary);
+  --color-ds-disabled: var(--ds-color-disabled);
+  --color-ds-brand: var(--ds-color-brand);
+  --color-ds-inverse: var(--ds-color-inverse);
 }
 
-/* Design system: Figma 5ZKJkYmk6v3nuiJB3Q218D (졸작 캡스톤) */
+/* Design system: Figma 5ZKJkYmk6v3nuiJB3Q218D (node 1045-5250) */
 :root {
   --radius: 0.625rem;
-  /* Figma 변수 (직접 참조용) */
+  /* Gray 팔레트 */
   --ds-gray-0: #ffffff;
-  --ds-gray-10: #eeeff1;
-  --ds-bg-default: #ffffff;
-  --ds-bg-surface: #f4f4f6;
-  --ds-primary-50: #066bf9;
-  --ds-text-bolder: #131416;
-  --ds-text-subtle: #464c53;
-  /* Figma 헤더 아이콘 (24×24) */
-  --ds-icon-default: #67717E;
-  /* Figma 타이포 (Mobile/Pretendard Body 16_R, Title 18_SB) */
+  --ds-gray-5: #f1f2f4;
+  --ds-gray-10: #e3e5e8;
+  --ds-gray-20: #c7ccd1;
+  --ds-gray-30: #aab2bb;
+  --ds-gray-40: #8b95a1;
+  --ds-gray-50: #67717e;
+  --ds-gray-60: #545d68;
+  --ds-gray-70: #444c55;
+  --ds-gray-80: #2e3338;
+  --ds-gray-90: #17191c;
+  --ds-gray-95: #0b0d0e;
+  --ds-gray-100: #080808;
+  /* Blue 팔레트 */
+  --ds-blue-0: #ffffff;
+  --ds-blue-5: #e6f0fe;
+  --ds-blue-10: #cde1fe;
+  --ds-blue-20: #9bc4fd;
+  --ds-blue-30: #6aa6fb;
+  --ds-blue-40: #3889fa;
+  --ds-blue-50: #066bf9;
+  --ds-blue-60: #0556c7;
+  --ds-blue-70: #044095;
+  --ds-blue-80: #022b64;
+  --ds-blue-90: #011532;
+  --ds-blue-95: #010b19;
+  --ds-blue-100: #080808;
+  /* 시맨틱 별칭 (Gray/Blue 참조) */
+  --ds-bg-default: var(--ds-gray-0);
+  --ds-bg-surface: var(--ds-gray-5);
+  --ds-text-bolder: var(--ds-gray-90);
+  --ds-text-subtle: var(--ds-gray-70);
+  --ds-icon-default: var(--ds-gray-50);
+  --ds-primary-50: var(--ds-blue-50);
+  /* DS 색상 (텍스트/UI 시맨틱) */
+  --ds-color-primary: var(--ds-gray-90);
+  --ds-color-secondary: var(--ds-gray-70);
+  --ds-color-tertiary: var(--ds-gray-50);
+  --ds-color-disabled: var(--ds-gray-50);
+  --ds-color-brand: var(--ds-blue-50);
+  --ds-color-inverse: var(--ds-gray-0);
+  /* DS 타이포 (Title / Body / Caption) – size(px), line(letterSpacing %→배수), weight */
   --font-pretendard: "Pretendard", var(--font-geist-sans), sans-serif;
-  --ds-text-body-size: 16px;
-  --ds-text-body-line: 1.5;
-  --ds-text-title-size: 18px;
-  --ds-text-title-line: 1.5;
   --ds-letter-spacing: -0.025em;
+  /* title */
+  --ds-typo-title-24-sb-size: 24px;
+  --ds-typo-title-24-sb-line: 1.3;
+  --ds-typo-title-24-m-size: 24px;
+  --ds-typo-title-24-m-line: 1.3;
+  --ds-typo-title-20-sb-size: 20px;
+  --ds-typo-title-20-sb-line: 1.4;
+  --ds-typo-title-18-sb-size: 18px;
+  --ds-typo-title-18-sb-line: 1.5;
+  /* body */
+  --ds-typo-body-16-sb-size: 16px;
+  --ds-typo-body-16-sb-line: 1.5;
+  --ds-typo-body-16-m-size: 16px;
+  --ds-typo-body-16-m-line: 1.5;
+  --ds-typo-body-16-r-size: 16px;
+  --ds-typo-body-16-r-line: 1.5;
+  /* caption */
+  --ds-typo-caption-14-m-size: 14px;
+  --ds-typo-caption-14-m-line: 1.5;
+  --ds-typo-caption-14-r-size: 14px;
+  --ds-typo-caption-14-r-line: 1.5;
   /* Figma 드롭쉐도우 (Rectangle 183 / 184) */
   --ds-shadow-soft: 0px 0px 24px 0px rgba(8, 8, 8, 0.1);
   --ds-shadow-glow: 0px 0px 32px 0px rgba(255, 255, 255, 0.8);
@@ -131,41 +209,6 @@
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
   /* 모바일 전용: 앱 최대 폭 (큰 화면에서는 중앙에 이 폭만 표시) */
   --app-max-width: 430px;
-}
-
-.dark {
-  /* Dark: 배경/전경 반전, Primary 유지 */
-  --background: #131416;
-  --foreground: #ffffff;
-  --card: #1a1c1e;
-  --card-foreground: #ffffff;
-  --popover: #1a1c1e;
-  --popover-foreground: #ffffff;
-  --primary: #066bf9;
-  --primary-foreground: #ffffff;
-  --secondary: #464c53;
-  --secondary-foreground: #ffffff;
-  --muted: #464c53;
-  --muted-foreground: #eeeff1;
-  --accent: #464c53;
-  --accent-foreground: #ffffff;
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
-  --ring: #066bf9;
-  --chart-1: #066bf9;
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: #1a1c1e;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #066bf9;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #464c53;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #066bf9;
 }
 
 /* 모바일 전용 앱 프레임: 큰 화면에서도 이 폭만 사용, 중앙 정렬 */

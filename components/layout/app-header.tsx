@@ -14,6 +14,8 @@ export interface AppHeaderProps {
   showHistory?: boolean;
   /** [우] 추가 버튼 노출 */
   showAdd?: boolean;
+  /** 스크롤 시 헤더 하단 쉐도우 (디자인 시스템) */
+  scrolled?: boolean;
   onHistory?: () => void;
   onAdd?: () => void;
 }
@@ -25,6 +27,7 @@ function AppHeader({
   showTitle = true,
   showHistory = true,
   showAdd = true,
+  scrolled,
   onHistory,
   onAdd,
 }: AppHeaderProps) {
@@ -40,6 +43,7 @@ function AppHeader({
       onHistory={showHistory ? onHistory ?? (() => {}) : undefined}
       showAdd={showAdd}
       onAdd={showAdd ? onAdd ?? (() => {}) : undefined}
+      scrolled={scrolled}
     />
   );
 }

@@ -30,7 +30,7 @@ export function BottomBar() {
   return (
     <nav
       className="flex h-14 shrink-0 items-center justify-around border-t border-border bg-background"
-      style={{ paddingBottom: "var(--safe-area-inset-bottom)" }}
+      style={{ paddingBottom: "calc(var(--safe-area-inset-bottom) + 8px)" }}
       aria-label="하단 메뉴"
     >
       {TAB_CONFIG.map(({ href, label, iconSrc }) => {

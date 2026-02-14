@@ -24,6 +24,8 @@ export interface HeaderProps {
   onAdd?: () => void;
   /** [우] 커스텀 영역 (지정 시 showHistory/showAdd/onHistory/onAdd 무시) */
   rightSlot?: React.ReactNode;
+  /** 스크롤 시 하단에 디자인 시스템 쉐도우 적용 (--ds-shadow-soft) */
+  scrolled?: boolean;
   className?: string;
 }
 
@@ -41,6 +43,7 @@ function Header({
   showAdd = true,
   onAdd,
   rightSlot,
+  scrolled = false,
   className,
 }: HeaderProps) {
   const showLeft = showBack && onBack != null;
@@ -53,7 +56,8 @@ function Header({
   return (
     <header
       className={cn(
-        "relative sticky top-0 z-10 flex min-h-12 items-center justify-between gap-2 bg-background px-2",
+        "relative sticky top-0 z-10 flex min-h-12 items-center justify-between gap-2 bg-background px-2 transition-shadow duration-200",
+        scrolled && "shadow-ds-soft",
         className
       )}
       style={{ paddingTop: "calc(0.5rem + var(--safe-area-inset-top))", paddingBottom: "0.5rem" }}
