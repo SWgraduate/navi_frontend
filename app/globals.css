@@ -215,11 +215,13 @@
   --header-bg: var(--background);
 }
 
-/* 앱 프레임: 최대 폭 430px, 중앙 정렬 */
+/* 앱 프레임: 최대 폭 430px, 중앙 정렬, 뷰포트 높이 채움 */
 .app-frame {
   width: 100%;
   max-width: var(--app-max-width);
-  min-height: 200dvh;
+  height: 100%;
+  min-height: 100vh; /* dvh 미지원 폴백 */
+  min-height: 100dvh;
   margin: 0 auto;
   background: var(--background);
   box-shadow: 0 0 0 2px var(--ds-gray-70);

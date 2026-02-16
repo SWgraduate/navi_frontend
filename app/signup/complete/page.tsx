@@ -225,7 +225,7 @@ export default function SignupCompletePage() {
     }
     setFormErrors({});
     // TODO: 회원가입 API (학적 정보 저장)
-    withViewTransition(() => router.push("/home"));
+    withViewTransition(() => router.push("/signup/welcome"));
   };
 
   return (
