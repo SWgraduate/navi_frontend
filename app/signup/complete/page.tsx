@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
+import { signupCompleteFormSchema } from "@/lib/schemas/signup-complete";
 import { Search } from "lucide-react";
 
 function UpDownIcon({ className }: { className?: string }) {
@@ -133,6 +134,7 @@ export default function SignupCompletePage() {
   const [yearSemesterSheetOpen, setYearSemesterSheetOpen] = useState(false);
   const [sheetYear, setSheetYear] = useState<number | null>(null);
   const [sheetSemester, setSheetSemester] = useState<number | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const majorSheetDragControls = useDragControls();
   const secondMajorTypeDragControls = useDragControls();
@@ -165,6 +167,7 @@ export default function SignupCompletePage() {
   const confirmYearSemester = () => {
     if (sheetYear != null && sheetSemester != null) {
       setYearSemester(`${sheetYear}-${sheetSemester}`);
+      if (formErrors.yearSemester) setFormErrors((p) => ({ ...p, yearSemester: "" }));
     }
     setYearSemesterSheetOpen(false);
   };
@@ -176,6 +179,11 @@ export default function SignupCompletePage() {
           return `${y}학년 ${s}학기`;
         })()
       : "";
+
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollAreaRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const filteredMajors = useMemo(() => {
     if (!majorSearch.trim()) return MAJOR_OPTIONS;
@@ -197,7 +205,24 @@ export default function SignupCompletePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    const result = signupCompleteFormSchema.safeParse({
+      studentId: studentId.trim(),
+      major: major.trim(),
+      secondMajorType,
+      secondMajor: secondMajor.trim(),
+      academicStatus,
+      yearSemester: yearSemester.trim(),
+    });
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors as Record<string, string[] | undefined>;
+      const next: Record<string, string> = {};
+      for (const [key, messages] of Object.entries(fieldErrors)) {
+        if (messages?.[0]) next[key] = messages[0];
+      }
+      setFormErrors(next);
+      return;
+    }
+    setFormErrors({});
     // TODO: 회원가입 API (학적 정보 저장)
     withViewTransition(() => router.push("/home"));
   };
@@ -205,7 +230,9 @@ export default function SignupCompletePage() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <div
-        className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-4 pb-8"
+        ref={scrollAreaRef}
+        tabIndex={0}
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-4 pb-8 outline-none"
         style={{
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
@@ -242,9 +269,18 @@ export default function SignupCompletePage() {
               inputMode="numeric"
               placeholder="학번을 입력해주세요 (예: 2026000000)"
               value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              className="rounded-md border-2 border-transparent bg-secondary p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:border-primary focus:outline-none focus:ring-0"
+              onChange={(e) => {
+                setStudentId(e.target.value);
+                if (formErrors.studentId) setFormErrors((p) => ({ ...p, studentId: "" }));
+              }}
+              className={cn(
+                "rounded-md border-2 bg-secondary p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0",
+                formErrors.studentId ? "border-destructive" : "border-transparent focus:border-primary"
+              )}
             />
+            {formErrors.studentId && (
+              <p className="text-ds-caption-14-r text-destructive">{formErrors.studentId}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -257,14 +293,23 @@ export default function SignupCompletePage() {
             <button
               id="signup-major-trigger"
               type="button"
-              onClick={() => setMajorSheetOpen(true)}
-              className="relative flex w-full items-center justify-between rounded-md border-2 border-transparent bg-secondary p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:border-primary focus:outline-none focus:ring-0"
+              onClick={() => {
+                setMajorSheetOpen(true);
+                if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
+              }}
+              className={cn(
+                "relative flex w-full items-center justify-between rounded-md border-2 bg-secondary p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0",
+                formErrors.major ? "border-destructive" : "border-transparent focus:border-primary"
+              )}
             >
               <span className={cn(major ? "text-ds-gray-90" : "text-ds-tertiary")}>
                 {major || "전공을 선택해주세요"}
               </span>
               <UpDownIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
             </button>
+            {formErrors.major && (
+              <p className="text-ds-caption-14-r text-destructive">{formErrors.major}</p>
+            )}
           </div>
 
           {/* 주전공 선택 바텀시트 (Figma 1105-11744) */}
@@ -300,7 +345,7 @@ export default function SignupCompletePage() {
                 >
                 <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                   <div
-                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
+                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
                     aria-hidden
                     onPointerDown={(e) => majorSheetDragControls.start(e)}
                   >
@@ -329,6 +374,7 @@ export default function SignupCompletePage() {
                           setMajor(m);
                           setMajorSheetOpen(false);
                           setMajorSearch("");
+                          if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
                         }}
                         className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
@@ -405,7 +451,7 @@ export default function SignupCompletePage() {
                 >
                 <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                   <div
-                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
+                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
                     aria-hidden
                     onPointerDown={(e) => secondMajorTypeDragControls.start(e)}
                   >
@@ -447,15 +493,24 @@ export default function SignupCompletePage() {
               <button
                 id="signup-second-major-picker-trigger"
                 type="button"
-                onClick={() => setSecondMajorPickerOpen(true)}
+                onClick={() => {
+                  setSecondMajorPickerOpen(true);
+                  if (formErrors.secondMajor) setFormErrors((p) => ({ ...p, secondMajor: "" }));
+                }}
                 className={cn(
-                  "relative flex w-full items-center justify-between rounded-md border-2 border-transparent bg-secondary p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:border-primary focus:outline-none focus:ring-0",
+                  "relative flex w-full items-center justify-between rounded-md border-2 bg-secondary p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0",
+                  formErrors.secondMajor
+                    ? "border-destructive"
+                    : "border-transparent focus:border-primary",
                   secondMajor ? "text-ds-gray-90" : "text-ds-tertiary"
                 )}
               >
                 <span>{secondMajor || "전공을 선택해주세요"}</span>
                 <UpDownIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
               </button>
+              {formErrors.secondMajor && (
+                <p className="text-ds-caption-14-r text-destructive">{formErrors.secondMajor}</p>
+              )}
             </div>
           )}
 
@@ -492,7 +547,7 @@ export default function SignupCompletePage() {
                 >
                   <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                     <div
-                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
+                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
                       aria-hidden
                       onPointerDown={(e) => secondMajorPickerDragControls.start(e)}
                     >
@@ -521,6 +576,7 @@ export default function SignupCompletePage() {
                             setSecondMajor(m);
                             setSecondMajorPickerOpen(false);
                             setSecondMajorPickerSearch("");
+                            if (formErrors.secondMajor) setFormErrors((p) => ({ ...p, secondMajor: "" }));
                           }}
                           className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                         >
@@ -546,29 +602,42 @@ export default function SignupCompletePage() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setAcademicStatus("enrolled")}
+                onClick={() => {
+                  setAcademicStatus("enrolled");
+                  if (formErrors.academicStatus) setFormErrors((p) => ({ ...p, academicStatus: "" }));
+                }}
                 className={cn(
                   "flex-1 rounded-md border-2 py-3 text-ds-body-16-r leading-ds-body-16-r",
                   academicStatus === "enrolled"
                     ? "border-primary bg-primary/10 text-primary"
-                    : "border-transparent bg-secondary text-ds-tertiary"
+                    : formErrors.academicStatus
+                      ? "border-destructive bg-secondary text-ds-tertiary"
+                      : "border-transparent bg-secondary text-ds-tertiary"
                 )}
               >
                 재학생
               </button>
               <button
                 type="button"
-                onClick={() => setAcademicStatus("leave")}
+                onClick={() => {
+                  setAcademicStatus("leave");
+                  if (formErrors.academicStatus) setFormErrors((p) => ({ ...p, academicStatus: "" }));
+                }}
                 className={cn(
                   "flex-1 rounded-md border-2 py-3 text-ds-body-16-r leading-ds-body-16-r",
                   academicStatus === "leave"
                     ? "border-primary bg-primary/10 text-primary"
-                    : "border-transparent bg-secondary text-ds-tertiary"
+                    : formErrors.academicStatus
+                      ? "border-destructive bg-secondary text-ds-tertiary"
+                      : "border-transparent bg-secondary text-ds-tertiary"
                 )}
               >
                 휴학생
               </button>
             </div>
+            {formErrors.academicStatus && (
+              <p className="text-ds-caption-14-r text-destructive">{formErrors.academicStatus}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -581,14 +650,21 @@ export default function SignupCompletePage() {
             <button
               id="signup-year-semester-trigger"
               type="button"
-              onClick={openYearSemesterSheet}
+              onClick={() => {
+                openYearSemesterSheet();
+                if (formErrors.yearSemester) setFormErrors((p) => ({ ...p, yearSemester: "" }));
+              }}
               className={cn(
-                "flex w-full items-center rounded-md border-2 border-transparent bg-secondary p-4 text-left text-ds-body-16-r leading-ds-body-16-r focus:border-primary focus:outline-none focus:ring-0",
+                "flex w-full items-center rounded-md border-2 bg-secondary p-4 text-left text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0",
+                formErrors.yearSemester ? "border-destructive" : "border-transparent focus:border-primary",
                 yearSemesterDisplay ? "text-ds-gray-90" : "text-ds-tertiary"
               )}
             >
               <span>{yearSemesterDisplay || "학년/학기를 선택해주세요"}</span>
             </button>
+            {formErrors.yearSemester && (
+              <p className="text-ds-caption-14-r text-destructive">{formErrors.yearSemester}</p>
+            )}
           </div>
 
           {/* 현재 이수한 학년/학기 바텀시트 (Figma 1113-9691) */}
@@ -624,7 +700,7 @@ export default function SignupCompletePage() {
                 >
                   <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                     <div
-                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
+                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
                       aria-hidden
                       onPointerDown={(e) => yearSemesterDragControls.start(e)}
                     >
