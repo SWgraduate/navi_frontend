@@ -46,13 +46,13 @@ export default function Home() {
   return (
     <>
       {showSplash && <SplashScreen />}
-      <main className="bg-background p-4">
+      <div data-home-main-area className="h-full bg-background p-4">
         {/* Figma 1136-9535: 메인 빈 영역 환영 문구, 한양대만 브랜드 색 */}
         <p className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
           {MOCK_MAIN_USER.name}님의 <br/>
           <span className="text-ds-brand">한양대</span> 생활을 더 편하게
         </p>
-      </main>
+      </div>
     </>
   );
 }

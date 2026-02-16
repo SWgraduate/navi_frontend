@@ -22,8 +22,12 @@ export function BottomBar() {
 
   return (
     <nav
-      className="flex shrink-0 flex-col bg-white"
-      style={{ paddingBottom: "calc(var(--safe-area-inset-bottom) + 8px)" }}
+      className="fixed bottom-0 left-0 right-0 z-10 flex shrink-0 flex-col bg-white"
+      style={{
+        paddingBottom: "calc(var(--safe-area-inset-bottom) + 8px)",
+        maxWidth: "var(--app-max-width)",
+        margin: "0 auto",
+      }}
       aria-label="하단 메뉴"
     >
       {/* 상단 한 줄: 구간별로 회색 / 파란색 (아이콘·글자와 동일한 ds-brand) */}

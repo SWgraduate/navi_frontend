@@ -210,17 +210,17 @@
   /* 앱 최대 폭 430px */
   --app-max-width: 430px;
   /* 큰 화면에서 앱 좌우 여백 배경 (앱 영역 밖) */
-  --app-outer-bg: #c7ccd1;
+  --app-outer-bg: var(--background);
 }
 
 /* 앱 프레임: 최대 폭 430px, 중앙 정렬 */
 .app-frame {
   width: 100%;
   max-width: var(--app-max-width);
-  min-height: 100dvh;
+  min-height: 200dvh;
   margin: 0 auto;
   background: var(--background);
-  box-shadow: 0 0 0 1px var(--border);
+  box-shadow: 0 0 0 2px var(--ds-gray-70);
 }
 
 /* Figma 모달: dialog 배경 딤 및 좌우 가운데 정렬 */

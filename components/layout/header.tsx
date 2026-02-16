@@ -56,11 +56,16 @@ function Header({
   return (
     <header
       className={cn(
-        "relative sticky top-0 z-10 flex min-h-12 items-center justify-between gap-2 bg-background px-2 transition-shadow duration-200",
+        "fixed top-0 left-0 right-0 z-10 flex min-h-12 items-center justify-between gap-2 bg-background px-2 transition-shadow duration-200",
         scrolled && "shadow-ds-soft",
         className
       )}
-      style={{ paddingTop: "calc(0.5rem + var(--safe-area-inset-top))", paddingBottom: "0.5rem" }}
+      style={{
+        paddingTop: "calc(0.5rem + var(--safe-area-inset-top))",
+        paddingBottom: "0.5rem",
+        maxWidth: "var(--app-max-width)",
+        margin: "0 auto",
+      }}
     >
       <div className="flex min-w-10 items-center justify-start">
         {showLeft ? (

@@ -11,6 +11,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  interactiveWidget: "resizes-visual", // 키보드 등 인터랙티브 위젯에 대한 뷰포트 리사이즈 동작 설정
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#066bf9" },
     { media: "(prefers-color-scheme: dark)", color: "#066bf9" },
