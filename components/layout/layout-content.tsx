@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardDebug } from "@/components/debug/keyboard-debug";
 import { AppHeader } from "@/components/layout/app-header";
 import { BottomBar } from "@/components/layout/bottom-bar";
 import { ChatInput } from "@/components/layout/chat-input";
@@ -284,7 +283,6 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-frame flex h-full min-h-0 flex-col overflow-hidden">
-      <KeyboardDebug />
       {showHeader && (
         <div ref={headerRef}>
           <AppHeader
@@ -310,6 +308,11 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           paddingTop: resolvedPaddingTop,
           paddingBottom: resolvedPaddingBottom,
           transition: "height 220ms ease, max-height 220ms ease, padding-bottom 220ms ease",
+          touchAction: "pan-y", // 세로 스크롤만 허용
+          WebkitOverflowScrolling: "touch", // iOS 부드러운 스크롤
+          overflowY: "scroll", // 모바일에서 스크롤 강제
+          overflowX: "hidden",
+          position: "relative", // 스크롤 컨테이너로 명확히 지정
         }}
       >
         {children}

@@ -263,6 +263,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  main {
+    /* 메인 영역만 스크롤 가능 */
+    touch-action: pan-y !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
   body {
     @apply text-foreground;
     font-size: var(--ds-typo-body-16-r-size);
@@ -271,5 +278,15 @@
     -webkit-tap-highlight-color: transparent;
     /* 모바일 영역 밖: 구분되는 배경색 (큰 화면 좌우) */
     background: var(--app-outer-bg);
+    /* body 레벨 스크롤 방지, 메인 영역만 스크롤 가능 */
+    overscroll-behavior: none;
+    overflow: hidden;
+  }
+  
+  html {
+    /* html 레벨 스크롤 방지 */
+    touch-action: none;
+    overscroll-behavior: none;
+    overflow: hidden;
   }
 }

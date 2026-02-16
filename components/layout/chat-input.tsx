@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { VoiceModeButton } from "@/components/ui/icon-buttons";
 import { cn } from "@/lib/utils";
+import { useChat } from "@/contexts/chat-context";
 
 export interface ChatInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> {
@@ -25,9 +26,12 @@ function ChatInput({
   keyboardHeight = 0,
   ...inputProps
 }: ChatInputProps) {
+  const { sendMessage } = useChat();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const [bottomBarHeight, setBottomBarHeight] = React.useState(0);
   const [inputFocused, setInputFocused] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
 
   // 하단바 높이 계산
   React.useEffect(() => {
@@ -126,6 +130,21 @@ function ChatInput({
       ? `calc(${bottomBarHeight}px + var(--safe-area-inset-bottom))`
       : `calc(70px + var(--safe-area-inset-bottom))`;
 
+  const handleSend = () => {
+    if (!inputValue.trim()) return;
+    sendMessage(inputValue);
+    setInputValue("");
+    // 키보드를 닫지 않고 포커스 유지
+    inputRef.current?.focus();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <div
       ref={containerRef}
@@ -143,9 +162,13 @@ function ChatInput({
     >
       <div className="flex flex-col rounded-xl bg-(--ds-gray-5) p-4">
         <input
+          ref={inputRef}
           type="text"
           placeholder="무엇이든 물어보세요."
           className="w-full bg-transparent pb-4 text-base text-foreground placeholder:text-ds-secondary focus:outline-none"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyPress={handleKeyPress}
           {...inputProps}
         />
         <div className="flex items-center justify-between">
