@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -130,6 +130,52 @@ export default function SignupCompletePage() {
   const [secondMajor, setSecondMajor] = useState("");
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
   const [secondMajorPickerSearch, setSecondMajorPickerSearch] = useState("");
+  const [yearSemesterSheetOpen, setYearSemesterSheetOpen] = useState(false);
+  const [sheetYear, setSheetYear] = useState<number | null>(null);
+  const [sheetSemester, setSheetSemester] = useState<number | null>(null);
+
+  const majorSheetDragControls = useDragControls();
+  const secondMajorTypeDragControls = useDragControls();
+  const secondMajorPickerDragControls = useDragControls();
+  const yearSemesterDragControls = useDragControls();
+
+  const handleSheetDragEnd = (
+    _: MouseEvent | TouchEvent | PointerEvent,
+    info: { offset: { y: number }; velocity: { y: number } },
+    onClose: () => void
+  ) => {
+    if (info.offset.y > 80 || info.velocity.y > 300) onClose();
+  };
+
+  const YEAR_OPTIONS = [1, 2, 3, 4] as const;
+  const SEMESTER_OPTIONS = [1, 2] as const;
+
+  const openYearSemesterSheet = () => {
+    if (yearSemester) {
+      const [y, s] = yearSemester.split("-").map(Number);
+      setSheetYear(y);
+      setSheetSemester(s);
+    } else {
+      setSheetYear(null);
+      setSheetSemester(null);
+    }
+    setYearSemesterSheetOpen(true);
+  };
+
+  const confirmYearSemester = () => {
+    if (sheetYear != null && sheetSemester != null) {
+      setYearSemester(`${sheetYear}-${sheetSemester}`);
+    }
+    setYearSemesterSheetOpen(false);
+  };
+
+  const yearSemesterDisplay =
+    yearSemester && yearSemester.includes("-")
+      ? (() => {
+          const [y, s] = yearSemester.split("-").map(Number);
+          return `${y}학년 ${s}학기`;
+        })()
+      : "";
 
   const filteredMajors = useMemo(() => {
     if (!majorSearch.trim()) return MAJOR_OPTIONS;
@@ -159,12 +205,13 @@ export default function SignupCompletePage() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <div
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4 pb-8"
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-4 pb-8"
         style={{
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
         }}
       >
+        <div className="flex min-h-screen flex-col gap-4 pb-24">
         <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
           <span className="text-ds-brand">6</span> / 6
         </p>
@@ -244,9 +291,21 @@ export default function SignupCompletePage() {
                   animate="open"
                   exit="closed"
                   transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+                  drag="y"
+                  dragConstraints={{ top: 0 }}
+                  dragElastic={{ bottom: 0.25 }}
+                  dragListener={false}
+                  dragControls={majorSheetDragControls}
+                  onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setMajorSheetOpen(false))}
                 >
-                <div className="flex shrink-0 flex-col gap-3 px-4">
-                  <div className="mx-auto h-1 w-10 rounded-full bg-ds-gray-20" aria-hidden />
+                <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
+                  <div
+                    className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                    aria-hidden
+                    onPointerDown={(e) => majorSheetDragControls.start(e)}
+                  >
+                    <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                  </div>
                   <h2 id="major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
                     주전공을 선택해주세요
                   </h2>
@@ -271,7 +330,7 @@ export default function SignupCompletePage() {
                           setMajorSheetOpen(false);
                           setMajorSearch("");
                         }}
-                        className="w-full py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10"
+                        className="w-full min-h-[48px] py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
                         {m}
                       </button>
@@ -337,9 +396,21 @@ export default function SignupCompletePage() {
                   animate="open"
                   exit="closed"
                   transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+                  drag="y"
+                  dragConstraints={{ top: 0 }}
+                  dragElastic={{ bottom: 0.25 }}
+                  dragListener={false}
+                  dragControls={secondMajorTypeDragControls}
+                  onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setSecondMajorSheetOpen(false))}
                 >
-                <div className="flex shrink-0 flex-col gap-3 px-4">
-                  <div className="mx-auto h-1 w-10 rounded-full bg-ds-gray-20" aria-hidden />
+                <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
+                  <div
+                    className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                    aria-hidden
+                    onPointerDown={(e) => secondMajorTypeDragControls.start(e)}
+                  >
+                    <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                  </div>
                   <h2 id="second-major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
                     제2전공 유형을 선택해주세요
                   </h2>
@@ -353,7 +424,7 @@ export default function SignupCompletePage() {
                           setSecondMajorType(option);
                           setSecondMajorSheetOpen(false);
                         }}
-                        className="w-full py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10"
+                        className="w-full min-h-[48px] py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
                         {option}
                       </button>
@@ -412,9 +483,21 @@ export default function SignupCompletePage() {
                   animate="open"
                   exit="closed"
                   transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+                  drag="y"
+                  dragConstraints={{ top: 0 }}
+                  dragElastic={{ bottom: 0.25 }}
+                  dragListener={false}
+                  dragControls={secondMajorPickerDragControls}
+                  onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setSecondMajorPickerOpen(false))}
                 >
-                  <div className="flex shrink-0 flex-col gap-3 px-4">
-                    <div className="mx-auto h-1 w-10 rounded-full bg-ds-gray-20" aria-hidden />
+                  <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
+                    <div
+                      className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                      aria-hidden
+                      onPointerDown={(e) => secondMajorPickerDragControls.start(e)}
+                    >
+                      <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                    </div>
                     <h2 id="second-major-picker-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
                       제2전공을 선택해주세요
                     </h2>
@@ -439,7 +522,7 @@ export default function SignupCompletePage() {
                             setSecondMajorPickerOpen(false);
                             setSecondMajorPickerSearch("");
                           }}
-                          className="w-full py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10"
+                          className="w-full min-h-[48px] py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                         >
                           {m}
                         </button>
@@ -490,33 +573,128 @@ export default function SignupCompletePage() {
 
           <div className="flex flex-col gap-2">
             <label
-              htmlFor="signup-year-semester"
+              htmlFor="signup-year-semester-trigger"
               className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
             >
               현재 이수한 학년/학기 <span className="text-destructive">*</span>
             </label>
-            <div className="flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
-              <select
-                id="signup-year-semester"
-                value={yearSemester}
-                onChange={(e) => setYearSemester(e.target.value)}
-                className={cn(
-                  "w-full appearance-none rounded-md bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0 scheme-light",
-                  yearSemester ? "text-ds-gray-90" : "text-ds-tertiary"
-                )}
-              >
-                <option value="">학년/학기를 선택해주세요</option>
-                <option value="1-1">1학년 1학기</option>
-                <option value="1-2">1학년 2학기</option>
-                <option value="2-1">2학년 1학기</option>
-                <option value="2-2">2학년 2학기</option>
-                <option value="3-1">3학년 1학기</option>
-                <option value="3-2">3학년 2학기</option>
-                <option value="4-1">4학년 1학기</option>
-                <option value="4-2">4학년 2학기</option>
-              </select>
-            </div>
+            <button
+              id="signup-year-semester-trigger"
+              type="button"
+              onClick={openYearSemesterSheet}
+              className={cn(
+                "flex w-full items-center rounded-md border-2 border-transparent bg-secondary p-4 text-left text-ds-body-16-r leading-ds-body-16-r focus:border-primary focus:outline-none focus:ring-0",
+                yearSemesterDisplay ? "text-ds-gray-90" : "text-ds-tertiary"
+              )}
+            >
+              <span>{yearSemesterDisplay || "학년/학기를 선택해주세요"}</span>
+            </button>
           </div>
+
+          {/* 현재 이수한 학년/학기 바텀시트 (Figma 1113-9691) */}
+          <AnimatePresence>
+            {yearSemesterSheetOpen && (
+              <>
+                <motion.div
+                  className="fixed inset-0 z-40 bg-black/40"
+                  aria-hidden
+                  onClick={() => setYearSemesterSheetOpen(false)}
+                  variants={sheetOverlayVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ duration: 0.2 }}
+                />
+                <motion.div
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="year-semester-sheet-title"
+                  variants={sheetPanelVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+                  drag="y"
+                  dragConstraints={{ top: 0 }}
+                  dragElastic={{ bottom: 0.25 }}
+                  dragListener={false}
+                  dragControls={yearSemesterDragControls}
+                  onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setYearSemesterSheetOpen(false))}
+                >
+                  <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
+                    <div
+                      className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                      aria-hidden
+                      onPointerDown={(e) => yearSemesterDragControls.start(e)}
+                    >
+                      <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                    </div>
+                    <h2 id="year-semester-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
+                      학년 / 학기를 선택해주세요
+                    </h2>
+                  </div>
+                  <div className="flex gap-4 p-4">
+                    <div className="min-w-0 flex-1">
+                      <ul className="flex flex-col gap-1">
+                        {YEAR_OPTIONS.map((y) => (
+                          <li key={y}>
+                            <button
+                              type="button"
+                              onClick={() => setSheetYear(y)}
+                              className={cn(
+                                "w-full min-h-[48px] rounded-md py-3 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
+                                sheetYear === y
+                                  ? "bg-primary/10 font-semibold text-ds-gray-90"
+                                  : "text-ds-gray-90"
+                              )}
+                            >
+                              {y}학년
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <ul className="flex flex-col gap-1">
+                        {SEMESTER_OPTIONS.map((s) => (
+                          <li key={s}>
+                            <button
+                              type="button"
+                              onClick={() => setSheetSemester(s)}
+                              className={cn(
+                                "w-full min-h-[48px] rounded-md py-3 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
+                                sheetSemester === s
+                                  ? "bg-primary/10 font-semibold text-ds-gray-90"
+                                  : "text-ds-gray-90"
+                              )}
+                            >
+                              {s}학기
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="shrink-0 px-4 pb-12">
+                    <button
+                      type="button"
+                      onClick={confirmYearSemester}
+                      disabled={sheetYear == null || sheetSemester == null}
+                      className={cn(
+                        "w-full rounded-md py-4 text-ds-body-16-sb leading-ds-body-16-sb",
+                        sheetYear != null && sheetSemester != null
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-[#EEEFF1] text-ds-disabled"
+                      )}
+                    >
+                      완료
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           <Button
             type="submit"
@@ -533,6 +711,7 @@ export default function SignupCompletePage() {
             완료
           </Button>
         </form>
+        </div>
       </div>
     </div>
   );
