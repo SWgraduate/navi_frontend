@@ -65,7 +65,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const { isKeyboardOpen, keyboardHeight } = useKeyboardStatus();
-  const headerTitle = HEADER_TITLE[pathname] ?? "NAVI";
+  const headerTitle =
+    pathname === "/signup" || pathname.startsWith("/signup/")
+      ? "회원가입"
+      : HEADER_TITLE[pathname] ?? "NAVI";
 
   const mainRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);

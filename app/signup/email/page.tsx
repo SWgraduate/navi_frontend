@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
+import { signupEmailFormSchema } from "@/lib/schemas/signup-email";
 
 const EMAIL_SUFFIX = "@hanyang.ac.kr";
 
@@ -20,12 +21,23 @@ export default function SignupEmailPage() {
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
   const [emailPart, setEmailPart] = useState("");
+  const [touched, setTouched] = useState({ emailPart: false });
 
-  const canSubmit = emailPart.trim().length > 0;
+  const fieldErrors = useMemo(() => {
+    if (!touched.emailPart) return {};
+    const parsed = signupEmailFormSchema.safeParse({ emailPart });
+    if (parsed.success) return {};
+    const flattened = parsed.error.flatten().fieldErrors;
+    return { emailPart: flattened.emailPart?.[0] };
+  }, [emailPart, touched.emailPart]);
+
+  const canSubmit = useMemo(() => signupEmailFormSchema.safeParse({ emailPart }).success, [emailPart]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    setTouched({ emailPart: true });
+    const parsed = signupEmailFormSchema.safeParse({ emailPart });
+    if (!parsed.success) return;
     // TODO: 인증번호 발송 API 연동
     withViewTransition(() => router.push("/signup/verify"));
   };
@@ -62,7 +74,14 @@ export default function SignupEmailPage() {
           >
             이메일
           </label>
-          <div className="flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
+          <div
+            className={cn(
+              "flex items-center rounded-md border-2 bg-secondary",
+              touched.emailPart && fieldErrors.emailPart
+                ? "border-destructive"
+                : "border-transparent focus-within:border-primary"
+            )}
+          >
             <input
               id="signup-email"
               type="text"
@@ -71,12 +90,21 @@ export default function SignupEmailPage() {
               placeholder="이메일을 입력해주세요"
               value={emailPart}
               onChange={(e) => setEmailPart(e.target.value)}
-              className="min-w-0 flex-1 rounded-md bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
+              onBlur={() => setTouched((t) => ({ ...t, emailPart: true }))}
+              className={cn(
+                "min-w-0 flex-1 rounded-md bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r placeholder:text-ds-tertiary focus:outline-none focus:ring-0",
+                touched.emailPart && fieldErrors.emailPart ? "text-destructive" : "text-ds-gray-90"
+              )}
             />
             <span className="shrink-0 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-secondary">
               {EMAIL_SUFFIX}
             </span>
           </div>
+          {touched.emailPart && fieldErrors.emailPart && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {fieldErrors.emailPart}
+            </p>
+          )}
         </form>
       </div>
 
