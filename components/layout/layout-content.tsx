@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "@/components/layout/app-header";
 import { BottomBar } from "@/components/layout/bottom-bar";
@@ -12,6 +12,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/login": "로그인",
   "/graduation": "졸업 관리",
   "/my": "마이",
+  "/history": "기록",
 };
 
 const ROUTES_WITH_BOTTOM_BAR = ["/", "/graduation", "/my"] as const;
@@ -46,12 +47,14 @@ function isIOSSafari(): boolean {
 
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isHome = pathname === "/";
   const isSplash = pathname === "/splash";
   const routeShowsBottomBar = pathHasBottomBar(pathname);
   const showChatInput = isHome;
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
   const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
+  const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
   const showHeader = !isSplash && !isMyPage && !isGraduationPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
@@ -289,9 +292,16 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
             title={headerTitle}
             showBack={pathname !== "/" && pathname !== "/my"}
             showTitle={pathname !== "/" && pathname !== "/my"}
-            showHistory={pathname !== "/my"}
-            showAdd={pathname !== "/my"}
+            showHistory={!isHistoryPage && pathname !== "/my"}
+            showAdd={!isHistoryPage && pathname !== "/my"}
             scrolled={scrolled}
+            onHistory={
+              !isHistoryPage
+                ? () => {
+                    router.push("/history");
+                  }
+                : undefined
+            }
           />
         </div>
       )}
@@ -313,6 +323,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           overflowY: "scroll", // 모바일에서 스크롤 강제
           overflowX: "hidden",
           position: "relative", // 스크롤 컨테이너로 명확히 지정
+          background: "var(--header-bg, var(--background))", // 페이지에서 설정한 헤더 배경색을 main도 따라감
         }}
       >
         {children}

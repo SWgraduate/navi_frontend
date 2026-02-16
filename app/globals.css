@@ -211,6 +211,8 @@
   --app-max-width: 430px;
   /* 큰 화면에서 앱 좌우 여백 배경 (앱 영역 밖) */
   --app-outer-bg: var(--background);
+  /* 헤더 배경색 (각 페이지에서 오버라이드 가능) */
+  --header-bg: var(--background);
 }
 
 /* 앱 프레임: 최대 폭 430px, 중앙 정렬 */
@@ -285,6 +287,12 @@
     touch-action: pan-y !important;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    /* 오른쪽 흰 스크롤바 제거 (기능은 유지) */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  main::-webkit-scrollbar {
+    display: none;
   }
   body {
     @apply text-foreground;

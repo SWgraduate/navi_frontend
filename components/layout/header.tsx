@@ -56,7 +56,7 @@ function Header({
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-10 flex min-h-12 items-center justify-between gap-2 bg-background px-2 transition-shadow duration-200",
+        "fixed top-0 left-0 right-0 z-10 flex min-h-12 items-center justify-between gap-2 px-2 transition-shadow duration-200",
         scrolled && "shadow-ds-soft",
         className
       )}
@@ -65,6 +65,7 @@ function Header({
         paddingBottom: "0.5rem",
         maxWidth: "var(--app-max-width)",
         margin: "0 auto",
+        background: "var(--header-bg)",
       }}
     >
       <div className="flex min-w-10 items-center justify-start">
@@ -88,7 +89,7 @@ function Header({
       {showCenter ? (
         <h1
           className={cn(
-            "pointer-events-none absolute left-1/2 top-1/2 max-w-[60%] -translate-x-1/2 -translate-y-1/2 truncate text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary"
+            "pointer-events-none absolute left-1/2 top-1/2 max-w-[60%] -translate-x-1/2 -translate-y-1/2 truncate text-ds-body-16-sb leading-ds-body-16-sb font-semibold text-ds-primary"
           )}
         >
           {title}

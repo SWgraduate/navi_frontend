@@ -16,6 +16,8 @@ export interface AppHeaderProps {
   showAdd?: boolean;
   /** 스크롤 시 헤더 하단 쉐도우 (디자인 시스템) */
   scrolled?: boolean;
+  /** 헤더 루트에 적용할 클래스 (예: 배경색) */
+  className?: string;
   onHistory?: () => void;
   onAdd?: () => void;
 }
@@ -28,6 +30,7 @@ function AppHeader({
   showHistory = true,
   showAdd = true,
   scrolled,
+  className,
   onHistory,
   onAdd,
 }: AppHeaderProps) {
@@ -44,6 +47,7 @@ function AppHeader({
       showAdd={showAdd}
       onAdd={showAdd ? onAdd ?? (() => {}) : undefined}
       scrolled={scrolled}
+      className={className}
     />
   );
 }
