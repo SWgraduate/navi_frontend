@@ -88,9 +88,10 @@ const sheetOverlayVariants = {
   closed: { opacity: 0 },
 };
 
+/** top/bottom으로 열고 닫아서 transform 미사용 → 모바일 터치 좌표 어긋남 방지 */
 const sheetPanelVariants = {
-  open: { y: 0 },
-  closed: { y: "100%" },
+  open: { top: "auto" as const, bottom: 0 },
+  closed: { top: "100%", bottom: "auto" as const },
 };
 
 const MAJOR_OPTIONS = [
@@ -327,7 +328,7 @@ export default function SignupCompletePage() {
                   transition={{ duration: 0.2 }}
                 />
                 <motion.div
-                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="major-sheet-title"
@@ -371,7 +372,7 @@ export default function SignupCompletePage() {
                       <button
                         type="button"
                         onClick={() => {
-                          setMajor(m);
+                          setMajor(major === m ? "" : m);
                           setMajorSheetOpen(false);
                           setMajorSearch("");
                           if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
@@ -433,7 +434,7 @@ export default function SignupCompletePage() {
                   transition={{ duration: 0.2 }}
                 />
                 <motion.div
-                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="second-major-sheet-title"
@@ -467,7 +468,12 @@ export default function SignupCompletePage() {
                       <button
                         type="button"
                         onClick={() => {
-                          setSecondMajorType(option);
+                          if (secondMajorType === option) {
+                            setSecondMajorType("");
+                            setSecondMajor("");
+                          } else {
+                            setSecondMajorType(option);
+                          }
                           setSecondMajorSheetOpen(false);
                         }}
                         className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
@@ -529,7 +535,7 @@ export default function SignupCompletePage() {
                   transition={{ duration: 0.2 }}
                 />
                 <motion.div
-                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="second-major-picker-sheet-title"
@@ -573,7 +579,7 @@ export default function SignupCompletePage() {
                         <button
                           type="button"
                           onClick={() => {
-                            setSecondMajor(m);
+                            setSecondMajor(secondMajor === m ? "" : m);
                             setSecondMajorPickerOpen(false);
                             setSecondMajorPickerSearch("");
                             if (formErrors.secondMajor) setFormErrors((p) => ({ ...p, secondMajor: "" }));
@@ -682,7 +688,7 @@ export default function SignupCompletePage() {
                   transition={{ duration: 0.2 }}
                 />
                 <motion.div
-                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="year-semester-sheet-title"
@@ -717,7 +723,7 @@ export default function SignupCompletePage() {
                           <li key={y}>
                             <button
                               type="button"
-                              onClick={() => setSheetYear(y)}
+                              onClick={() => setSheetYear(sheetYear === y ? null : y)}
                               className={cn(
                                 "w-full min-h-[56px] rounded-md py-4 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
                                 sheetYear === y
@@ -737,7 +743,7 @@ export default function SignupCompletePage() {
                           <li key={s}>
                             <button
                               type="button"
-                              onClick={() => setSheetSemester(s)}
+                              onClick={() => setSheetSemester(sheetSemester === s ? null : s)}
                               className={cn(
                                 "w-full min-h-[56px] rounded-md py-4 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
                                 sheetSemester === s
