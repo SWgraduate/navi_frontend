@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { setLoggedIn } from "@/lib/auth-storage";
 import { matchMockAccount } from "@/lib/mock-accounts";
+import { loginFormSchema } from "@/lib/schemas/login";
 import { withViewTransition } from "@/lib/view-transition";
 
 const EMAIL_SUFFIX = "@hanyang.ac.kr";
@@ -18,17 +19,40 @@ export default function LoginPage() {
   const [emailPart, setEmailPart] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [touched, setTouched] = useState({ emailPart: false, password: false });
+  const [credentialsErrors, setCredentialsErrors] = useState<{
+    email?: string;
+    password?: string;
+  } | null>(null);
+
+  const fieldErrors = useMemo(() => {
+    if (!touched.emailPart && !touched.password) return {};
+    const parsed = loginFormSchema.safeParse({ emailPart, password });
+    if (parsed.success) return {};
+    const flattened = parsed.error.flatten().fieldErrors;
+    return {
+      emailPart: flattened.emailPart?.[0],
+      password: flattened.password?.[0],
+    };
+  }, [emailPart, password, touched.emailPart, touched.password]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    const fullEmail = `${emailPart.trim()}${EMAIL_SUFFIX}`.toLowerCase();
-    if (matchMockAccount(fullEmail, password)) {
+    setTouched({ emailPart: true, password: true });
+
+    const parsed = loginFormSchema.safeParse({ emailPart, password });
+    if (!parsed.success) return;
+
+    const fullEmail = `${parsed.data.emailPart}${EMAIL_SUFFIX}`.toLowerCase();
+    if (matchMockAccount(fullEmail, parsed.data.password)) {
+      setCredentialsErrors(null);
       setLoggedIn(true);
       withViewTransition(() => router.replace("/"));
     } else {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      setCredentialsErrors({
+        email: "이메일이 올바르지 않습니다",
+        password: "비밀번호가 올바르지 않습니다",
+      });
     }
   };
 
@@ -40,7 +64,9 @@ export default function LoginPage() {
           <label htmlFor="login-email" className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
             이메일
           </label>
-          <div className="flex items-center rounded-lg bg-secondary">
+          <div
+            className={`flex items-center rounded-lg border-2 bg-secondary ${(touched.emailPart && fieldErrors.emailPart) || credentialsErrors?.email ? "border-destructive" : "border-transparent focus-within:border-primary"}`}
+          >
             <input
               id="login-email"
               type="text"
@@ -48,13 +74,22 @@ export default function LoginPage() {
               autoComplete="username"
               placeholder="이메일을 입력해주세요"
               value={emailPart}
-              onChange={(e) => setEmailPart(e.target.value)}
-              className="min-w-0 flex-1 rounded-lg bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-inset"
+              onChange={(e) => {
+              setEmailPart(e.target.value);
+              setCredentialsErrors(null);
+            }}
+              onBlur={() => setTouched((t) => ({ ...t, emailPart: true }))}
+              className={`min-w-0 flex-1 rounded-lg bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r placeholder:text-ds-tertiary focus:outline-none focus:ring-0 ${(touched.emailPart && fieldErrors.emailPart) || credentialsErrors?.email ? "text-destructive" : "text-ds-gray-90"}`}
             />
             <span className="shrink-0 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-secondary">
               {EMAIL_SUFFIX}
             </span>
           </div>
+          {((touched.emailPart && fieldErrors.emailPart) || credentialsErrors?.email) && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {credentialsErrors?.email ?? fieldErrors.emailPart}
+            </p>
+          )}
         </div>
 
         {/* 비밀번호 */}
@@ -62,15 +97,21 @@ export default function LoginPage() {
           <label htmlFor="login-password" className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
             비밀번호
           </label>
-          <div className="relative flex items-center rounded-lg bg-secondary">
+          <div
+            className={`relative flex items-center rounded-lg border-2 bg-secondary ${(touched.password && fieldErrors.password) || credentialsErrors?.password ? "border-destructive" : "border-transparent focus-within:border-primary"}`}
+          >
             <input
               id="login-password"
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               placeholder="비밀번호를 입력해주세요"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg bg-transparent py-4 pl-4 pr-12 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-inset"
+              onChange={(e) => {
+              setPassword(e.target.value);
+              setCredentialsErrors(null);
+            }}
+              onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+              className="w-full rounded-lg bg-transparent py-4 pl-4 pr-12 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
             />
             <button
               type="button"
@@ -81,6 +122,11 @@ export default function LoginPage() {
               {showPassword ? <EyeOff style={{ width: 24, height: 24 }} /> : <Eye style={{ width: 24, height: 24 }} />}
             </button>
           </div>
+          {((touched.password && fieldErrors.password) || credentialsErrors?.password) && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {credentialsErrors?.password ?? fieldErrors.password}
+            </p>
+          )}
         </div>
 
         {/* 링크: 아이디 찾기 | 비밀번호 찾기 | 회원가입 */}
@@ -99,12 +145,6 @@ export default function LoginPage() {
             회원가입
           </button>
         </div>
-
-        {error && (
-          <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-            {error}
-          </p>
-        )}
 
         <Button
           type="submit"

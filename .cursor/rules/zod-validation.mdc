@@ -1,0 +1,60 @@
+---
+description: Zod 스키마·유효성 검사 컨벤션
+globs: **/*.ts,**/*.tsx,lib/schemas/**
+alwaysApply: false
+---
+
+# Zod 유효성 검사 규칙
+
+## 기본 원칙
+
+- **스키마 위치**: 도메인별로 `lib/schemas/` 아래에 두고, 한 파일에 한 스키마(또는 한 폼/API 단위).
+- **타입 추출**: `z.infer<typeof 스키마>`로 타입을 export 해서 스키마와 타입을 단일 소스로 유지.
+- **에러 메시지**: 사용자 노출 메시지는 `.refine()` / `.superRefine()` 또는 `message` 옵션으로 **한글**로 작성.
+
+## 스키마 작성
+
+- 객체 스키마는 필요 시 `.strict()`로 알 수 없는 키 차단 (API 응답 등).
+- 문자열은 `.trim()` 후 검사할지 스키마에 명시 (예: `z.string().trim().min(1)`).
+- 이메일·URL 등은 `z.string().email()`, `z.string().url()` 활용하고, 도메인 제한이 있으면 `.refine()`으로 추가.
+
+```typescript
+// lib/schemas/login.ts 예시
+import { z } from "zod";
+
+const EMAIL_SUFFIX = "@hanyang.ac.kr";
+
+export const loginFormSchema = z.object({
+  emailPart: z.string().trim().min(1, "이메일을 입력해주세요"),
+  password: z.string().min(1, "비밀번호를 입력해주세요"),
+});
+
+export type LoginFormValues = z.infer<typeof loginFormSchema>;
+
+// 제출 시 전체 이메일 검사가 필요하면
+export const loginSubmitSchema = loginFormSchema.extend({
+  fullEmail: z.string().email("올바른 이메일 형식이 아닙니다").refine(
+    (s) => s.endsWith(EMAIL_SUFFIX),
+    { message: `이메일은 ${EMAIL_SUFFIX}로 끝나야 합니다` }
+  ),
+});
+```
+
+## 폼에서 사용
+
+- **검사 시점**: `onSubmit`에서 `schema.safeParse(payload)` 사용. 실패 시 `error.flatten().fieldErrors` 등으로 필드별 에러 표시.
+- **목 데이터와 일치**: 로그인처럼 목 계정으로 검증하는 경우, 스키마 규칙(최소 길이 등)이 목 계정 값을 통과시키는지 확인. 스키마를 강화하면 `lib/mock-accounts.ts`의 정답 데이터(이메일/비밀번호)를 스키마에 맞게 수정해야 함.
+
+```typescript
+const result = loginFormSchema.safeParse({ emailPart, password });
+if (!result.success) {
+  const fieldErrors = result.error.flatten().fieldErrors;
+  // setError(fieldErrors.password?.[0] ?? fieldErrors.emailPart?.[0] ?? "입력값을 확인해주세요");
+  return;
+}
+```
+
+## API/직렬화
+
+- 요청/응답 body는 `z.object().strict()` 권장.
+- 날짜는 `z.coerce.date()` 또는 `z.string().datetime()` 등 용도에 맞게 선택.
