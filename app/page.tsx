@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { SplashScreen } from "@/components/splash-screen";
 import { ChatMessage } from "@/components/chat/chat-message";
+import { ChatLoading } from "@/components/chat/chat-loading";
 import { useChat } from "@/contexts/chat-context";
 
 const SPLASH_STORAGE_KEY = "navi_splash_shown";
@@ -19,7 +20,7 @@ function hideSplash() {
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
-  const { messages } = useChat();
+  const { messages, isLoading } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 첫 방문이 아니면 스플래시 건너뜀
@@ -47,11 +48,10 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [showSplash]);
 
-  // 메시지가 추가될 때마다 스크롤을 가장 마지막 답변 위치로
+  // 메시지·로딩 상태가 바뀔 때마다 스크롤을 가장 아래로
   useEffect(() => {
-    if (messages.length === 0) return;
+    if (messages.length === 0 && !isLoading) return;
     
-    // 마지막 메시지가 렌더링된 후 스크롤 이동
     const timeoutId = setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ 
         behavior: "smooth",
@@ -61,7 +61,7 @@ export default function Home() {
     }, 100);
     
     return () => clearTimeout(timeoutId);
-  }, [messages]);
+  }, [messages, isLoading]);
 
   return (
     <>
@@ -83,6 +83,7 @@ export default function Home() {
                 isUser={message.isUser}
               />
             ))}
+            {isLoading && <ChatLoading />}
             <div ref={messagesEndRef} />
           </div>
         )}

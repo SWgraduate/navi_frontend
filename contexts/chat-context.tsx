@@ -10,6 +10,7 @@ interface Message {
 
 interface ChatContextType {
   messages: Message[];
+  isLoading: boolean;
   sendMessage: (text: string) => void;
 }
 
@@ -17,6 +18,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
@@ -28,9 +30,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       isUser: true,
     };
     setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
 
-    // TODO: API 호출 예정
-    // 지금은 목데이터로 답변 추가
+    // TODO: API 호출 예정. 현재는 2초 로딩 후 목데이터 답변
+    const LOADING_MS = 2000;
     setTimeout(() => {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -38,11 +41,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         isUser: false,
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    }, 500);
+      setIsLoading(false);
+    }, LOADING_MS);
   };
 
   return (
-    <ChatContext.Provider value={{ messages, sendMessage }}>
+    <ChatContext.Provider value={{ messages, isLoading, sendMessage }}>
       {children}
     </ChatContext.Provider>
   );
