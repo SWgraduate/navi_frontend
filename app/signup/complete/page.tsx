@@ -300,15 +300,15 @@ export default function SignupCompletePage() {
                 >
                 <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                   <div
-                    className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
                     aria-hidden
                     onPointerDown={(e) => majorSheetDragControls.start(e)}
                   >
                     <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                    <h2 id="major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
+                      주전공을 선택해주세요
+                    </h2>
                   </div>
-                  <h2 id="major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-                    주전공을 선택해주세요
-                  </h2>
                   <div className="relative flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
                     <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
                     <input
@@ -320,7 +320,7 @@ export default function SignupCompletePage() {
                     />
                   </div>
                 </div>
-                <ul className="overflow-y-auto px-4 max-h-[60vh]">
+                <ul className="overflow-y-auto px-4 max-h-[60vh] touch-manipulation">
                   {filteredMajors.map((m) => (
                     <li key={m}>
                       <button
@@ -330,7 +330,7 @@ export default function SignupCompletePage() {
                           setMajorSheetOpen(false);
                           setMajorSearch("");
                         }}
-                        className="w-full min-h-[48px] py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
+                        className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
                         {m}
                       </button>
@@ -405,17 +405,17 @@ export default function SignupCompletePage() {
                 >
                 <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                   <div
-                    className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
                     aria-hidden
                     onPointerDown={(e) => secondMajorTypeDragControls.start(e)}
                   >
                     <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                    <h2 id="second-major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
+                      제2전공 유형을 선택해주세요
+                    </h2>
                   </div>
-                  <h2 id="second-major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-                    제2전공 유형을 선택해주세요
-                  </h2>
                 </div>
-                <ul className="overflow-y-auto px-4 max-h-[60vh]">
+                <ul className="overflow-y-auto px-4 max-h-[60vh] touch-manipulation">
                   {SECOND_MAJOR_OPTIONS.map((option) => (
                     <li key={option}>
                       <button
@@ -424,7 +424,7 @@ export default function SignupCompletePage() {
                           setSecondMajorType(option);
                           setSecondMajorSheetOpen(false);
                         }}
-                        className="w-full min-h-[48px] py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
+                        className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
                         {option}
                       </button>
@@ -492,15 +492,15 @@ export default function SignupCompletePage() {
                 >
                   <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                     <div
-                      className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
                       aria-hidden
                       onPointerDown={(e) => secondMajorPickerDragControls.start(e)}
                     >
                       <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                      <h2 id="second-major-picker-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
+                        제2전공을 선택해주세요
+                      </h2>
                     </div>
-                    <h2 id="second-major-picker-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-                      제2전공을 선택해주세요
-                    </h2>
                     <div className="relative flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
                       <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
                       <input
@@ -512,7 +512,7 @@ export default function SignupCompletePage() {
                       />
                     </div>
                   </div>
-                  <ul className="overflow-y-auto px-4 max-h-[60vh]">
+                  <ul className="overflow-y-auto px-4 max-h-[60vh] touch-manipulation">
                     {filteredSecondMajors.map((m) => (
                       <li key={m}>
                         <button
@@ -522,7 +522,7 @@ export default function SignupCompletePage() {
                             setSecondMajorPickerOpen(false);
                             setSecondMajorPickerSearch("");
                           }}
-                          className="w-full min-h-[48px] py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
+                          className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                         >
                           {m}
                         </button>
@@ -624,15 +624,15 @@ export default function SignupCompletePage() {
                 >
                   <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
                     <div
-                      className="flex min-h-[40px] cursor-grab active:cursor-grabbing items-center justify-center py-1.5 touch-manipulation"
+                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-manipulation"
                       aria-hidden
                       onPointerDown={(e) => yearSemesterDragControls.start(e)}
                     >
                       <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
+                      <h2 id="year-semester-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
+                        학년 / 학기를 선택해주세요
+                      </h2>
                     </div>
-                    <h2 id="year-semester-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-                      학년 / 학기를 선택해주세요
-                    </h2>
                   </div>
                   <div className="flex gap-4 p-4">
                     <div className="min-w-0 flex-1">
@@ -643,7 +643,7 @@ export default function SignupCompletePage() {
                               type="button"
                               onClick={() => setSheetYear(y)}
                               className={cn(
-                                "w-full min-h-[48px] rounded-md py-3 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
+                                "w-full min-h-[56px] rounded-md py-4 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
                                 sheetYear === y
                                   ? "bg-primary/10 font-semibold text-ds-gray-90"
                                   : "text-ds-gray-90"
@@ -663,7 +663,7 @@ export default function SignupCompletePage() {
                               type="button"
                               onClick={() => setSheetSemester(s)}
                               className={cn(
-                                "w-full min-h-[48px] rounded-md py-3 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
+                                "w-full min-h-[56px] rounded-md py-4 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
                                 sheetSemester === s
                                   ? "bg-primary/10 font-semibold text-ds-gray-90"
                                   : "text-ds-gray-90"
@@ -682,7 +682,7 @@ export default function SignupCompletePage() {
                       onClick={confirmYearSemester}
                       disabled={sheetYear == null || sheetSemester == null}
                       className={cn(
-                        "w-full rounded-md py-4 text-ds-body-16-sb leading-ds-body-16-sb",
+                        "min-h-[56px] w-full rounded-md py-4 text-ds-body-16-sb leading-ds-body-16-sb touch-manipulation",
                         sheetYear != null && sheetSemester != null
                           ? "bg-primary text-primary-foreground"
                           : "bg-[#EEEFF1] text-ds-disabled"
