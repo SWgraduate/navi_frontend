@@ -62,7 +62,7 @@ export default function SignupPasswordPage() {
     const parsed = signupPasswordFormSchema.safeParse({ password, passwordConfirm });
     if (!parsed.success) return;
     // TODO: 회원가입 API (비밀번호 저장)
-    withViewTransition(() => router.push("/home"));
+    withViewTransition(() => router.push("/signup/complete"));
   };
 
   const displayName = signupName.trim() || "회원";
