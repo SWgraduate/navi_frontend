@@ -22,6 +22,8 @@ export interface ModalProps {
   onCancel?: () => void;
   /** 확인 버튼 로딩/비활성 */
   confirmDisabled?: boolean;
+  /** 확인 버튼 스타일. destructive 시 빨간 배경 (탈퇴 등) */
+  confirmVariant?: "primary" | "destructive";
   /** 모달 너비. 기본 320px (모바일) */
   className?: string;
   children?: React.ReactNode;
@@ -41,6 +43,7 @@ function Modal({
   onConfirm,
   onCancel,
   confirmDisabled,
+  confirmVariant = "primary",
   className,
   children,
 }: ModalProps) {
@@ -111,7 +114,14 @@ function Modal({
               id="modal-caption"
               className="text-left text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary"
             >
-              {caption}
+              {typeof caption === "string"
+                ? caption.split("\n").map((line, i, arr) => (
+                    <React.Fragment key={i}>
+                      {line}
+                      {i < arr.length - 1 && <br />}
+                    </React.Fragment>
+                  ))
+                : caption}
             </p>
           )}
         </div>
@@ -133,9 +143,12 @@ function Modal({
           {confirmLabel != null && confirmLabel !== "" && (
             <Button
               type="button"
-              variant="primary"
+              variant={confirmVariant === "destructive" ? "primary" : "primary"}
               size="md"
-              className="w-[120px] shrink-0 text-white"
+              className={cn(
+                "w-[120px] shrink-0 text-white",
+                confirmVariant === "destructive" && "bg-destructive hover:bg-destructive/90 active:bg-destructive/80"
+              )}
               onClick={handleConfirm}
               disabled={confirmDisabled}
             >

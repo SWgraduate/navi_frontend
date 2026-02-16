@@ -30,10 +30,18 @@ const MOCK_VERSION = "1.00";
 export default function MyPage() {
   const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
 
   const handleLogoutConfirm = () => {
     setLogoutModalOpen(false);
     setLoggedIn(false);
+    withViewTransition(() => router.replace("/login"));
+  };
+
+  const handleWithdrawConfirm = () => {
+    setWithdrawModalOpen(false);
+    setLoggedIn(false);
+    // TODO: 회원 탈퇴 API 호출
     withViewTransition(() => router.replace("/login"));
   };
 
@@ -87,6 +95,15 @@ export default function MyPage() {
         >
           로그아웃
         </button>
+        <button
+          type="button"
+          className={cn(
+            "flex w-full items-center py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-destructive active:opacity-70"
+          )}
+          onClick={() => setWithdrawModalOpen(true)}
+        >
+          탈퇴하기
+        </button>
       </nav>
 
       <Modal
@@ -97,6 +114,17 @@ export default function MyPage() {
         cancelLabel="취소"
         confirmLabel="로그아웃"
         onConfirm={handleLogoutConfirm}
+      />
+      <Modal
+        open={withdrawModalOpen}
+        onOpenChange={setWithdrawModalOpen}
+        title="정말 NAVI를 떠나시겠어요?"
+        caption={`삭제된 데이터는 다시 복구할 수 없으니
+신중하게 결정해 주세요`}
+        cancelLabel="취소"
+        confirmLabel="탈퇴"
+        confirmVariant="destructive"
+        onConfirm={handleWithdrawConfirm}
       />
     </div>
   );
