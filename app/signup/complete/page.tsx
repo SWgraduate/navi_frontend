@@ -2,24 +2,114 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { useHeaderBackground } from "@/hooks/use-header-background";
-import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
-import { ChevronDown, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
-const BUTTON_AREA_HEIGHT = 80;
+function UpDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M7 15L12 20L17 15"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 9L12 4L17 9"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function DropdownDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M6 9L12 15L18 9"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function DropdownUpIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M18 15L12 9L6 15"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const sheetOverlayVariants = {
+  open: { opacity: 1 },
+  closed: { opacity: 0 },
+};
+
+const sheetPanelVariants = {
+  open: { y: 0 },
+  closed: { y: "100%" },
+};
 
 const MAJOR_OPTIONS = [
   "ICT융합학부",
   "ICT융합학부 디자인테크놀로지",
   "ICT융합학부 미디어테크놀로지",
   "ICT융합학부 컬처테크놀로지",
-  "컴퓨터융합학부",
+  "컴퓨터학부",
   "인공지능학부",
   "수리데이터사이언스학과",
   "경영학과",
+] as const;
+
+const SECOND_MAJOR_OPTIONS = [
+  "다중전공",
+  "융합전공",
+  "부전공",
+  "복수전공",
+  "연계전공",
+  "마이크로전공",
 ] as const;
 
 type AcademicStatus = "enrolled" | "leave";
@@ -28,22 +118,30 @@ type AcademicStatus = "enrolled" | "leave";
 export default function SignupCompletePage() {
   const router = useRouter();
   useHeaderBackground("white");
-  const { keyboardHeight } = useKeyboardStatus();
-  const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
   const [studentId, setStudentId] = useState("");
   const [major, setMajor] = useState("");
   const [secondMajorType, setSecondMajorType] = useState("");
-  const [academicStatus, setAcademicStatus] = useState<AcademicStatus>("enrolled");
+  const [academicStatus, setAcademicStatus] = useState<AcademicStatus | "">("");
   const [yearSemester, setYearSemester] = useState("");
   const [majorSheetOpen, setMajorSheetOpen] = useState(false);
   const [majorSearch, setMajorSearch] = useState("");
+  const [secondMajorSheetOpen, setSecondMajorSheetOpen] = useState(false);
+  const [secondMajor, setSecondMajor] = useState("");
+  const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
+  const [secondMajorPickerSearch, setSecondMajorPickerSearch] = useState("");
 
   const filteredMajors = useMemo(() => {
     if (!majorSearch.trim()) return MAJOR_OPTIONS;
     const q = majorSearch.trim().toLowerCase();
     return MAJOR_OPTIONS.filter((m) => m.toLowerCase().includes(q));
   }, [majorSearch]);
+
+  const filteredSecondMajors = useMemo(() => {
+    if (!secondMajorPickerSearch.trim()) return MAJOR_OPTIONS;
+    const q = secondMajorPickerSearch.trim().toLowerCase();
+    return MAJOR_OPTIONS.filter((m) => m.toLowerCase().includes(q));
+  }, [secondMajorPickerSearch]);
 
   const canSubmit =
     studentId.trim().length > 0 &&
@@ -61,11 +159,10 @@ export default function SignupCompletePage() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <div
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4 transition-[padding-bottom] duration-250 ease-out"
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4 pb-8"
         style={{
-          paddingBottom: effectiveKeyboardInset > 0
-            ? `calc(${BUTTON_AREA_HEIGHT}px + ${effectiveKeyboardInset}px + var(--safe-area-inset-bottom, 0px) + 8px)`
-            : "calc(112px + var(--safe-area-inset-bottom, 0px) + 8px)",
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-y",
         }}
       >
         <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
@@ -119,25 +216,36 @@ export default function SignupCompletePage() {
               <span className={cn(major ? "text-ds-gray-90" : "text-ds-tertiary")}>
                 {major || "전공을 선택해주세요"}
               </span>
-              <ChevronDown className="absolute right-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
+              <UpDownIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
             </button>
           </div>
 
           {/* 주전공 선택 바텀시트 (Figma 1105-11744) */}
-          {majorSheetOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40 bg-black/40"
-                aria-hidden
-                onClick={() => setMajorSheetOpen(false)}
-              />
-              <div
-                className="fixed inset-x-0 bottom-0 z-50 flex h-[85vh] flex-col rounded-t-xl bg-white shadow-lg"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="major-sheet-title"
-              >
-                <div className="flex shrink-0 flex-col gap-3 p-4">
+          <AnimatePresence>
+            {majorSheetOpen && (
+              <>
+                <motion.div
+                  className="fixed inset-0 z-40 bg-black/40"
+                  aria-hidden
+                  onClick={() => setMajorSheetOpen(false)}
+                  variants={sheetOverlayVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ duration: 0.2 }}
+                />
+                <motion.div
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="major-sheet-title"
+                  variants={sheetPanelVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+                >
+                <div className="flex shrink-0 flex-col gap-3 px-4">
                   <div className="mx-auto h-1 w-10 rounded-full bg-ds-gray-20" aria-hidden />
                   <h2 id="major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
                     주전공을 선택해주세요
@@ -153,7 +261,7 @@ export default function SignupCompletePage() {
                     />
                   </div>
                 </div>
-                <ul className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
+                <ul className="overflow-y-auto px-4 max-h-[60vh]">
                   {filteredMajors.map((m) => (
                     <li key={m}>
                       <button
@@ -175,32 +283,178 @@ export default function SignupCompletePage() {
                     </li>
                   )}
                 </ul>
-              </div>
-            </>
-          )}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           <div className="flex flex-col gap-2">
             <label
-              htmlFor="signup-second-major"
+              htmlFor="signup-second-major-trigger"
               className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
             >
               제2전공 유형
             </label>
-            <div className="relative flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
-              <select
-                id="signup-second-major"
-                value={secondMajorType}
-                onChange={(e) => setSecondMajorType(e.target.value)}
-                className="w-full appearance-none rounded-md bg-transparent p-4 pr-10 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 focus:outline-none focus:ring-0 scheme-light"
-              >
-                <option value="">제2전공 유형을 선택해주세요</option>
-                <option value="minor">부전공</option>
-                <option value="double">복수전공</option>
-                <option value="none">해당 없음</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
-            </div>
+            <button
+              id="signup-second-major-trigger"
+              type="button"
+              onClick={() => setSecondMajorSheetOpen(true)}
+              className={cn(
+                "relative flex w-full items-center justify-between rounded-md border-2 border-transparent bg-secondary p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:border-primary focus:outline-none focus:ring-0",
+                secondMajorType ? "text-ds-gray-90" : "text-ds-tertiary"
+              )}
+            >
+              <span>{secondMajorType || "제2전공 유형을 선택해주세요"}</span>
+              {secondMajorSheetOpen ? (
+                <DropdownUpIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
+              ) : (
+                <DropdownDownIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
+              )}
+            </button>
           </div>
+
+          {/* 제2전공 유형 선택 바텀시트 (Figma 1105-12985) */}
+          <AnimatePresence>
+            {secondMajorSheetOpen && (
+              <>
+                <motion.div
+                  className="fixed inset-0 z-40 bg-black/40"
+                  aria-hidden
+                  onClick={() => setSecondMajorSheetOpen(false)}
+                  variants={sheetOverlayVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ duration: 0.2 }}
+                />
+                <motion.div
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="second-major-sheet-title"
+                  variants={sheetPanelVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+                >
+                <div className="flex shrink-0 flex-col gap-3 px-4">
+                  <div className="mx-auto h-1 w-10 rounded-full bg-ds-gray-20" aria-hidden />
+                  <h2 id="second-major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
+                    제2전공 유형을 선택해주세요
+                  </h2>
+                </div>
+                <ul className="overflow-y-auto px-4 max-h-[60vh]">
+                  {SECOND_MAJOR_OPTIONS.map((option) => (
+                    <li key={option}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSecondMajorType(option);
+                          setSecondMajorSheetOpen(false);
+                        }}
+                        className="w-full py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10"
+                      >
+                        {option}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          {secondMajorType && (
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="signup-second-major-picker-trigger"
+                className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
+              >
+                제2전공
+              </label>
+              <button
+                id="signup-second-major-picker-trigger"
+                type="button"
+                onClick={() => setSecondMajorPickerOpen(true)}
+                className={cn(
+                  "relative flex w-full items-center justify-between rounded-md border-2 border-transparent bg-secondary p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:border-primary focus:outline-none focus:ring-0",
+                  secondMajor ? "text-ds-gray-90" : "text-ds-tertiary"
+                )}
+              >
+                <span>{secondMajor || "전공을 선택해주세요"}</span>
+                <UpDownIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
+              </button>
+            </div>
+          )}
+
+          {/* 제2전공 선택 바텀시트 (Figma 1086-6608) */}
+          <AnimatePresence>
+            {secondMajorPickerOpen && (
+              <>
+                <motion.div
+                  className="fixed inset-0 z-40 bg-black/40"
+                  aria-hidden
+                  onClick={() => setSecondMajorPickerOpen(false)}
+                  variants={sheetOverlayVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ duration: 0.2 }}
+                />
+                <motion.div
+                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="second-major-picker-sheet-title"
+                  variants={sheetPanelVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+                >
+                  <div className="flex shrink-0 flex-col gap-3 px-4">
+                    <div className="mx-auto h-1 w-10 rounded-full bg-ds-gray-20" aria-hidden />
+                    <h2 id="second-major-picker-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
+                      제2전공을 선택해주세요
+                    </h2>
+                    <div className="relative flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
+                      <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
+                      <input
+                        type="search"
+                        placeholder="전공을 검색하세요"
+                        value={secondMajorPickerSearch}
+                        onChange={(e) => setSecondMajorPickerSearch(e.target.value)}
+                        className="w-full rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
+                      />
+                    </div>
+                  </div>
+                  <ul className="overflow-y-auto px-4 max-h-[60vh]">
+                    {filteredSecondMajors.map((m) => (
+                      <li key={m}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSecondMajor(m);
+                            setSecondMajorPickerOpen(false);
+                            setSecondMajorPickerSearch("");
+                          }}
+                          className="w-full py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10"
+                        >
+                          {m}
+                        </button>
+                      </li>
+                    ))}
+                    {filteredSecondMajors.length === 0 && (
+                      <li className="py-4 text-center text-ds-caption-14-r text-ds-tertiary">
+                        검색 결과가 없습니다
+                      </li>
+                    )}
+                  </ul>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           <div className="flex flex-col gap-2">
             <span className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
@@ -241,12 +495,15 @@ export default function SignupCompletePage() {
             >
               현재 이수한 학년/학기 <span className="text-destructive">*</span>
             </label>
-            <div className="relative flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
+            <div className="flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
               <select
                 id="signup-year-semester"
                 value={yearSemester}
                 onChange={(e) => setYearSemester(e.target.value)}
-                className="w-full appearance-none rounded-md bg-transparent p-4 pr-10 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 focus:outline-none focus:ring-0 scheme-light"
+                className={cn(
+                  "w-full appearance-none rounded-md bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0 scheme-light",
+                  yearSemester ? "text-ds-gray-90" : "text-ds-tertiary"
+                )}
               >
                 <option value="">학년/학기를 선택해주세요</option>
                 <option value="1-1">1학년 1학기</option>
@@ -258,38 +515,24 @@ export default function SignupCompletePage() {
                 <option value="4-1">4학년 1학기</option>
                 <option value="4-2">4학년 2학기</option>
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
             </div>
           </div>
-        </form>
-      </div>
 
-      <div
-        className="fixed left-0 right-0 z-10 bg-white pt-8 pb-8 transition-[bottom] duration-250 ease-out"
-        style={{
-          bottom: effectiveKeyboardInset > 0
-            ? `${effectiveKeyboardInset}px`
-            : "calc(32px + var(--safe-area-inset-bottom, 0px))",
-          paddingBottom: "8px",
-          maxWidth: "var(--app-max-width)",
-          margin: "0 auto",
-        }}
-      >
-        <Button
-          type="submit"
-          form="signup-complete-form"
-          variant="primary"
-          size="lg"
-          className={cn(
-            "h-auto w-full rounded-none py-4 text-ds-body-16-sb leading-ds-body-16-sb",
-            canSubmit
-              ? "bg-primary text-primary-foreground"
-              : "bg-[#EEEFF1] text-ds-disabled"
-          )}
-          disabled={!canSubmit}
-        >
-          완료
-        </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className={cn(
+              "mt-4 h-auto w-full rounded-none py-4 text-ds-body-16-sb leading-ds-body-16-sb",
+              canSubmit
+                ? "bg-primary text-primary-foreground"
+                : "bg-[#EEEFF1] text-ds-disabled"
+            )}
+            disabled={!canSubmit}
+          >
+            완료
+          </Button>
+        </form>
       </div>
     </div>
   );

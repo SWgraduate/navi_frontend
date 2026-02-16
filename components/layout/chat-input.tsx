@@ -165,7 +165,7 @@ function ChatInput({
           ref={inputRef}
           type="text"
           placeholder="무엇이든 물어보세요."
-          className="w-full bg-transparent pb-4 text-base text-foreground placeholder:text-ds-secondary focus:outline-none"
+          className="w-full bg-transparent pb-4 text-base text-foreground placeholder:text-ds-tertiary focus:outline-none"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import "../node_modules/shadcn/dist/tailwind.css";
 @import "@fontsource/pretendard/400.css";
 @import "@fontsource/pretendard/500.css";
 @import "@fontsource/pretendard/600.css";
@@ -308,8 +308,9 @@
   }
   
   html {
-    /* html 레벨 스크롤 방지 */
-    touch-action: none;
+    /* 모바일 뷰포트 높이 보장; touch-action 제거해 main 스크롤 가능 */
+    min-height: 100dvh;
+    min-height: 100vh; /* dvh 미지원 폴백 */
     overscroll-behavior: none;
     overflow: hidden;
   }
