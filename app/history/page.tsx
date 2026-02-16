@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
+import { HistoryItemPopover } from "@/components/history/history-item-popover";
+import { HistoryRow } from "@/components/history/history-row";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
 interface HistoryItem {
@@ -36,12 +38,37 @@ const MOCK_HISTORY: HistoryItem[] = [
 export default function HistoryPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [popover, setPopover] = useState<{
+    item: HistoryItem;
+    x: number;
+    y: number;
+  } | null>(null);
 
   useHeaderBackground("white");
 
   const filteredHistory = MOCK_HISTORY.filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleLongPress = useCallback((item: HistoryItem, e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = "touches" in e ? e.touches[0]?.clientX ?? e.changedTouches?.[0]?.clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0]?.clientY ?? e.changedTouches?.[0]?.clientY : e.clientY;
+    if (clientX != null && clientY != null) {
+      setPopover({ item, x: clientX, y: clientY });
+    }
+  }, []);
+
+  const closePopover = useCallback(() => setPopover(null), []);
+
+  const handlePin = useCallback(() => {
+    // TODO: 고정 API
+  }, []);
+  const handleRename = useCallback(() => {
+    // TODO: 이름 변경
+  }, []);
+  const handleDelete = useCallback(() => {
+    // TODO: 삭제 API
+  }, []);
 
   return (
     <div className="min-h-full bg-white">
@@ -94,22 +121,27 @@ export default function HistoryPage() {
         ) : (
           <div className="divide-y divide-ds-gray-20">
             {filteredHistory.map((item) => (
-              <button
+              <HistoryRow
                 key={item.id}
+                item={item}
+                onLongPress={handleLongPress}
                 onClick={() => {
+                  if (popover?.item.id === item.id) return;
                   // TODO: 기록 상세 페이지로 이동 또는 채팅 재개
                 }}
-                className="w-full py-4 text-left transition-opacity active:opacity-70"
-              >
-                <p className="mb-1 font-semibold text-ds-body-16-sb leading-ds-body-16-sb text-ds-gray-90">
-                  {item.title}
-                </p>
-                <p className="font-normal text-ds-caption-14-r leading-ds-caption-14-r text-ds-gray-50">
-                  {item.date} {item.time}
-                </p>
-              </button>
+              />
             ))}
           </div>
+        )}
+        {popover && (
+          <HistoryItemPopover
+            x={popover.x}
+            y={popover.y}
+            onClose={closePopover}
+            onPin={handlePin}
+            onRename={handleRename}
+            onDelete={handleDelete}
+          />
         )}
       </div>
     </div>
