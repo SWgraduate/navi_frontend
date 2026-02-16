@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useHeaderBackground } from "@/hooks/use-header-background";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
 interface HistoryItem {
@@ -36,13 +37,7 @@ export default function HistoryPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 히스토리 페이지에서 헤더와 main 배경을 흰색으로 설정
-  useEffect(() => {
-    document.documentElement.style.setProperty("--header-bg", "white");
-    return () => {
-      document.documentElement.style.removeProperty("--header-bg");
-    };
-  }, []);
+  useHeaderBackground("white");
 
   const filteredHistory = MOCK_HISTORY.filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
