@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { RightIcon } from "@/components/icons/header-icons";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { Modal } from "@/components/ui/modal";
+import { setLoggedIn } from "@/lib/auth-storage";
 import { cn } from "@/lib/utils";
+import { withViewTransition } from "@/lib/view-transition";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
 const MOCK_USER = {
@@ -25,11 +28,13 @@ const MOCK_VERSION = "1.00";
 
 /** Figma 1086-8553 마이페이지. 로그아웃 확인: Figma 1128-8760 */
 export default function MyPage() {
+  const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const handleLogoutConfirm = () => {
     setLogoutModalOpen(false);
-    // TODO: 실제 로그아웃 처리 (세션/토큰 제거, 리다이렉트 등)
+    setLoggedIn(false);
+    withViewTransition(() => router.replace("/login"));
   };
 
   return (

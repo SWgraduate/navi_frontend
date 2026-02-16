@@ -93,7 +93,7 @@ function Modal({
       <div
         role="presentation"
         className={cn(
-          "mx-auto w-full max-w-[320px] shrink-0 rounded-(--radius) bg-white p-5 shadow-ds-soft",
+          "mx-auto w-full max-w-[288px] shrink-0 rounded-(--radius) bg-white p-5 shadow-ds-soft",
           "flex flex-col gap-4",
           className
         )}
@@ -118,13 +118,13 @@ function Modal({
 
         {children != null && <div className="text-foreground">{children}</div>}
 
-        <div className="flex gap-2 pt-1">
+        <div className="flex justify-center gap-2 pt-1">
           {cancelLabel != null && cancelLabel !== "" && (
             <Button
               type="button"
               variant="ghost"
               size="md"
-              className="flex-1 bg-(--ds-gray-5) text-ds-tertiary hover:bg-(--ds-gray-10)"
+              className="w-[120px] shrink-0 bg-(--ds-gray-5) text-ds-tertiary hover:bg-(--ds-gray-10)"
               onClick={handleCancel}
             >
               {cancelLabel}
@@ -135,7 +135,7 @@ function Modal({
               type="button"
               variant="primary"
               size="md"
-              className="flex-1 text-white"
+              className="w-[120px] shrink-0 text-white"
               onClick={handleConfirm}
               disabled={confirmDisabled}
             >

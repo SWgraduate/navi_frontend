@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { setLoggedIn } from "@/lib/auth-storage";
 import { matchMockAccount } from "@/lib/mock-accounts";
 import { loginFormSchema } from "@/lib/schemas/login";
+import { TransitionLink } from "@/components/layout/transition-link";
 import { withViewTransition } from "@/lib/view-transition";
 
 const EMAIL_SUFFIX = "@hanyang.ac.kr";
@@ -47,7 +48,7 @@ export default function LoginPage() {
     if (matchMockAccount(fullEmail, parsed.data.password)) {
       setCredentialsErrors(null);
       setLoggedIn(true);
-      withViewTransition(() => router.replace("/"));
+      withViewTransition(() => router.replace("/home"));
     } else {
       setCredentialsErrors({
         email: "이메일이 올바르지 않습니다",
@@ -141,16 +142,16 @@ export default function LoginPage() {
           </button>
           <span aria-hidden
           className="text-[#EEEFF1]">|</span>
-          <button type="button" className="active:opacity-70">
+          <TransitionLink href="/signup" className="active:opacity-70">
             회원가입
-          </button>
+          </TransitionLink>
         </div>
 
         <Button
           type="submit"
           variant="primary"
           size="lg"
-          className="h-auto w-full py-4 text-ds-body-16-sb leading-ds-body-16-sb text-white mt-4"
+          className="h-auto w-full py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white mt-4"
         >
           로그인
         </Button>

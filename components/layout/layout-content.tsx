@@ -10,18 +10,19 @@ import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 
 const HEADER_TITLE: Record<string, string> = {
-  "/": "NAVI",
+  "/home": "NAVI",
   "/login": "로그인",
+  "/signup": "회원가입",
   "/graduation": "졸업 관리",
   "/my": "마이",
   "/history": "기록",
 };
 
-const ROUTES_WITH_BOTTOM_BAR = ["/", "/graduation", "/my"] as const;
+const ROUTES_WITH_BOTTOM_BAR = ["/home", "/graduation", "/my"] as const;
 
 function pathHasBottomBar(pathname: string): boolean {
   return ROUTES_WITH_BOTTOM_BAR.some((route) => {
-    if (route === "/") return pathname === "/";
+    if (route === "/home") return pathname === "/home";
     return pathname === route || pathname.startsWith(route + "/");
   });
 }
@@ -51,14 +52,15 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { startNewChat } = useChat();
-  const isHome = pathname === "/";
-  const isSplash = pathname === "/splash";
+  const isHome = pathname === "/home";
+  const isSplash = pathname === "/";
   const routeShowsBottomBar = pathHasBottomBar(pathname);
   const showChatInput = isHome;
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
   const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
   const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
+  const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const showHeader = !isSplash && !isMyPage && !isGraduationPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
@@ -301,10 +303,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         <div ref={headerRef}>
           <AppHeader
             title={headerTitle}
-            showBack={pathname !== "/" && pathname !== "/my"}
-            showTitle={pathname !== "/" && pathname !== "/my"}
-            showHistory={!isHistoryPage && !isLoginPage && pathname !== "/my"}
-            showAdd={!isHistoryPage && !isLoginPage && pathname !== "/my"}
+            showBack={pathname !== "/home" && pathname !== "/my"}
+            showTitle={pathname !== "/home" && pathname !== "/my"}
+            showHistory={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my"}
+            showAdd={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my"}
             scrolled={scrolled}
             onHistory={
               !isHistoryPage
@@ -317,7 +319,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
               !isHistoryPage
                 ? () => {
                     startNewChat();
-                    withViewTransition(() => router.push("/"));
+                    withViewTransition(() => router.push("/home"));
                   }
                 : undefined
             }

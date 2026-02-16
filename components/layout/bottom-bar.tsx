@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const TAB_CONFIG = [
   { href: "/graduation", label: "졸업 관리", Icon: GraduationCapIcon },
-  { href: "/", label: "NAVI", Icon: NaviIcon },
+  { href: "/home", label: "NAVI", Icon: NaviIcon },
   { href: "/my", label: "마이", Icon: MyIcon },
 ] as const;
 
@@ -16,9 +16,7 @@ export function BottomBar() {
   const pathname = usePathname();
 
   const getIsActive = (href: string) =>
-    href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
+    pathname === href || pathname.startsWith(href + "/");
 
   return (
     <nav
