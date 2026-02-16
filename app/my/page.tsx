@@ -78,6 +78,18 @@ export default function MyPage() {
       </nav>
       <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
 
+      {/* 약관 및 개인정보 처리 동의 */}
+      <nav className="px-4" aria-label="약관 및 개인정보">
+        <TransitionLink
+          href="/my/terms"
+          className="flex items-center justify-between py-3 text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:opacity-70"
+        >
+          <span>약관 및 개인정보 처리 동의</span>
+          <RightIcon className="text-ds-tertiary" />
+        </TransitionLink>
+      </nav>
+      <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
+
       {/* 버전 정보 · 로그아웃 */}
       <nav className="px-4" aria-label="버전 및 계정">
         <div className="flex items-center justify-between py-3 text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
