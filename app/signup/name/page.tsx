@@ -36,6 +36,7 @@ export default function SignupNamePage() {
     setTouched(true);
     const parsed = signupNameFormSchema.safeParse({ name });
     if (!parsed.success) return;
+    if (typeof window !== "undefined") sessionStorage.setItem("signup_name", parsed.data.name);
     withViewTransition(() => router.push("/signup/password"));
   };
 

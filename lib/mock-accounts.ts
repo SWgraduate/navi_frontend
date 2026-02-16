@@ -11,7 +11,7 @@ export const MOCK_LOGIN_ACCOUNT = {
   /** 이메일 (한양대 도메인) */
   email: "aaaaaaaa@hanyang.ac.kr",
   /** 비밀번호 (스키마: 8자 이상, 한글 불가) */
-  password: "qwer1234",
+  password: "Qwer1234!",
 } as const;
 
 /** 목데이터와 일치하는지 검사 (이메일·비밀번호) */
