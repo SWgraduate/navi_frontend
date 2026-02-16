@@ -182,7 +182,7 @@ export default function SignupVerifyPage() {
       return;
     }
     setConsecutiveFail(0);
-    withViewTransition(() => router.push("/signup/password"));
+    withViewTransition(() => router.push("/signup/name"));
   };
 
   return (
@@ -277,7 +277,7 @@ export default function SignupVerifyPage() {
       </div>
 
       <div
-        className="fixed left-0 right-0 z-10 bg-white pt-8 pb-8 transition-[bottom] duration-250 ease-out"
+        className="fixed left-0 right-0 z-10 bg-white px-4 pt-8 pb-8 transition-[bottom] duration-250 ease-out"
         style={{
           bottom: effectiveKeyboardInset > 0
             ? `${effectiveKeyboardInset}px`
@@ -293,7 +293,7 @@ export default function SignupVerifyPage() {
           variant="primary"
           size="lg"
           className={cn(
-            "h-auto w-full rounded-none py-4 text-ds-body-16-sb leading-ds-body-16-sb",
+            "h-auto w-full rounded-sm py-4 text-ds-body-16-sb leading-ds-body-16-sb",
             canSubmit
               ? "bg-primary text-primary-foreground"
               : "bg-[#EEEFF1] text-ds-disabled"
