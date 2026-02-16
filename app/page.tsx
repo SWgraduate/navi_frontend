@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { SplashScreen } from "@/components/splash-screen";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatLoading } from "@/components/chat/chat-loading";
 import { useChat } from "@/contexts/chat-context";
+import { isLoggedIn } from "@/lib/auth-storage";
 
 const SPLASH_STORAGE_KEY = "navi_splash_shown";
 const SPLASH_DURATION_MS = 1500;
@@ -19,9 +21,19 @@ function hideSplash() {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [showSplash, setShowSplash] = useState(true);
   const { messages, isLoading } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 비로그인 시 로그인 페이지로 (메인 직접 진입 시)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isLoggedIn()) {
+      router.replace("/login");
+      return;
+    }
+  }, [router]);
 
   // 첫 방문이 아니면 스플래시 건너뜀
   useEffect(() => {

@@ -58,6 +58,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
   const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
   const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
+  const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const showHeader = !isSplash && !isMyPage && !isGraduationPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
@@ -302,8 +303,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
             title={headerTitle}
             showBack={pathname !== "/" && pathname !== "/my"}
             showTitle={pathname !== "/" && pathname !== "/my"}
-            showHistory={!isHistoryPage && pathname !== "/my"}
-            showAdd={!isHistoryPage && pathname !== "/my"}
+            showHistory={!isHistoryPage && !isLoginPage && pathname !== "/my"}
+            showAdd={!isHistoryPage && !isLoginPage && pathname !== "/my"}
             scrolled={scrolled}
             onHistory={
               !isHistoryPage
