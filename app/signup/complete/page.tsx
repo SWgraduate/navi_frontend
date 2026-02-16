@@ -355,20 +355,20 @@ export default function SignupCompletePage() {
                       주전공을 선택해주세요
                     </h2>
                   </div>
-                  <div className="relative flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
-                    <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
+                  <div className="relative flex min-h-[48px] items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
+                    <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary pointer-events-none" aria-hidden />
                     <input
                       type="search"
                       placeholder="전공을 검색하세요"
                       value={majorSearch}
                       onChange={(e) => setMajorSearch(e.target.value)}
-                      className="w-full rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
+                      className="w-full min-h-[48px] rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0 touch-manipulation"
                     />
                   </div>
                 </div>
-                <ul className="overflow-y-auto px-4 max-h-[60vh] touch-manipulation">
+                <ul className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
                   {filteredMajors.map((m) => (
-                    <li key={m}>
+                    <li key={m} className="flex">
                       <button
                         type="button"
                         onClick={() => {
@@ -377,7 +377,7 @@ export default function SignupCompletePage() {
                           setMajorSearch("");
                           if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
                         }}
-                        className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
+                        className="w-full min-h-[52px] cursor-pointer select-none py-5 px-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
                         {m}
                       </button>
@@ -462,9 +462,9 @@ export default function SignupCompletePage() {
                     </h2>
                   </div>
                 </div>
-                <ul className="overflow-y-auto px-4 max-h-[60vh] touch-manipulation">
+                <ul className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
                   {SECOND_MAJOR_OPTIONS.map((option) => (
-                    <li key={option}>
+                    <li key={option} className="flex">
                       <button
                         type="button"
                         onClick={() => {
@@ -476,7 +476,7 @@ export default function SignupCompletePage() {
                           }
                           setSecondMajorSheetOpen(false);
                         }}
-                        className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
+                        className="w-full min-h-[52px] cursor-pointer select-none py-5 px-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
                         {option}
                       </button>
@@ -562,20 +562,20 @@ export default function SignupCompletePage() {
                         제2전공을 선택해주세요
                       </h2>
                     </div>
-                    <div className="relative flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
-                      <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary" aria-hidden />
+                    <div className="relative flex min-h-[48px] items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
+                      <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary pointer-events-none" aria-hidden />
                       <input
                         type="search"
                         placeholder="전공을 검색하세요"
                         value={secondMajorPickerSearch}
                         onChange={(e) => setSecondMajorPickerSearch(e.target.value)}
-                        className="w-full rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
+                        className="w-full min-h-[48px] rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0 touch-manipulation"
                       />
                     </div>
                   </div>
-                  <ul className="overflow-y-auto px-4 max-h-[60vh] touch-manipulation">
+                  <ul className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
                     {filteredSecondMajors.map((m) => (
-                      <li key={m}>
+                      <li key={m} className="flex">
                         <button
                           type="button"
                           onClick={() => {
@@ -584,7 +584,7 @@ export default function SignupCompletePage() {
                             setSecondMajorPickerSearch("");
                             if (formErrors.secondMajor) setFormErrors((p) => ({ ...p, secondMajor: "" }));
                           }}
-                          className="w-full min-h-[56px] py-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
+                          className="w-full min-h-[52px] cursor-pointer select-none py-5 px-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                         >
                           {m}
                         </button>
@@ -718,14 +718,14 @@ export default function SignupCompletePage() {
                   </div>
                   <div className="flex gap-4 p-4">
                     <div className="min-w-0 flex-1">
-                      <ul className="flex flex-col gap-1">
+                      <ul className="flex flex-col gap-2">
                         {YEAR_OPTIONS.map((y) => (
-                          <li key={y}>
+                          <li key={y} className="flex">
                             <button
                               type="button"
                               onClick={() => setSheetYear(sheetYear === y ? null : y)}
                               className={cn(
-                                "w-full min-h-[56px] rounded-md py-4 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
+                                "w-full min-h-[52px] cursor-pointer select-none rounded-md py-5 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
                                 sheetYear === y
                                   ? "bg-primary/10 font-semibold text-ds-gray-90"
                                   : "text-ds-gray-90"
@@ -738,14 +738,14 @@ export default function SignupCompletePage() {
                       </ul>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <ul className="flex flex-col gap-1">
+                      <ul className="flex flex-col gap-2">
                         {SEMESTER_OPTIONS.map((s) => (
-                          <li key={s}>
+                          <li key={s} className="flex">
                             <button
                               type="button"
                               onClick={() => setSheetSemester(sheetSemester === s ? null : s)}
                               className={cn(
-                                "w-full min-h-[56px] rounded-md py-4 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
+                                "w-full min-h-[52px] cursor-pointer select-none rounded-md py-5 text-center text-ds-body-16-r leading-ds-body-16-r touch-manipulation",
                                 sheetSemester === s
                                   ? "bg-primary/10 font-semibold text-ds-gray-90"
                                   : "text-ds-gray-90"
@@ -764,7 +764,7 @@ export default function SignupCompletePage() {
                       onClick={confirmYearSemester}
                       disabled={sheetYear == null || sheetSemester == null}
                       className={cn(
-                        "min-h-[56px] w-full rounded-md py-4 text-ds-body-16-sb leading-ds-body-16-sb touch-manipulation",
+                        "min-h-[52px] w-full cursor-pointer select-none rounded-md py-5 text-ds-body-16-sb leading-ds-body-16-sb touch-manipulation",
                         sheetYear != null && sheetSemester != null
                           ? "bg-primary text-primary-foreground"
                           : "bg-[#EEEFF1] text-ds-disabled"

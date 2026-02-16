@@ -34,7 +34,7 @@ export default function SignupWelcomePage() {
           type="button"
           size="lg"
           className="w-full touch-manipulation text-white"
-          onClick={() => withViewTransition(() => router.push("/home"))}
+          onClick={() => withViewTransition(() => router.push("/login"))}
         >
           나비 시작
         </Button>
