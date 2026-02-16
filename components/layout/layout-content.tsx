@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "@/components/layout/app-header";
 import { BottomBar } from "@/components/layout/bottom-bar";
 import { ChatInput } from "@/components/layout/chat-input";
+import { useChat } from "@/contexts/chat-context";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 
@@ -49,6 +50,7 @@ function isIOSSafari(): boolean {
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { startNewChat } = useChat();
   const isHome = pathname === "/";
   const isSplash = pathname === "/splash";
   const routeShowsBottomBar = pathHasBottomBar(pathname);
@@ -307,6 +309,14 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
               !isHistoryPage
                 ? () => {
                     withViewTransition(() => router.push("/history"));
+                  }
+                : undefined
+            }
+            onAdd={
+              !isHistoryPage
+                ? () => {
+                    startNewChat();
+                    withViewTransition(() => router.push("/"));
                   }
                 : undefined
             }

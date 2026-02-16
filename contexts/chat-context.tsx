@@ -12,6 +12,8 @@ interface ChatContextType {
   messages: Message[];
   isLoading: boolean;
   sendMessage: (text: string) => void;
+  /** 새 채팅 시작 (메시지 초기화 후 메인으로 이동할 때 사용) */
+  startNewChat: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -45,8 +47,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }, LOADING_MS);
   };
 
+  const startNewChat = () => {
+    setMessages([]);
+    setIsLoading(false);
+  };
+
   return (
-    <ChatContext.Provider value={{ messages, isLoading, sendMessage }}>
+    <ChatContext.Provider value={{ messages, isLoading, sendMessage, startNewChat }}>
       {children}
     </ChatContext.Provider>
   );
