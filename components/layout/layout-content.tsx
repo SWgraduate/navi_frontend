@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { BottomBar } from "@/components/layout/bottom-bar";
 import { ChatInput } from "@/components/layout/chat-input";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
+import { withViewTransition } from "@/lib/view-transition";
 
 const HEADER_TITLE: Record<string, string> = {
   "/": "NAVI",
@@ -258,8 +259,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const mainHeight = useMemo(() => {
     if (effectiveViewportHeight == null) return undefined;
     const topInset = showHeader ? headerHeight : 0;
-    return Math.max(0, effectiveViewportHeight - topInset);
-  }, [effectiveViewportHeight, headerHeight, showHeader]);
+    // 졸업관리 페이지는 bottomBar를 main 높이에 포함 (paddingBottom 없으므로)
+    const bottomInset = isGraduationPage && showBottomBar ? bottomBarHeight : 0;
+    return Math.max(0, effectiveViewportHeight - topInset - bottomInset);
+  }, [effectiveViewportHeight, headerHeight, showHeader, isGraduationPage, showBottomBar, bottomBarHeight]);
 
   const resolvedPaddingTop = showHeader
     ? headerHeight > 0
@@ -268,6 +271,11 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     : "0px";
 
   const resolvedPaddingBottom = useMemo(() => {
+    // 졸업관리 페이지는 중앙 정렬을 위해 paddingBottom 제거
+    if (isGraduationPage) {
+      return "0px";
+    }
+
     if (keyboardActive) {
       return "0px";
     }
@@ -278,7 +286,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
     if (showBottomBar) return `${bottomBarHeight}px`;
     return "0px";
-  }, [bottomBarHeight, chatInputHeight, keyboardActive, showBottomBar, showChatInput]);
+  }, [bottomBarHeight, chatInputHeight, keyboardActive, showBottomBar, showChatInput, isGraduationPage]);
 
   if (isSplash) {
     return <>{children}</>;
@@ -298,7 +306,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
             onHistory={
               !isHistoryPage
                 ? () => {
-                    router.push("/history");
+                    withViewTransition(() => router.push("/history"));
                   }
                 : undefined
             }
@@ -310,7 +318,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         onScroll={onScroll}
         tabIndex={-1}
-        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden focus:outline-none"
+        className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden focus:outline-none${isGraduationPage ? " flex items-center justify-center" : ""}`}
         suppressHydrationWarning
         style={{
           height: mainHeight != null ? `${mainHeight}px` : undefined,
@@ -318,9 +326,9 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           paddingTop: resolvedPaddingTop,
           paddingBottom: resolvedPaddingBottom,
           transition: "height 220ms ease, max-height 220ms ease, padding-bottom 220ms ease",
-          touchAction: "pan-y", // 세로 스크롤만 허용
-          WebkitOverflowScrolling: "touch", // iOS 부드러운 스크롤
-          overflowY: "scroll", // 모바일에서 스크롤 강제
+          touchAction: isGraduationPage ? "none" : "pan-y", // 졸업관리 페이지는 스크롤 비활성화
+          WebkitOverflowScrolling: isGraduationPage ? "auto" : "touch", // iOS 부드러운 스크롤
+          overflowY: isGraduationPage ? "hidden" : "scroll", // 졸업관리 페이지는 스크롤 비활성화
           overflowX: "hidden",
           position: "relative", // 스크롤 컨테이너로 명확히 지정
           background: "var(--header-bg, var(--background))", // 페이지에서 설정한 헤더 배경색을 main도 따라감

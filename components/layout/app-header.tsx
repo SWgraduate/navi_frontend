@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Header } from "./header";
+import { withViewTransition } from "@/lib/view-transition";
 
 export interface AppHeaderProps {
   /** [중] 타이틀 텍스트 */
@@ -35,11 +36,12 @@ function AppHeader({
   onAdd,
 }: AppHeaderProps) {
   const router = useRouter();
+  const handleBack = () => withViewTransition(() => router.back());
 
   return (
     <Header
       showBack={showBack}
-      onBack={showBack ? () => router.back() : undefined}
+      onBack={showBack ? handleBack : undefined}
       showTitle={showTitle}
       title={title}
       showHistory={showHistory}
