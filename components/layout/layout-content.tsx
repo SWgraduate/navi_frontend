@@ -158,7 +158,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const isGraduationRootPage = pathname === "/graduation";
   const showHeader = !isSplash && !isMyPage && !isGraduationRootPage;
-  const isWhiteBackgroundPage = isMyPage || isGraduationResultPage;
+  const isWhiteBackgroundPage = isSplash || isMyPage || isGraduationResultPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
