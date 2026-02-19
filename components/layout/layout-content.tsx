@@ -340,7 +340,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         <div ref={headerRef}>
           <AppHeader
             title={headerTitle}
-            showBack={pathname !== "/home" && pathname !== "/my"}
+            showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage}
             showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons}
             showHistory={
               !isHistoryPage &&

@@ -40,7 +40,7 @@ export const signupCompleteFormSchema = z
       if (!data.secondMajorType || !data.secondMajor.trim()) return true;
       return data.major.trim() !== data.secondMajor.trim();
     },
-    { message: "주전공과 제2전공이 같을 수 없어요", path: ["secondMajor"] }
+    { message: "이미 주전공으로 선택했어요", path: ["secondMajor"] }
   );
 
 export type SignupCompleteFormValues = z.infer<typeof signupCompleteFormSchema>;
