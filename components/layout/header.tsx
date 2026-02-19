@@ -22,6 +22,10 @@ export interface HeaderProps {
   showAdd?: boolean;
   /** [우] 추가 클릭 핸들러 */
   onAdd?: () => void;
+  /** [우] 히스토리 자리 커스텀 아이콘 (지정 시 HistoryIcon 대신 사용, 예: edit.svg) */
+  historyIcon?: React.ReactNode;
+  /** [우] 추가 자리 커스텀 아이콘 (지정 시 NewChatIcon 대신 사용, 예: scan.svg) */
+  addIcon?: React.ReactNode;
   /** [우] 커스텀 영역 (지정 시 showHistory/showAdd/onHistory/onAdd 무시) */
   rightSlot?: React.ReactNode;
   /** 스크롤 시 하단에 디자인 시스템 쉐도우 적용 (--ds-shadow-soft) */
@@ -42,6 +46,8 @@ function Header({
   onHistory,
   showAdd = true,
   onAdd,
+  historyIcon,
+  addIcon,
   rightSlot,
   scrolled = false,
   className,
@@ -77,7 +83,7 @@ function Header({
             aria-label="뒤로"
             className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
           >
-            <span className="text-ds-tertiary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
+            <span className="text-ds-secondary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
               <LeftIcon />
             </span>
           </Button>
@@ -111,8 +117,8 @@ function Header({
                 aria-label="히스토리"
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
-                <span className="text-ds-tertiary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
-                  <HistoryIcon />
+                <span className="text-ds-secondary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
+                  {historyIcon ?? <HistoryIcon />}
                 </span>
               </Button>
             )}
@@ -124,8 +130,8 @@ function Header({
                 aria-label="추가"
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
-                <span className="text-ds-tertiary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
-                  <NewChatIcon />
+                <span className="text-ds-secondary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
+                  {addIcon ?? <NewChatIcon />}
                 </span>
               </Button>
             )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { HistoryItemPopover } from "@/components/history/history-item-popover";
 import { HistoryRow } from "@/components/history/history-row";
@@ -36,7 +35,6 @@ const MOCK_HISTORY: HistoryItem[] = [
 ];
 
 export default function HistoryPage() {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [popover, setPopover] = useState<{
     item: HistoryItem;

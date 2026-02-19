@@ -1,7 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { EditIcon, ScanIcon } from "@/components/icons/header-icons";
 import { AppHeader } from "@/components/layout/app-header";
 import { BottomBar } from "@/components/layout/bottom-bar";
 import { ChatInput } from "@/components/layout/chat-input";
@@ -16,6 +19,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/graduation": "졸업 관리",
   "/graduation/upload": "졸업사정조회 스캔",
   "/graduation/upload/processing": "졸업사정조회 스캔",
+  "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
   "/history": "기록",
 };
@@ -53,15 +57,17 @@ function isIOSSafari(): boolean {
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { startNewChat } = useChat();
   const isHome = pathname === "/home";
   const isSplash = pathname === "/";
   const routeShowsBottomBar = pathHasBottomBar(pathname);
   const showChatInput = isHome;
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
-  const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
   const isGraduationUploadPage = pathname === "/graduation/upload";
   const isGraduationProcessingPage = pathname === "/graduation/upload/processing";
+  const isGraduationResultPage = pathname === "/graduation/result" || pathname.startsWith("/graduation/result/");
+  const isGraduationHeaderWithIcons = isGraduationResultPage;
   const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
@@ -69,11 +75,14 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const showHeader = !isSplash && !isMyPage && !isGraduationRootPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
+  const [scanMenuOpen, setScanMenuOpen] = useState(false);
   const { isKeyboardOpen, keyboardHeight } = useKeyboardStatus();
   const headerTitle =
     pathname === "/signup" || pathname.startsWith("/signup/")
       ? "회원가입"
-      : HEADER_TITLE[pathname] ?? "NAVI";
+      : pathname === "/graduation/upload/processing" && searchParams.get("edit")
+        ? "수정"
+        : HEADER_TITLE[pathname] ?? "NAVI";
 
   const mainRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -94,8 +103,18 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
   const effectiveKeyboardInset = Math.max(0, keyboardHeight);
 
+  useEffect(() => {
+    const t = setTimeout(() => setScanMenuOpen(false), 0);
+    return () => clearTimeout(t);
+  }, [pathname]);
+
   const keyboardActive = chatInputFocused || isKeyboardOpen || keyboardHeight > 0;
-  const showBottomBar = !isSplash && routeShowsBottomBar && !keyboardActive && !isGraduationUploadPage && !isGraduationProcessingPage;
+  const showBottomBar =
+    !isSplash &&
+    routeShowsBottomBar &&
+    !keyboardActive &&
+    !isGraduationUploadPage &&
+    !isGraduationProcessingPage;
 
   useEffect(() => {
     const onFocus = (e: FocusEvent) => {
@@ -226,16 +245,24 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   }, [showHeader]);
 
   useEffect(() => {
+    // 하단바가 숨겨지면 높이를 0으로 설정 (비동기로 처리해 set-state-in-effect 규칙 준수)
+    if (!showBottomBar) {
+      const t = setTimeout(() => setBottomBarHeight(0), 0);
+      return () => clearTimeout(t);
+    }
+
     const updateBottomBarHeight = () => {
       const bottomBarEl = document.querySelector("[data-bottom-bar] nav") as HTMLElement | null;
       if (bottomBarEl) {
         setBottomBarHeight(bottomBarEl.offsetHeight);
       } else {
-        setBottomBarHeight(showBottomBar ? 60 : 0);
+        // 하단바 요소가 없으면 기본값 사용
+        setBottomBarHeight(60);
       }
     };
 
-    updateBottomBarHeight();
+    // 약간의 지연을 두어 DOM이 업데이트된 후 측정
+    const timeoutId = setTimeout(updateBottomBarHeight, 0);
     window.addEventListener("resize", updateBottomBarHeight);
 
     const bottomBarEl = document.querySelector("[data-bottom-bar] nav") as HTMLElement | null;
@@ -243,12 +270,14 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
       const resizeObserver = new ResizeObserver(updateBottomBarHeight);
       resizeObserver.observe(bottomBarEl);
       return () => {
+        clearTimeout(timeoutId);
         window.removeEventListener("resize", updateBottomBarHeight);
         resizeObserver.disconnect();
       };
     }
 
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener("resize", updateBottomBarHeight);
     };
   }, [showBottomBar, pathname]);
@@ -312,24 +341,46 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           <AppHeader
             title={headerTitle}
             showBack={pathname !== "/home" && pathname !== "/my"}
-            showTitle={pathname !== "/home" && pathname !== "/my"}
-            showHistory={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage && !isGraduationProcessingPage}
-            showAdd={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage && !isGraduationProcessingPage}
+            showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons}
+            showHistory={
+              !isHistoryPage &&
+              !isLoginPage &&
+              !isSignupPage &&
+              pathname !== "/my" &&
+              (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+            }
+            showAdd={
+              !isHistoryPage &&
+              !isLoginPage &&
+              !isSignupPage &&
+              pathname !== "/my" &&
+              (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+            }
+            historyIcon={
+              isGraduationHeaderWithIcons ? <EditIcon /> : undefined
+            }
+            addIcon={
+              isGraduationHeaderWithIcons ? <ScanIcon /> : undefined
+            }
             scrolled={scrolled}
             onHistory={
-              !isHistoryPage
-                ? () => {
-                    withViewTransition(() => router.push("/history"));
-                  }
-                : undefined
+              isGraduationResultPage
+                ? () => withViewTransition(() => router.push("/graduation/upload/processing?edit=1"))
+                : isGraduationUploadPage || isGraduationProcessingPage
+                  ? () => withViewTransition(() => router.push("/history"))
+                  : !isHistoryPage
+                    ? () => withViewTransition(() => router.push("/history"))
+                    : undefined
             }
             onAdd={
-              !isHistoryPage
-                ? () => {
-                    startNewChat();
-                    withViewTransition(() => router.push("/home"));
-                  }
-                : undefined
+              isGraduationHeaderWithIcons
+                ? () => setScanMenuOpen((open) => !open)
+                : !isHistoryPage
+                    ? () => {
+                        startNewChat();
+                        withViewTransition(() => router.push("/home"));
+                      }
+                    : undefined
             }
           />
         </div>
@@ -370,6 +421,56 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           <BottomBar />
         </div>
       )}
+
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isGraduationResultPage && scanMenuOpen && (
+              <>
+                <motion.div
+                  role="presentation"
+                  className="fixed inset-0 z-40"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => setScanMenuOpen(false)}
+                />
+                <motion.div
+                  role="menu"
+                  aria-label="스캔 메뉴"
+                  className="fixed right-1 z-50 flex flex-col items-stretch rounded-lg border border-[#EEEFF1] bg-white py-1 shadow-ds-soft"
+                  style={{ top: "calc(3rem + 0.5rem + var(--safe-area-inset-top))" }}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="whitespace-nowrap px-4 py-3 text-left text-ds-body-16-r text-ds-primary hover:bg-ds-tertiary/10 active:bg-ds-tertiary/15"
+                    onClick={() => {
+                      setScanMenuOpen(false);
+                      withViewTransition(() => router.push("/graduation/upload"));
+                    }}
+                  >
+                    졸업사정조회 스캔
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="whitespace-nowrap px-4 py-3 text-left text-ds-body-16-r text-ds-primary hover:bg-ds-tertiary/10 active:bg-ds-tertiary/15"
+                    onClick={() => setScanMenuOpen(false)}
+                  >
+                    최근 시간표 스캔
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }

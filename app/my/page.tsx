@@ -6,6 +6,7 @@ import { RightIcon } from "@/components/icons/header-icons";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { Modal } from "@/components/ui/modal";
 import { setLoggedIn } from "@/lib/auth-storage";
+import { clearGraduationResult } from "@/lib/mock-accounts";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 
@@ -35,12 +36,14 @@ export default function MyPage() {
   const handleLogoutConfirm = () => {
     setLogoutModalOpen(false);
     setLoggedIn(false);
+    clearGraduationResult(); // 로그아웃 시 졸업사정조회 결과 삭제
     withViewTransition(() => router.replace("/login"));
   };
 
   const handleWithdrawConfirm = () => {
     setWithdrawModalOpen(false);
     setLoggedIn(false);
+    clearGraduationResult(); // 탈퇴 시 졸업사정조회 결과 삭제
     // TODO: 회원 탈퇴 API 호출
     withViewTransition(() => router.replace("/login"));
   };

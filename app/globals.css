@@ -301,6 +301,31 @@
     @apply border-border outline-ring/50;
   }
   
+  /* 졸업사정조회 테이블 셀 여백 2px 및 레이아웃 시프트 방지 */
+  .graduation-table th,
+  .graduation-table td {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    vertical-align: middle !important;
+  }
+  .graduation-table .credits-input {
+    height: 32px !important;
+    box-sizing: border-box !important;
+    min-height: 32px !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    margin: 0 !important;
+    display: inline-block !important;
+  }
+  
+  /* 취득(잔여) 열 하늘색 박스 라운드 2px 및 배경색 */
+  .graduation-table tbody td span[style*="backgroundColor"] {
+    border-radius: 2px !important;
+    -webkit-border-radius: 2px !important;
+    -moz-border-radius: 2px !important;
+    background-color: #e6f0fe !important;
+  }
+  
   main {
     /* 메인 영역만 스크롤 가능 */
     touch-action: pan-y !important;
