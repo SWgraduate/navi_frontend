@@ -279,6 +279,23 @@
   animation: pulse-scale 1.5s ease-in-out infinite;
 }
 
+/* 이미지 인식 그라디언트 애니메이션 */
+@keyframes gradient-move {
+  0% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(50%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.animate-gradient-move {
+  animation: gradient-move 3s ease-in-out infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

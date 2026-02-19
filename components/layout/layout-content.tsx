@@ -15,6 +15,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/signup": "회원가입",
   "/graduation": "졸업 관리",
   "/graduation/upload": "졸업사정조회 스캔",
+  "/graduation/upload/processing": "졸업사정조회 스캔",
   "/my": "마이",
   "/history": "기록",
 };
@@ -60,6 +61,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
   const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
   const isGraduationUploadPage = pathname === "/graduation/upload";
+  const isGraduationProcessingPage = pathname === "/graduation/upload/processing";
   const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
@@ -93,7 +95,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const effectiveKeyboardInset = Math.max(0, keyboardHeight);
 
   const keyboardActive = chatInputFocused || isKeyboardOpen || keyboardHeight > 0;
-  const showBottomBar = !isSplash && routeShowsBottomBar && !keyboardActive && !isGraduationUploadPage;
+  const showBottomBar = !isSplash && routeShowsBottomBar && !keyboardActive && !isGraduationUploadPage && !isGraduationProcessingPage;
 
   useEffect(() => {
     const onFocus = (e: FocusEvent) => {
@@ -311,8 +313,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
             title={headerTitle}
             showBack={pathname !== "/home" && pathname !== "/my"}
             showTitle={pathname !== "/home" && pathname !== "/my"}
-            showHistory={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage}
-            showAdd={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage}
+            showHistory={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage && !isGraduationProcessingPage}
+            showAdd={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage && !isGraduationProcessingPage}
             scrolled={scrolled}
             onHistory={
               !isHistoryPage

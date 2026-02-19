@@ -1,13 +1,16 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
+import { withViewTransition } from "@/lib/view-transition";
 
 /** Figma 1212-11510: 졸업사정조회 스캔 페이지 */
 export default function GraduationUploadPage() {
   useHeaderBackground("white");
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -31,11 +34,11 @@ export default function GraduationUploadPage() {
   };
 
   const handleUpload = () => {
-    if (!selectedFile) return;
-    // TODO: 파일 업로드 API 호출
-    console.log("Uploading file:", selectedFile.name);
-    // 업로드 후 다음 단계로 이동
-    // withViewTransition(() => router.push("/graduation/result"));
+    if (!selectedFile || !previewUrl) return;
+    // 이미지 인식 처리 페이지로 이동
+    withViewTransition(() => {
+      router.push(`/graduation/upload/processing?image=${encodeURIComponent(previewUrl)}`);
+    });
   };
 
   return (
