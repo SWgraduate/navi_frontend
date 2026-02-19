@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { RightIcon } from "@/components/icons/header-icons";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { Modal } from "@/components/ui/modal";
+import { useHeaderBackground } from "@/hooks/use-header-background";
 import { setLoggedIn } from "@/lib/auth-storage";
+import { clearGraduationResult } from "@/lib/mock-accounts";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 
@@ -28,6 +30,7 @@ const MOCK_VERSION = "1.00";
 
 /** Figma 1086-8553 마이페이지. 로그아웃 확인: Figma 1128-8760 */
 export default function MyPage() {
+  useHeaderBackground("white"); // 헤더·노치 영역 배경 흰색
   const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
@@ -35,20 +38,22 @@ export default function MyPage() {
   const handleLogoutConfirm = () => {
     setLogoutModalOpen(false);
     setLoggedIn(false);
+    clearGraduationResult(); // 로그아웃 시 졸업사정조회 결과 삭제
     withViewTransition(() => router.replace("/login"));
   };
 
   const handleWithdrawConfirm = () => {
     setWithdrawModalOpen(false);
     setLoggedIn(false);
+    clearGraduationResult(); // 탈퇴 시 졸업사정조회 결과 삭제
     // TODO: 회원 탈퇴 API 호출
     withViewTransition(() => router.replace("/login"));
   };
 
   return (
     <div className="bg-(--ds-gray-0)">
-      {/* 사용자 정보 */}
-      <section className="px-4 py-16">
+      {/* 사용자 정보 - 메인과 동일한 높이에서 시작 (pt-4) */}
+      <section className="px-4 pt-20 pb-16">
         <p className="font-semibold text-ds-title-24-sb leading-ds-title-24-sb text-ds-primary">
           {MOCK_USER.name}님
           <br />

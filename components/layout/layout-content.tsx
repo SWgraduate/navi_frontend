@@ -1,7 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { EditIcon, ScanIcon } from "@/components/icons/header-icons";
 import { AppHeader } from "@/components/layout/app-header";
 import { BottomBar } from "@/components/layout/bottom-bar";
 import { ChatInput } from "@/components/layout/chat-input";
@@ -14,6 +17,9 @@ const HEADER_TITLE: Record<string, string> = {
   "/login": "로그인",
   "/signup": "회원가입",
   "/graduation": "졸업 관리",
+  "/graduation/upload": "졸업사정조회 스캔",
+  "/graduation/upload/processing": "졸업사정조회 스캔",
+  "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
   "/history": "기록",
 };
@@ -48,6 +54,92 @@ function isIOSSafari(): boolean {
   return isIOS && isSafari;
 }
 
+function AppHeaderWithSearchParams({
+  pathname,
+  isLoginPage,
+  isSignupPage,
+  isGraduationHeaderWithIcons,
+  isHistoryPage,
+  isGraduationUploadPage,
+  isGraduationProcessingPage,
+  isGraduationResultPage,
+  scrolled,
+  router,
+  startNewChat,
+  scanMenuOpen,
+  setScanMenuOpen,
+}: {
+  pathname: string;
+  isLoginPage: boolean;
+  isSignupPage: boolean;
+  isGraduationHeaderWithIcons: boolean;
+  isHistoryPage: boolean;
+  isGraduationUploadPage: boolean;
+  isGraduationProcessingPage: boolean;
+  isGraduationResultPage: boolean;
+  scrolled: boolean;
+  router: ReturnType<typeof useRouter>;
+  startNewChat: () => void;
+  scanMenuOpen: boolean;
+  setScanMenuOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+}) {
+  const searchParams = useSearchParams();
+  const headerTitle =
+    pathname === "/signup" || pathname.startsWith("/signup/")
+      ? "회원가입"
+      : pathname === "/graduation/upload/processing" && searchParams.get("edit")
+        ? "수정"
+        : HEADER_TITLE[pathname] ?? "NAVI";
+
+  return (
+    <AppHeader
+      title={headerTitle}
+      showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage}
+      showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons}
+      showHistory={
+        !isHistoryPage &&
+        !isLoginPage &&
+        !isSignupPage &&
+        pathname !== "/my" &&
+        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+      }
+      showAdd={
+        !isHistoryPage &&
+        !isLoginPage &&
+        !isSignupPage &&
+        pathname !== "/my" &&
+        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+      }
+      historyIcon={
+        isGraduationHeaderWithIcons ? <EditIcon /> : undefined
+      }
+      addIcon={
+        isGraduationHeaderWithIcons ? <ScanIcon /> : undefined
+      }
+      scrolled={scrolled}
+      onHistory={
+        isGraduationResultPage
+          ? () => withViewTransition(() => router.push("/graduation/upload/processing?edit=1"))
+          : isGraduationUploadPage || isGraduationProcessingPage
+            ? () => withViewTransition(() => router.push("/history"))
+            : !isHistoryPage
+              ? () => withViewTransition(() => router.push("/history"))
+              : undefined
+      }
+      onAdd={
+        isGraduationHeaderWithIcons
+          ? () => setScanMenuOpen((open) => !open)
+          : !isHistoryPage
+              ? () => {
+                  startNewChat();
+                  withViewTransition(() => router.push("/home"));
+                }
+              : undefined
+      }
+    />
+  );
+}
+
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -57,18 +149,20 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const routeShowsBottomBar = pathHasBottomBar(pathname);
   const showChatInput = isHome;
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
-  const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
+  const isGraduationUploadPage = pathname === "/graduation/upload";
+  const isGraduationProcessingPage = pathname === "/graduation/upload/processing";
+  const isGraduationResultPage = pathname === "/graduation/result" || pathname.startsWith("/graduation/result/");
+  const isGraduationHeaderWithIcons = isGraduationResultPage;
   const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
-  const showHeader = !isSplash && !isMyPage && !isGraduationPage;
+  const isGraduationRootPage = pathname === "/graduation";
+  const showHeader = !isSplash && !isMyPage && !isGraduationRootPage;
+  const isWhiteBackgroundPage = isMyPage || isGraduationResultPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
+  const [scanMenuOpen, setScanMenuOpen] = useState(false);
   const { isKeyboardOpen, keyboardHeight } = useKeyboardStatus();
-  const headerTitle =
-    pathname === "/signup" || pathname.startsWith("/signup/")
-      ? "회원가입"
-      : HEADER_TITLE[pathname] ?? "NAVI";
 
   const mainRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -89,8 +183,31 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
   const effectiveKeyboardInset = Math.max(0, keyboardHeight);
 
+  useEffect(() => {
+    const t = setTimeout(() => setScanMenuOpen(false), 0);
+    return () => clearTimeout(t);
+  }, [pathname]);
+
+  // 마이·result 페이지: body·html·노치 영역까지 흰색 (모바일에서 회색으로 보이는 것 방지)
+  useEffect(() => {
+    if (!isWhiteBackgroundPage) return;
+    const prevBody = document.body.style.background;
+    const prevHtml = document.documentElement.style.background;
+    document.body.style.background = "white";
+    document.documentElement.style.background = "white";
+    return () => {
+      document.body.style.background = prevBody;
+      document.documentElement.style.background = prevHtml;
+    };
+  }, [isWhiteBackgroundPage]);
+
   const keyboardActive = chatInputFocused || isKeyboardOpen || keyboardHeight > 0;
-  const showBottomBar = !isSplash && routeShowsBottomBar && !keyboardActive;
+  const showBottomBar =
+    !isSplash &&
+    routeShowsBottomBar &&
+    !keyboardActive &&
+    !isGraduationUploadPage &&
+    !isGraduationProcessingPage;
 
   useEffect(() => {
     const onFocus = (e: FocusEvent) => {
@@ -221,16 +338,24 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   }, [showHeader]);
 
   useEffect(() => {
+    // 하단바가 숨겨지면 높이를 0으로 설정 (비동기로 처리해 set-state-in-effect 규칙 준수)
+    if (!showBottomBar) {
+      const t = setTimeout(() => setBottomBarHeight(0), 0);
+      return () => clearTimeout(t);
+    }
+
     const updateBottomBarHeight = () => {
       const bottomBarEl = document.querySelector("[data-bottom-bar] nav") as HTMLElement | null;
       if (bottomBarEl) {
         setBottomBarHeight(bottomBarEl.offsetHeight);
       } else {
-        setBottomBarHeight(showBottomBar ? 60 : 0);
+        // 하단바 요소가 없으면 기본값 사용
+        setBottomBarHeight(60);
       }
     };
 
-    updateBottomBarHeight();
+    // 약간의 지연을 두어 DOM이 업데이트된 후 측정
+    const timeoutId = setTimeout(updateBottomBarHeight, 0);
     window.addEventListener("resize", updateBottomBarHeight);
 
     const bottomBarEl = document.querySelector("[data-bottom-bar] nav") as HTMLElement | null;
@@ -238,12 +363,14 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
       const resizeObserver = new ResizeObserver(updateBottomBarHeight);
       resizeObserver.observe(bottomBarEl);
       return () => {
+        clearTimeout(timeoutId);
         window.removeEventListener("resize", updateBottomBarHeight);
         resizeObserver.disconnect();
       };
     }
 
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener("resize", updateBottomBarHeight);
     };
   }, [showBottomBar, pathname]);
@@ -267,10 +394,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const mainHeight = useMemo(() => {
     if (effectiveViewportHeight == null) return undefined;
     const topInset = showHeader ? headerHeight : 0;
-    // 졸업관리 페이지는 bottomBar를 main 높이에 포함 (paddingBottom 없으므로)
-    const bottomInset = isGraduationPage && showBottomBar ? bottomBarHeight : 0;
+    // 졸업관리 루트 페이지는 bottomBar를 main 높이에 포함 (paddingBottom 없으므로)
+    const bottomInset = isGraduationRootPage && showBottomBar ? bottomBarHeight : 0;
     return Math.max(0, effectiveViewportHeight - topInset - bottomInset);
-  }, [effectiveViewportHeight, headerHeight, showHeader, isGraduationPage, showBottomBar, bottomBarHeight]);
+  }, [effectiveViewportHeight, headerHeight, showHeader, isGraduationRootPage, showBottomBar, bottomBarHeight]);
 
   const resolvedPaddingTop = showHeader
     ? headerHeight > 0
@@ -279,8 +406,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     : "0px";
 
   const resolvedPaddingBottom = useMemo(() => {
-    // 졸업관리 페이지는 중앙 정렬을 위해 paddingBottom 제거
-    if (isGraduationPage) {
+    // 졸업관리 루트 페이지는 중앙 정렬을 위해 paddingBottom 제거
+    if (isGraduationRootPage) {
       return "0px";
     }
 
@@ -294,39 +421,36 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
     if (showBottomBar) return `${bottomBarHeight}px`;
     return "0px";
-  }, [bottomBarHeight, chatInputHeight, keyboardActive, showBottomBar, showChatInput, isGraduationPage]);
+  }, [bottomBarHeight, chatInputHeight, keyboardActive, showBottomBar, showChatInput, isGraduationRootPage]);
 
   if (isSplash) {
     return <>{children}</>;
   }
 
   return (
-    <div className="app-frame flex h-full min-h-0 flex-col overflow-hidden">
+    <div
+      className="app-frame flex h-full min-h-0 flex-col overflow-hidden"
+      style={isWhiteBackgroundPage ? { background: "white" } : undefined}
+    >
       {showHeader && (
         <div ref={headerRef}>
-          <AppHeader
-            title={headerTitle}
-            showBack={pathname !== "/home" && pathname !== "/my"}
-            showTitle={pathname !== "/home" && pathname !== "/my"}
-            showHistory={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my"}
-            showAdd={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my"}
-            scrolled={scrolled}
-            onHistory={
-              !isHistoryPage
-                ? () => {
-                    withViewTransition(() => router.push("/history"));
-                  }
-                : undefined
-            }
-            onAdd={
-              !isHistoryPage
-                ? () => {
-                    startNewChat();
-                    withViewTransition(() => router.push("/home"));
-                  }
-                : undefined
-            }
-          />
+          <Suspense fallback={<AppHeader title={HEADER_TITLE[pathname] ?? "NAVI"} showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage} showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons} showHistory={false} showAdd={false} scrolled={scrolled} />}>
+            <AppHeaderWithSearchParams
+              pathname={pathname}
+              isLoginPage={isLoginPage}
+              isSignupPage={isSignupPage}
+              isGraduationHeaderWithIcons={isGraduationHeaderWithIcons}
+              isHistoryPage={isHistoryPage}
+              isGraduationUploadPage={isGraduationUploadPage}
+              isGraduationProcessingPage={isGraduationProcessingPage}
+              isGraduationResultPage={isGraduationResultPage}
+              scrolled={scrolled}
+              router={router}
+              startNewChat={startNewChat}
+              scanMenuOpen={scanMenuOpen}
+              setScanMenuOpen={setScanMenuOpen}
+            />
+          </Suspense>
         </div>
       )}
 
@@ -334,7 +458,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         onScroll={onScroll}
         tabIndex={-1}
-        className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden focus:outline-none${isGraduationPage ? " flex items-center justify-center" : ""}`}
+        className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden focus:outline-none${isGraduationRootPage ? " flex items-center justify-center" : ""}`}
         suppressHydrationWarning
         style={{
           height: mainHeight != null ? `${mainHeight}px` : undefined,
@@ -342,9 +466,9 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           paddingTop: resolvedPaddingTop,
           paddingBottom: resolvedPaddingBottom,
           transition: "height 220ms ease, max-height 220ms ease, padding-bottom 220ms ease",
-          touchAction: isGraduationPage ? "none" : "pan-y", // 졸업관리 페이지는 스크롤 비활성화
-          WebkitOverflowScrolling: isGraduationPage ? "auto" : "touch", // iOS 부드러운 스크롤
-          overflowY: isGraduationPage ? "hidden" : "scroll", // 졸업관리 페이지는 스크롤 비활성화
+          touchAction: isGraduationRootPage ? "none" : "pan-y", // 졸업관리 루트 페이지는 스크롤 비활성화
+          WebkitOverflowScrolling: isGraduationRootPage ? "auto" : "touch", // iOS 부드러운 스크롤
+          overflowY: isGraduationRootPage ? "hidden" : "scroll", // 졸업관리 루트 페이지는 스크롤 비활성화
           overflowX: "hidden",
           position: "relative", // 스크롤 컨테이너로 명확히 지정
           background: "var(--header-bg, var(--background))", // 페이지에서 설정한 헤더 배경색을 main도 따라감
@@ -365,6 +489,56 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           <BottomBar />
         </div>
       )}
+
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isGraduationResultPage && scanMenuOpen && (
+              <>
+                <motion.div
+                  role="presentation"
+                  className="fixed inset-0 z-40"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => setScanMenuOpen(false)}
+                />
+                <motion.div
+                  role="menu"
+                  aria-label="스캔 메뉴"
+                  className="fixed right-1 z-50 flex flex-col items-stretch rounded-lg border border-[#EEEFF1] bg-white py-1 shadow-ds-soft"
+                  style={{ top: "calc(3rem + 0.5rem + var(--safe-area-inset-top))" }}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="whitespace-nowrap px-4 py-3 text-left text-ds-body-16-r text-ds-primary hover:bg-ds-tertiary/10 active:bg-ds-tertiary/15"
+                    onClick={() => {
+                      setScanMenuOpen(false);
+                      withViewTransition(() => router.push("/graduation/upload"));
+                    }}
+                  >
+                    졸업사정조회 스캔
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="whitespace-nowrap px-4 py-3 text-left text-ds-body-16-r text-ds-primary hover:bg-ds-tertiary/10 active:bg-ds-tertiary/15"
+                    onClick={() => setScanMenuOpen(false)}
+                  >
+                    최근 시간표 스캔
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }

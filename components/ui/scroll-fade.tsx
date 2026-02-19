@@ -35,7 +35,6 @@ const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(
     const gradientStyle = (direction: "left" | "right" | "top" | "bottom") => {
       const transparent = "transparent";
       const color = fadeColor;
-      const size = `${fadeSize}px`;
       const maps = {
         left: `linear-gradient(to right, ${color}, ${transparent})`,
         right: `linear-gradient(to left, ${color}, ${transparent})`,
