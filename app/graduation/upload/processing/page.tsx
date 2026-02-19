@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,7 @@ import { withViewTransition } from "@/lib/view-transition";
 /** Figma 1229-15538: 졸업사정조회 결과 확인 페이지 */
 /** Figma 1229-18755: 이미지 없이 현황만 수정하는 화면 */
 
-export default function GraduationProcessingPage() {
-  useHeaderBackground("white");
+function GraduationProcessingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const imageUrl = searchParams.get("image");
@@ -926,5 +925,18 @@ export default function GraduationProcessingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GraduationProcessingPage() {
+  useHeaderBackground("white");
+  return (
+    <Suspense fallback={
+      <div className="flex h-full min-h-0 flex-col items-center justify-center bg-white">
+        <div className="text-ds-body-16-r text-ds-tertiary">로딩 중...</div>
+      </div>
+    }>
+      <GraduationProcessingContent />
+    </Suspense>
   );
 }

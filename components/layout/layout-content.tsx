@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { EditIcon, ScanIcon } from "@/components/icons/header-icons";
@@ -54,10 +54,95 @@ function isIOSSafari(): boolean {
   return isIOS && isSafari;
 }
 
+function AppHeaderWithSearchParams({
+  pathname,
+  isLoginPage,
+  isSignupPage,
+  isGraduationHeaderWithIcons,
+  isHistoryPage,
+  isGraduationUploadPage,
+  isGraduationProcessingPage,
+  isGraduationResultPage,
+  scrolled,
+  router,
+  startNewChat,
+  scanMenuOpen,
+  setScanMenuOpen,
+}: {
+  pathname: string;
+  isLoginPage: boolean;
+  isSignupPage: boolean;
+  isGraduationHeaderWithIcons: boolean;
+  isHistoryPage: boolean;
+  isGraduationUploadPage: boolean;
+  isGraduationProcessingPage: boolean;
+  isGraduationResultPage: boolean;
+  scrolled: boolean;
+  router: ReturnType<typeof useRouter>;
+  startNewChat: () => void;
+  scanMenuOpen: boolean;
+  setScanMenuOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+}) {
+  const searchParams = useSearchParams();
+  const headerTitle =
+    pathname === "/signup" || pathname.startsWith("/signup/")
+      ? "회원가입"
+      : pathname === "/graduation/upload/processing" && searchParams.get("edit")
+        ? "수정"
+        : HEADER_TITLE[pathname] ?? "NAVI";
+
+  return (
+    <AppHeader
+      title={headerTitle}
+      showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage}
+      showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons}
+      showHistory={
+        !isHistoryPage &&
+        !isLoginPage &&
+        !isSignupPage &&
+        pathname !== "/my" &&
+        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+      }
+      showAdd={
+        !isHistoryPage &&
+        !isLoginPage &&
+        !isSignupPage &&
+        pathname !== "/my" &&
+        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+      }
+      historyIcon={
+        isGraduationHeaderWithIcons ? <EditIcon /> : undefined
+      }
+      addIcon={
+        isGraduationHeaderWithIcons ? <ScanIcon /> : undefined
+      }
+      scrolled={scrolled}
+      onHistory={
+        isGraduationResultPage
+          ? () => withViewTransition(() => router.push("/graduation/upload/processing?edit=1"))
+          : isGraduationUploadPage || isGraduationProcessingPage
+            ? () => withViewTransition(() => router.push("/history"))
+            : !isHistoryPage
+              ? () => withViewTransition(() => router.push("/history"))
+              : undefined
+      }
+      onAdd={
+        isGraduationHeaderWithIcons
+          ? () => setScanMenuOpen((open) => !open)
+          : !isHistoryPage
+              ? () => {
+                  startNewChat();
+                  withViewTransition(() => router.push("/home"));
+                }
+              : undefined
+      }
+    />
+  );
+}
+
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { startNewChat } = useChat();
   const isHome = pathname === "/home";
   const isSplash = pathname === "/";
@@ -73,16 +158,11 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const isGraduationRootPage = pathname === "/graduation";
   const showHeader = !isSplash && !isMyPage && !isGraduationRootPage;
+  const isWhiteBackgroundPage = isMyPage || isGraduationResultPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
   const { isKeyboardOpen, keyboardHeight } = useKeyboardStatus();
-  const headerTitle =
-    pathname === "/signup" || pathname.startsWith("/signup/")
-      ? "회원가입"
-      : pathname === "/graduation/upload/processing" && searchParams.get("edit")
-        ? "수정"
-        : HEADER_TITLE[pathname] ?? "NAVI";
 
   const mainRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -107,6 +187,19 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     const t = setTimeout(() => setScanMenuOpen(false), 0);
     return () => clearTimeout(t);
   }, [pathname]);
+
+  // 마이·result 페이지: body·html·노치 영역까지 흰색 (모바일에서 회색으로 보이는 것 방지)
+  useEffect(() => {
+    if (!isWhiteBackgroundPage) return;
+    const prevBody = document.body.style.background;
+    const prevHtml = document.documentElement.style.background;
+    document.body.style.background = "white";
+    document.documentElement.style.background = "white";
+    return () => {
+      document.body.style.background = prevBody;
+      document.documentElement.style.background = prevHtml;
+    };
+  }, [isWhiteBackgroundPage]);
 
   const keyboardActive = chatInputFocused || isKeyboardOpen || keyboardHeight > 0;
   const showBottomBar =
@@ -335,54 +428,29 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="app-frame flex h-full min-h-0 flex-col overflow-hidden">
+    <div
+      className="app-frame flex h-full min-h-0 flex-col overflow-hidden"
+      style={isWhiteBackgroundPage ? { background: "white" } : undefined}
+    >
       {showHeader && (
         <div ref={headerRef}>
-          <AppHeader
-            title={headerTitle}
-            showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage}
-            showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons}
-            showHistory={
-              !isHistoryPage &&
-              !isLoginPage &&
-              !isSignupPage &&
-              pathname !== "/my" &&
-              (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
-            }
-            showAdd={
-              !isHistoryPage &&
-              !isLoginPage &&
-              !isSignupPage &&
-              pathname !== "/my" &&
-              (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
-            }
-            historyIcon={
-              isGraduationHeaderWithIcons ? <EditIcon /> : undefined
-            }
-            addIcon={
-              isGraduationHeaderWithIcons ? <ScanIcon /> : undefined
-            }
-            scrolled={scrolled}
-            onHistory={
-              isGraduationResultPage
-                ? () => withViewTransition(() => router.push("/graduation/upload/processing?edit=1"))
-                : isGraduationUploadPage || isGraduationProcessingPage
-                  ? () => withViewTransition(() => router.push("/history"))
-                  : !isHistoryPage
-                    ? () => withViewTransition(() => router.push("/history"))
-                    : undefined
-            }
-            onAdd={
-              isGraduationHeaderWithIcons
-                ? () => setScanMenuOpen((open) => !open)
-                : !isHistoryPage
-                    ? () => {
-                        startNewChat();
-                        withViewTransition(() => router.push("/home"));
-                      }
-                    : undefined
-            }
-          />
+          <Suspense fallback={<AppHeader title={HEADER_TITLE[pathname] ?? "NAVI"} showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage} showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons} showHistory={false} showAdd={false} scrolled={scrolled} />}>
+            <AppHeaderWithSearchParams
+              pathname={pathname}
+              isLoginPage={isLoginPage}
+              isSignupPage={isSignupPage}
+              isGraduationHeaderWithIcons={isGraduationHeaderWithIcons}
+              isHistoryPage={isHistoryPage}
+              isGraduationUploadPage={isGraduationUploadPage}
+              isGraduationProcessingPage={isGraduationProcessingPage}
+              isGraduationResultPage={isGraduationResultPage}
+              scrolled={scrolled}
+              router={router}
+              startNewChat={startNewChat}
+              scanMenuOpen={scanMenuOpen}
+              setScanMenuOpen={setScanMenuOpen}
+            />
+          </Suspense>
         </div>
       )}
 
