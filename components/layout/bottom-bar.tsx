@@ -22,7 +22,7 @@ export function BottomBar() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-10 flex shrink-0 flex-col bg-white"
       style={{
-        paddingBottom: "calc(var(--safe-area-inset-bottom) + 8px)",
+        paddingBottom: "calc(var(--safe-area-inset-bottom) + 32px)",
         maxWidth: "var(--app-max-width)",
         margin: "0 auto",
       }}
