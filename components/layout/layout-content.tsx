@@ -14,6 +14,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/login": "로그인",
   "/signup": "회원가입",
   "/graduation": "졸업 관리",
+  "/graduation/upload": "졸업사정조회 스캔",
   "/my": "마이",
   "/history": "기록",
 };
@@ -58,10 +59,12 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const showChatInput = isHome;
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
   const isGraduationPage = pathname === "/graduation" || pathname.startsWith("/graduation/");
+  const isGraduationUploadPage = pathname === "/graduation/upload";
   const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
-  const showHeader = !isSplash && !isMyPage && !isGraduationPage;
+  const isGraduationRootPage = pathname === "/graduation";
+  const showHeader = !isSplash && !isMyPage && !isGraduationRootPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const { isKeyboardOpen, keyboardHeight } = useKeyboardStatus();
@@ -90,7 +93,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const effectiveKeyboardInset = Math.max(0, keyboardHeight);
 
   const keyboardActive = chatInputFocused || isKeyboardOpen || keyboardHeight > 0;
-  const showBottomBar = !isSplash && routeShowsBottomBar && !keyboardActive;
+  const showBottomBar = !isSplash && routeShowsBottomBar && !keyboardActive && !isGraduationUploadPage;
 
   useEffect(() => {
     const onFocus = (e: FocusEvent) => {
@@ -267,10 +270,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const mainHeight = useMemo(() => {
     if (effectiveViewportHeight == null) return undefined;
     const topInset = showHeader ? headerHeight : 0;
-    // 졸업관리 페이지는 bottomBar를 main 높이에 포함 (paddingBottom 없으므로)
-    const bottomInset = isGraduationPage && showBottomBar ? bottomBarHeight : 0;
+    // 졸업관리 루트 페이지는 bottomBar를 main 높이에 포함 (paddingBottom 없으므로)
+    const bottomInset = isGraduationRootPage && showBottomBar ? bottomBarHeight : 0;
     return Math.max(0, effectiveViewportHeight - topInset - bottomInset);
-  }, [effectiveViewportHeight, headerHeight, showHeader, isGraduationPage, showBottomBar, bottomBarHeight]);
+  }, [effectiveViewportHeight, headerHeight, showHeader, isGraduationRootPage, showBottomBar, bottomBarHeight]);
 
   const resolvedPaddingTop = showHeader
     ? headerHeight > 0
@@ -279,8 +282,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     : "0px";
 
   const resolvedPaddingBottom = useMemo(() => {
-    // 졸업관리 페이지는 중앙 정렬을 위해 paddingBottom 제거
-    if (isGraduationPage) {
+    // 졸업관리 루트 페이지는 중앙 정렬을 위해 paddingBottom 제거
+    if (isGraduationRootPage) {
       return "0px";
     }
 
@@ -294,7 +297,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
     if (showBottomBar) return `${bottomBarHeight}px`;
     return "0px";
-  }, [bottomBarHeight, chatInputHeight, keyboardActive, showBottomBar, showChatInput, isGraduationPage]);
+  }, [bottomBarHeight, chatInputHeight, keyboardActive, showBottomBar, showChatInput, isGraduationRootPage]);
 
   if (isSplash) {
     return <>{children}</>;
@@ -308,8 +311,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
             title={headerTitle}
             showBack={pathname !== "/home" && pathname !== "/my"}
             showTitle={pathname !== "/home" && pathname !== "/my"}
-            showHistory={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my"}
-            showAdd={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my"}
+            showHistory={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage}
+            showAdd={!isHistoryPage && !isLoginPage && !isSignupPage && pathname !== "/my" && !isGraduationUploadPage}
             scrolled={scrolled}
             onHistory={
               !isHistoryPage
@@ -334,7 +337,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         onScroll={onScroll}
         tabIndex={-1}
-        className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden focus:outline-none${isGraduationPage ? " flex items-center justify-center" : ""}`}
+        className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden focus:outline-none${isGraduationRootPage ? " flex items-center justify-center" : ""}`}
         suppressHydrationWarning
         style={{
           height: mainHeight != null ? `${mainHeight}px` : undefined,
@@ -342,9 +345,9 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           paddingTop: resolvedPaddingTop,
           paddingBottom: resolvedPaddingBottom,
           transition: "height 220ms ease, max-height 220ms ease, padding-bottom 220ms ease",
-          touchAction: isGraduationPage ? "none" : "pan-y", // 졸업관리 페이지는 스크롤 비활성화
-          WebkitOverflowScrolling: isGraduationPage ? "auto" : "touch", // iOS 부드러운 스크롤
-          overflowY: isGraduationPage ? "hidden" : "scroll", // 졸업관리 페이지는 스크롤 비활성화
+          touchAction: isGraduationRootPage ? "none" : "pan-y", // 졸업관리 루트 페이지는 스크롤 비활성화
+          WebkitOverflowScrolling: isGraduationRootPage ? "auto" : "touch", // iOS 부드러운 스크롤
+          overflowY: isGraduationRootPage ? "hidden" : "scroll", // 졸업관리 루트 페이지는 스크롤 비활성화
           overflowX: "hidden",
           position: "relative", // 스크롤 컨테이너로 명확히 지정
           background: "var(--header-bg, var(--background))", // 페이지에서 설정한 헤더 배경색을 main도 따라감

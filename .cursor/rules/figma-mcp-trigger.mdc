@@ -1,0 +1,28 @@
+---
+description: "@figma" 트리거 시 Figma MCP 사용
+alwaysApply: true
+---
+
+# Figma MCP 트리거 규칙
+
+사용자가 메시지에 **"@figma"** 또는 **"@Figma"**를 포함하면, Figma MCP 서버(`user-Figma`)의 도구와 리소스를 사용해야 합니다.
+
+## 동작 방식
+
+1. **트리거 감지**: 사용자 메시지에 "@figma"가 포함되어 있으면 이 규칙이 활성화됩니다.
+
+2. **MCP 도구 사용**: 
+   - Figma MCP 서버의 도구들을 사용하여 Figma 관련 작업을 수행합니다.
+   - `call_mcp_tool`을 사용하여 Figma MCP 도구를 호출합니다.
+   - `fetch_mcp_resource`를 사용하여 Figma MCP 리소스를 가져옵니다.
+
+3. **사용 예시**:
+   - "@figma 디자인 시스템 가져와" → Figma MCP를 사용하여 디자인 시스템 정보를 가져옵니다.
+   - "@figma 컴포넌트 내보내기" → Figma MCP를 사용하여 컴포넌트를 내보냅니다.
+   - "@figma 변수 확인" → Figma MCP를 사용하여 변수 정보를 확인합니다.
+
+## 주의사항
+
+- "@figma" 트리거가 감지되면 반드시 Figma MCP 서버의 도구를 사용해야 합니다.
+- MCP 도구를 호출하기 전에 도구 스키마를 먼저 확인하세요.
+- 사용자가 Figma 관련 작업을 요청할 때는 자동으로 Figma MCP를 활용하세요.

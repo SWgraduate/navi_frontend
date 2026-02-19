@@ -1,12 +1,16 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { withViewTransition } from "@/lib/view-transition";
 
-/** Figma 1212-11061: 졸업 관리 인트로. 아이콘 + 타이틀 + 설명 + 시작 버튼 */
+/** Figma 1212-11510: 졸업 관리 시작하기 화면 */
 export default function GraduationPage() {
+  const router = useRouter();
+
   const handleStart = () => {
-    // TODO: 졸업 관리 플로우 시작 (스크린샷 업로드 등)
+    withViewTransition(() => router.push("/graduation/upload"));
   };
 
   return (
@@ -34,7 +38,7 @@ export default function GraduationPage() {
         className="mt-8 w-full max-w-[320px] text-white"
         onClick={handleStart}
       >
-        시작
+        시작하기
       </Button>
     </div>
   );
