@@ -59,33 +59,36 @@ export default function GraduationUploadPage() {
           </p>
         </div>
 
-        {/* 졸업사정조회 표 예시 */}
+        {/* 졸업사정조회 표 예시 또는 업로드된 이미지 */}
         <div className="mb-8 overflow-x-auto rounded-lg border border-[#EEEFF1] bg-white">
           <div className="relative w-full">
-            <Image
-              src="/example/example.png"
-              alt="졸업사정조회 표 예시"
-              width={800}
-              height={1200}
-              className="w-full h-auto"
-              priority
-            />
+            {previewUrl ? (
+              <button
+                type="button"
+                onClick={handleFileSelectClick}
+                className="w-full cursor-pointer"
+                aria-label="이미지 다시 선택하기"
+              >
+                <Image
+                  src={previewUrl}
+                  alt="업로드된 졸업사정조회 스크린샷"
+                  width={800}
+                  height={1200}
+                  className="w-full h-auto max-h-[1200px]"
+                />
+              </button>
+            ) : (
+              <Image
+                src="/example/example.png"
+                alt="졸업사정조회 표 예시"
+                width={800}
+                height={1200}
+                className="w-full h-auto max-h-[1200px]"
+                priority
+              />
+            )}
           </div>
         </div>
-
-        {/* 미리보기 영역 */}
-        {previewUrl && (
-          <div className="mb-6">
-            <div className="relative aspect-9/16 w-full max-w-sm mx-auto overflow-hidden rounded-lg border border-[#EEEFF1] bg-ds-gray-5">
-              <Image
-                src={previewUrl}
-                alt="업로드된 스크린샷"
-                fill
-                className="object-contain"
-              />
-            </div>
-          </div>
-        )}
 
         {/* 숨겨진 파일 입력 */}
         <input
@@ -147,7 +150,7 @@ export default function GraduationUploadPage() {
           className="flex-1 text-white"
           onClick={selectedFile ? handleUpload : handleFileSelectClick}
         >
-          {selectedFile ? "업로드하기" : "사진 선택"}
+          {selectedFile ? "다음" : "사진 선택"}
         </Button>
       </div>
     </div>
