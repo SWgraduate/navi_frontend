@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { signupCompleteFormSchema } from "@/lib/schemas/signup-complete";
 import { Search } from "lucide-react";
+import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
 
 function UpDownIcon({ className }: { className?: string }) {
   return (
@@ -94,7 +95,7 @@ const sheetPanelVariants = {
   closed: { top: "100%", bottom: "auto" as const },
 };
 
-const MAJOR_OPTIONS = [
+export const MAJOR_OPTIONS = [
   "ICT융합학부",
   "ICT융합학부 디자인테크놀로지",
   "ICT융합학부 미디어테크놀로지",
@@ -127,7 +128,6 @@ export default function SignupCompletePage() {
   const [academicStatus, setAcademicStatus] = useState<AcademicStatus | "">("");
   const [yearSemester, setYearSemester] = useState("");
   const [majorSheetOpen, setMajorSheetOpen] = useState(false);
-  const [majorSearch, setMajorSearch] = useState("");
   const [secondMajorSheetOpen, setSecondMajorSheetOpen] = useState(false);
   const [secondMajor, setSecondMajor] = useState("");
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
@@ -137,7 +137,6 @@ export default function SignupCompletePage() {
   const [sheetSemester, setSheetSemester] = useState<number | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const majorSheetDragControls = useDragControls();
   const secondMajorTypeDragControls = useDragControls();
   const secondMajorPickerDragControls = useDragControls();
   const yearSemesterDragControls = useDragControls();
@@ -185,12 +184,6 @@ export default function SignupCompletePage() {
   useEffect(() => {
     scrollAreaRef.current?.focus({ preventScroll: true });
   }, []);
-
-  const filteredMajors = useMemo(() => {
-    if (!majorSearch.trim()) return MAJOR_OPTIONS;
-    const q = majorSearch.trim().toLowerCase();
-    return MAJOR_OPTIONS.filter((m) => m.toLowerCase().includes(q));
-  }, [majorSearch]);
 
   const filteredSecondMajors = useMemo(() => {
     if (!secondMajorPickerSearch.trim()) return MAJOR_OPTIONS;
@@ -314,85 +307,17 @@ export default function SignupCompletePage() {
           </div>
 
           {/* 주전공 선택 바텀시트 (Figma 1105-11744) */}
-          <AnimatePresence>
-            {majorSheetOpen && (
-              <>
-                <motion.div
-                  className="fixed inset-0 z-40 bg-black/40"
-                  aria-hidden
-                  onClick={() => setMajorSheetOpen(false)}
-                  variants={sheetOverlayVariants}
-                  initial="closed"
-                  animate="open"
-                  exit="closed"
-                  transition={{ duration: 0.2 }}
-                />
-                <motion.div
-                  className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-labelledby="major-sheet-title"
-                  variants={sheetPanelVariants}
-                  initial="closed"
-                  animate="open"
-                  exit="closed"
-                  transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
-                  drag="y"
-                  dragConstraints={{ top: 0 }}
-                  dragElastic={{ bottom: 0.25 }}
-                  dragListener={false}
-                  dragControls={majorSheetDragControls}
-                  onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setMajorSheetOpen(false))}
-                >
-                <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
-                  <div
-                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
-                    aria-hidden
-                    onPointerDown={(e) => majorSheetDragControls.start(e)}
-                  >
-                    <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
-                    <h2 id="major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
-                      주전공을 선택해주세요
-                    </h2>
-                  </div>
-                  <div className="relative flex min-h-[48px] items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
-                    <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary pointer-events-none" aria-hidden />
-                    <input
-                      type="search"
-                      placeholder="전공을 검색하세요"
-                      value={majorSearch}
-                      onChange={(e) => setMajorSearch(e.target.value)}
-                      className="w-full min-h-[48px] rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0 touch-manipulation"
-                    />
-                  </div>
-                </div>
-                <ul className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
-                  {filteredMajors.map((m) => (
-                    <li key={m} className="flex">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMajor(major === m ? "" : m);
-                          setMajorSheetOpen(false);
-                          setMajorSearch("");
-                          if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
-                        }}
-                        className="w-full min-h-[52px] cursor-pointer select-none py-5 px-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
-                      >
-                        {m}
-                      </button>
-                    </li>
-                  ))}
-                  {filteredMajors.length === 0 && (
-                    <li className="py-4 text-center text-ds-caption-14-r text-ds-tertiary">
-                      검색 결과가 없습니다
-                    </li>
-                  )}
-                </ul>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
+          <MajorSelectSheet
+            open={majorSheetOpen}
+            selected={major}
+            options={MAJOR_OPTIONS}
+            onOpenChange={setMajorSheetOpen}
+            onSelect={(next) => {
+              setMajor(next);
+              setMajorSearch("");
+              if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
+            }}
+          />
 
           <div className="flex flex-col gap-2">
             <label

@@ -9,7 +9,7 @@ import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
 const PERSONAL_ITEMS: Array<{ label: string; value: string; href?: string }> = [
   { label: "이름", value: MOCK_PERSONAL_INFO.name, href: "/my/personal/name" },
   { label: "학번", value: MOCK_PERSONAL_INFO.studentId, href: "/my/personal/student-id" },
-  { label: "주전공", value: MOCK_PERSONAL_INFO.major },
+  { label: "주전공", value: MOCK_PERSONAL_INFO.major, href: "/my/personal/major" },
   { label: "제2전공", value: MOCK_PERSONAL_INFO.secondMajor },
   { label: "학적상태", value: MOCK_PERSONAL_INFO.academicStatus },
   { label: "현재 이수한 학년/학기", value: MOCK_PERSONAL_INFO.yearSemester },
