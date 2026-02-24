@@ -14,6 +14,16 @@ export const MOCK_LOGIN_ACCOUNT = {
   password: "Qwer1234!",
 } as const;
 
+/** 개인정보 설정 목데이터 (Figma 1091-6843 기준, API 연동 시 제거) */
+export const MOCK_PERSONAL_INFO = {
+  name: "최수진",
+  studentId: "2023040828",
+  major: "ICT융합학부 디자인테크놀로지",
+  secondMajor: "디자인공학전공",
+  academicStatus: "재학생",
+  yearSemester: "3학년 / 2학기",
+} as const;
+
 /** 목데이터와 일치하는지 검사 (이메일·비밀번호) */
 export function matchMockAccount(email: string, password: string): boolean {
   return (

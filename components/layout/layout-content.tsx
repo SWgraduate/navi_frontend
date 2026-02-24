@@ -21,6 +21,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/graduation/upload/processing": "졸업사정조회 스캔",
   "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
+  "/my/personal": "개인정보 설정",
   "/history": "기록",
 };
 
@@ -157,7 +158,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const isGraduationRootPage = pathname === "/graduation";
-  const showHeader = !isSplash && !isMyPage && !isGraduationRootPage;
+  const showHeader = !isSplash && pathname !== "/my" && !isGraduationRootPage;
   const isWhiteBackgroundPage = isSplash || isMyPage || isGraduationResultPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
