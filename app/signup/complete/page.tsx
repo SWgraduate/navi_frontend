@@ -314,7 +314,6 @@ export default function SignupCompletePage() {
             onOpenChange={setMajorSheetOpen}
             onSelect={(next) => {
               setMajor(next);
-              setMajorSearch("");
               if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
             }}
           />
