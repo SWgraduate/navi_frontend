@@ -92,6 +92,8 @@ function AppHeaderWithSearchParams({
         ? "수정"
         : HEADER_TITLE[pathname] ?? "NAVI";
 
+  const isMySection = pathname === "/my" || pathname.startsWith("/my/");
+
   return (
     <AppHeader
       title={headerTitle}
@@ -101,14 +103,14 @@ function AppHeaderWithSearchParams({
         !isHistoryPage &&
         !isLoginPage &&
         !isSignupPage &&
-        pathname !== "/my" &&
+        !isMySection &&
         (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
       }
       showAdd={
         !isHistoryPage &&
         !isLoginPage &&
         !isSignupPage &&
-        pathname !== "/my" &&
+        !isMySection &&
         (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
       }
       historyIcon={
