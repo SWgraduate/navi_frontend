@@ -106,7 +106,7 @@ export const MAJOR_OPTIONS = [
   "경영학과",
 ] as const;
 
-const SECOND_MAJOR_OPTIONS = [
+export const SECOND_MAJOR_OPTIONS = [
   "다중전공",
   "융합전공",
   "부전공",

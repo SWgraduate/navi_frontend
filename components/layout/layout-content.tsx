@@ -25,6 +25,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/my/personal/name": "이름",
   "/my/personal/student-id": "학번",
   "/my/personal/major": "주전공",
+  "/my/personal/second-major": "제2전공",
   "/history": "기록",
 };
 
