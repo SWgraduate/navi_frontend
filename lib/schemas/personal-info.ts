@@ -16,7 +16,14 @@ export const personalAcademicStatusSchema = z.enum(["enrolled", "leave"], {
   required_error: "학적상태를 선택해주세요",
 });
 
+/** 마이페이지 - 현재 이수한 학년/학기 스키마 ("N-N" 형식, 예: 3-2) */
+export const personalYearSemesterSchema = z
+  .string()
+  .trim()
+  .regex(/^[1-4]-[12]$/, "학년/학기를 선택해주세요");
+
 export type PersonalNameValue = z.infer<typeof personalNameSchema>;
 export type PersonalStudentIdValue = z.infer<typeof personalStudentIdSchema>;
 export type PersonalAcademicStatusValue = z.infer<typeof personalAcademicStatusSchema>;
+export type PersonalYearSemesterValue = z.infer<typeof personalYearSemesterSchema>;
 

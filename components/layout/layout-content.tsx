@@ -27,6 +27,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/my/personal/major": "주전공",
   "/my/personal/second-major": "제2전공",
   "/my/personal/academic-status": "학적상태",
+  "/my/personal/year-semester": "현재 이수한 학년/학기",
   "/history": "기록",
 };
 

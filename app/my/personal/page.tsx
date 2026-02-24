@@ -12,7 +12,7 @@ const PERSONAL_ITEMS: Array<{ label: string; value: string; href?: string }> = [
   { label: "주전공", value: MOCK_PERSONAL_INFO.major, href: "/my/personal/major" },
   { label: "제2전공", value: MOCK_PERSONAL_INFO.secondMajor, href: "/my/personal/second-major" },
   { label: "학적상태", value: MOCK_PERSONAL_INFO.academicStatus, href: "/my/personal/academic-status" },
-  { label: "현재 이수한 학년/학기", value: MOCK_PERSONAL_INFO.yearSemester },
+  { label: "현재 이수한 학년/학기", value: MOCK_PERSONAL_INFO.yearSemester, href: "/my/personal/year-semester" },
 ];
 
 export default function MyPersonalPage() {
