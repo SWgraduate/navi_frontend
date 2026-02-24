@@ -1,53 +1,43 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
-import { personalAcademicStatusSchema, type PersonalAcademicStatusValue } from "@/lib/schemas/personal-info";
-import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
-/** 마이페이지 - 학적상태 수정 (재학생 / 휴학생) */
-export default function MyPersonalAcademicStatusPage() {
+const LANGUAGE_OPTIONS = [
+  { code: "ko", label: "한국어" },
+  { code: "en", label: "English" },
+  { code: "zh", label: "中文" },
+] as const;
+
+/** 마이페이지 - 언어설정 (Figma 1115-10894) */
+export default function MyLanguagePage() {
   useHeaderBackground("white");
   const router = useRouter();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
-  const initialStatus: PersonalAcademicStatusValue | "" =
-    MOCK_PERSONAL_INFO.academicStatus === "휴학생" ? "leave" : "enrolled";
-
-  const [status, setStatus] = useState<PersonalAcademicStatusValue | "">(initialStatus);
-  const [touched, setTouched] = useState(false);
-
-  const hasError = useMemo(
-    () => touched && !personalAcademicStatusSchema.safeParse(status).success,
-    [status, touched]
+  const initialCode: (typeof LANGUAGE_OPTIONS)[number]["code"] = "ko";
+  const [languageCode, setLanguageCode] = useState<(typeof LANGUAGE_OPTIONS)[number]["code"]>(
+    initialCode
   );
-  const canSubmit = useMemo(
-    () => personalAcademicStatusSchema.safeParse(status).success,
-    [status]
-  );
+
+  const canSubmit = languageCode !== initialCode;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched(true);
     if (!canSubmit) return;
 
-    // TODO: 실제 API 연동 및 상태 저장
+    // TODO: 실제 API 연동 및 언어 설정 저장
     withViewTransition(() => router.back());
   };
-
-  const labelForStatus = (value: PersonalAcademicStatusValue) =>
-    value === "enrolled" ? "재학생" : "휴학생";
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <form
-        id="personal-academic-status-form"
         onSubmit={handleSubmit}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4 pb-4 transition-[padding-bottom] duration-250 ease-out"
         style={{
@@ -58,40 +48,38 @@ export default function MyPersonalAcademicStatusPage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          학적상태를 선택해주세요
+          언어설정을 선택해주세요
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
           <span className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
-            학적상태
+            언어설정
           </span>
-          <div className="flex gap-2">
-            {(["enrolled", "leave"] as const).map((value) => (
+          <div className="flex flex-col gap-2">
+            {LANGUAGE_OPTIONS.map((opt) => (
               <button
-                key={value}
+                key={opt.code}
                 type="button"
-                onClick={() => {
-                  setStatus(value);
-                  setTouched(true);
-                }}
-                className={cn(
-                  "flex-1 rounded-md border-2 py-3 text-ds-body-16-r leading-ds-body-16-r",
-                  status === value
-                    ? "border-primary bg-primary/10 text-primary"
-                    : hasError
-                      ? "border-destructive bg-(--ds-gray-5) text-ds-tertiary"
-                      : "border-transparent bg-(--ds-gray-5) text-ds-tertiary"
-                )}
+                onClick={() => setLanguageCode(opt.code)}
+                className="flex items-center gap-3 py-1 text-ds-body-16-r leading-ds-body-16-r text-ds-primary"
               >
-                {labelForStatus(value)}
+                <span
+                  className={
+                    "flex h-5 w-5 items-center justify-center rounded-full border-2" +
+                    (languageCode === opt.code
+                      ? " border-primary"
+                      : " border-(--border,rgba(23,25,28,0.16))")
+                  }
+                  aria-hidden
+                >
+                  {languageCode === opt.code && (
+                    <span className="block h-2.5 w-2.5 rounded-full bg-primary" />
+                  )}
+                </span>
+                <span>{opt.label}</span>
               </button>
             ))}
           </div>
-          {hasError && (
-            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              학적상태를 선택해주세요.
-            </p>
-          )}
         </div>
       </form>
 
@@ -109,7 +97,7 @@ export default function MyPersonalAcademicStatusPage() {
         <div className="px-4">
           <Button
             type="submit"
-            form="personal-academic-status-form"
+            form="language-form"
             variant="primary"
             size="lg"
             className={

@@ -133,7 +133,7 @@ export default function MyPersonalYearSemesterPage() {
               "h-auto w-full rounded-md py-3 text-ds-body-16-sb leading-ds-body-16-sb" +
               (canSubmit
                 ? " text-white"
-                : " bg-(--ds-gray-10) text-ds-disabled hover:bg-(--ds-gray-10) active:bg-(--ds-gray-10)")
+                : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
             disabled={!canSubmit}
           >

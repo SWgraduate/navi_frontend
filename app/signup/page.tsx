@@ -162,7 +162,7 @@ export default function SignupPage() {
             "h-auto w-full rounded-sm py-4 text-ds-body-16-sb leading-ds-body-16-sb",
             allRequiredAgreed
               ? "bg-primary text-primary-foreground"
-              : "bg-[#EEEFF1] text-ds-disabled"
+              : "bg-(--ds-bg-disabled) text-ds-disabled"
           )}
           disabled={!allRequiredAgreed}
           onClick={handleAgreeSubmit}

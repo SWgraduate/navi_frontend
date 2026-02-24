@@ -692,7 +692,7 @@ export default function SignupCompletePage() {
                         "min-h-[52px] w-full cursor-pointer select-none rounded-md py-5 text-ds-body-16-sb leading-ds-body-16-sb touch-manipulation",
                         sheetYear != null && sheetSemester != null
                           ? "bg-primary text-primary-foreground"
-                          : "bg-[#EEEFF1] text-ds-disabled"
+                          : "bg-(--ds-bg-disabled) text-ds-disabled"
                       )}
                     >
                       완료
@@ -711,7 +711,7 @@ export default function SignupCompletePage() {
               "mt-4 h-auto w-full rounded-none py-4 text-ds-body-16-sb leading-ds-body-16-sb",
               canSubmit
                 ? "bg-primary text-primary-foreground"
-                : "bg-[#EEEFF1] text-ds-disabled"
+                : "bg-(--ds-bg-disabled) text-ds-disabled"
             )}
             disabled={!canSubmit}
           >

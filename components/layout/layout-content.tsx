@@ -21,6 +21,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/graduation/upload/processing": "졸업사정조회 스캔",
   "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
+  "/my/language": "언어설정",
   "/my/personal": "개인정보 설정",
   "/my/personal/name": "이름",
   "/my/personal/student-id": "학번",

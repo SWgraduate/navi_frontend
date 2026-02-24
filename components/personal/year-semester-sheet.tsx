@@ -162,7 +162,7 @@ export function YearSemesterSheet({
                   "min-h-[52px] w-full cursor-pointer select-none rounded-md py-5 text-ds-body-16-sb leading-ds-body-16-sb touch-manipulation" +
                   (sheetYear != null && sheetSemester != null
                     ? " bg-primary text-primary-foreground"
-                    : " bg-[#EEEFF1] text-ds-disabled")
+                    : " bg-(--ds-bg-disabled) text-ds-disabled")
                 }
               >
                 완료
