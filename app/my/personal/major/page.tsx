@@ -130,21 +130,23 @@ export default function MyPersonalMajorPage() {
           margin: "0 auto",
         }}
       >
-        <Button
-          type="submit"
-          form="personal-major-form"
-          variant="primary"
-          size="lg"
-          className={
-            "h-auto w-full rounded-none py-3 text-ds-body-16-sb leading-ds-body-16-sb" +
-            (canSubmit
-              ? " text-white"
-              : " bg-(--ds-gray-10) text-ds-disabled hover:bg-(--ds-gray-10) active:bg-(--ds-gray-10)")
-          }
-          disabled={!canSubmit}
-        >
-          수정
-        </Button>
+        <div className="px-4">
+          <Button
+            type="submit"
+            form="personal-major-form"
+            variant="primary"
+            size="lg"
+            className={
+              "h-auto w-full rounded-md py-3 text-ds-body-16-sb leading-ds-body-16-sb" +
+              (canSubmit
+                ? " text-white"
+                : " bg-(--ds-gray-10) text-ds-disabled hover:bg-(--ds-gray-10) active:bg-(--ds-gray-10)")
+            }
+            disabled={!canSubmit}
+          >
+            수정
+          </Button>
+        </div>
       </div>
     </div>
   );
