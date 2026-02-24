@@ -14,6 +14,7 @@ export interface ChatInputProps
   onHeightChange?: (height: number) => void;
   isKeyboardOpen?: boolean;
   keyboardHeight?: number;
+  bottomBarHeight?: number;
 }
 
 /** Figma 1136-9535: 하단 바 바로 위. 바=BG/Surface, 입력창=흰색(BG/Default) 한 덩어리, 높이 타이트 */
@@ -24,44 +25,13 @@ function ChatInput({
   onHeightChange,
   isKeyboardOpen = false,
   keyboardHeight = 0,
+  bottomBarHeight = 0,
   ...inputProps
 }: ChatInputProps) {
   const { sendMessage } = useChat();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [bottomBarHeight, setBottomBarHeight] = React.useState(0);
-  const [inputFocused, setInputFocused] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-
-  // 하단바 높이 계산
-  React.useEffect(() => {
-    const updateBottomBarHeight = () => {
-      const bottomBarEl = document.querySelector("[data-bottom-bar] nav") as HTMLElement | null;
-      if (bottomBarEl) {
-        setBottomBarHeight(bottomBarEl.offsetHeight);
-      } else {
-        setBottomBarHeight(0);
-      }
-    };
-
-    updateBottomBarHeight();
-    
-    // ResizeObserver로 하단바 높이 변화 감지
-    const bottomBarContainer = document.querySelector("[data-bottom-bar]") as HTMLElement | null;
-    if (bottomBarContainer && window.ResizeObserver) {
-      const resizeObserver = new ResizeObserver(updateBottomBarHeight);
-      resizeObserver.observe(bottomBarContainer);
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }
-    
-    // 폴백: 주기적으로 확인
-    const interval = setInterval(updateBottomBarHeight, 200);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
 
   // 컨테이너 높이를 상위 레이아웃에 전달 (메인 영역 하단 여백 계산에 사용)
   React.useEffect(() => {
@@ -80,47 +50,7 @@ function ChatInput({
     }
   }, [onHeightChange]);
 
-  // ChatInput 포커스 상태 추적: 키보드 상태 신호보다 빠르게 도킹 시작
-  React.useEffect(() => {
-    const containerEl = containerRef.current;
-    if (!containerEl) return;
-
-    const handleFocusIn = (event: FocusEvent) => {
-      if (!(event.target instanceof Element)) return;
-      if (!containerEl.contains(event.target)) return;
-      if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement ||
-        (event.target instanceof HTMLElement && event.target.isContentEditable)
-      ) {
-        setInputFocused(true);
-      }
-    };
-
-    const handleFocusOut = () => {
-      window.setTimeout(() => {
-        const activeElement = document.activeElement;
-        const stillFocusedInside =
-          activeElement instanceof Element &&
-          containerEl.contains(activeElement) &&
-          (activeElement instanceof HTMLInputElement ||
-            activeElement instanceof HTMLTextAreaElement ||
-            (activeElement instanceof HTMLElement && activeElement.isContentEditable));
-
-        setInputFocused(stillFocusedInside);
-      }, 0);
-    };
-
-    document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("focusout", handleFocusOut);
-
-    return () => {
-      document.removeEventListener("focusin", handleFocusIn);
-      document.removeEventListener("focusout", handleFocusOut);
-    };
-  }, []);
-
-  const shouldDockToKeyboard = inputFocused || isKeyboardOpen || keyboardHeight > 0;
+  const shouldDockToKeyboard = isKeyboardOpen || keyboardHeight > 0;
 
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
@@ -128,7 +58,7 @@ function ChatInput({
     ? `${effectiveKeyboardInset}px`
     : bottomBarHeight > 0
       ? `calc(${bottomBarHeight}px + var(--safe-area-inset-bottom))`
-      : `calc(70px + var(--safe-area-inset-bottom))`;
+      : `calc(120px + var(--safe-area-inset-bottom))`;
 
   const handleSend = () => {
     if (!inputValue.trim()) return;

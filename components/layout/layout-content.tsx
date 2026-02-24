@@ -480,8 +480,9 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
       {showChatInput && (
         <ChatInput
           onHeightChange={onChatInputHeightChange}
-          isKeyboardOpen={isKeyboardOpen}
+          isKeyboardOpen={keyboardActive}
           keyboardHeight={effectiveKeyboardInset}
+          bottomBarHeight={bottomBarHeight}
         />
       )}
       {showBottomBar && (
