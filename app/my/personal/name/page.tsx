@@ -7,6 +7,7 @@ import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { personalNameSchema } from "@/lib/schemas/personal-info";
 
 /** Figma 1091-7200: 마이페이지 - 이름 수정 */
 export default function MyPersonalNamePage() {
@@ -18,8 +19,14 @@ export default function MyPersonalNamePage() {
   const [name, setName] = useState<string>(MOCK_PERSONAL_INFO.name);
   const [touched, setTouched] = useState(false);
 
-  const hasError = useMemo(() => touched && name.trim().length === 0, [name, touched]);
-  const canSubmit = useMemo(() => name.trim().length > 0, [name]);
+  const hasError = useMemo(
+    () => touched && !personalNameSchema.safeParse(name).success,
+    [name, touched]
+  );
+  const canSubmit = useMemo(
+    () => personalNameSchema.safeParse(name).success,
+    [name]
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

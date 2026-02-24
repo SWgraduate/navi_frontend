@@ -154,6 +154,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const routeShowsBottomBar = pathHasBottomBar(pathname);
   const showChatInput = isHome;
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
+  const isMyPersonalPage = pathname === "/my/personal" || pathname.startsWith("/my/personal/");
   const isGraduationUploadPage = pathname === "/graduation/upload";
   const isGraduationProcessingPage = pathname === "/graduation/upload/processing";
   const isGraduationResultPage = pathname === "/graduation/result" || pathname.startsWith("/graduation/result/");
@@ -210,6 +211,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const showBottomBar =
     !isSplash &&
     routeShowsBottomBar &&
+    !isMyPersonalPage &&
     !keyboardActive &&
     !isGraduationUploadPage &&
     !isGraduationProcessingPage;

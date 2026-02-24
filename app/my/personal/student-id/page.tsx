@@ -7,6 +7,7 @@ import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { personalStudentIdSchema } from "@/lib/schemas/personal-info";
 
 /** 마이페이지 - 학번 수정 (이름 수정 페이지와 동일 패턴) */
 export default function MyPersonalStudentIdPage() {
@@ -19,10 +20,13 @@ export default function MyPersonalStudentIdPage() {
   const [touched, setTouched] = useState(false);
 
   const hasError = useMemo(
-    () => touched && studentId.trim().length === 0,
+    () => touched && !personalStudentIdSchema.safeParse(studentId).success,
     [studentId, touched]
   );
-  const canSubmit = useMemo(() => studentId.trim().length > 0, [studentId]);
+  const canSubmit = useMemo(
+    () => personalStudentIdSchema.safeParse(studentId).success,
+    [studentId]
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +51,7 @@ export default function MyPersonalStudentIdPage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          학번을 입력해주세요
+          학번을 10자리 숫자로 입력해주세요
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
@@ -72,7 +76,7 @@ export default function MyPersonalStudentIdPage() {
           </div>
           {hasError && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              학번을 입력해주세요.
+              학번을 10자리 숫자로 입력해주세요
             </p>
           )}
         </div>
