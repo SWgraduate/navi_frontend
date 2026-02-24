@@ -21,6 +21,14 @@ const HEADER_TITLE: Record<string, string> = {
   "/graduation/upload/processing": "졸업사정조회 스캔",
   "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
+  "/my/language": "언어설정",
+  "/my/personal": "개인정보 설정",
+  "/my/personal/name": "이름",
+  "/my/personal/student-id": "학번",
+  "/my/personal/major": "주전공",
+  "/my/personal/second-major": "제2전공",
+  "/my/personal/academic-status": "학적상태",
+  "/my/personal/year-semester": "현재 이수한 학년/학기",
   "/history": "기록",
 };
 
@@ -91,6 +99,8 @@ function AppHeaderWithSearchParams({
         ? "수정"
         : HEADER_TITLE[pathname] ?? "NAVI";
 
+  const isMySection = pathname === "/my" || pathname.startsWith("/my/");
+
   return (
     <AppHeader
       title={headerTitle}
@@ -100,14 +110,14 @@ function AppHeaderWithSearchParams({
         !isHistoryPage &&
         !isLoginPage &&
         !isSignupPage &&
-        pathname !== "/my" &&
+        !isMySection &&
         (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
       }
       showAdd={
         !isHistoryPage &&
         !isLoginPage &&
         !isSignupPage &&
-        pathname !== "/my" &&
+        !isMySection &&
         (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
       }
       historyIcon={
@@ -149,6 +159,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const routeShowsBottomBar = pathHasBottomBar(pathname);
   const showChatInput = isHome;
   const isMyPage = pathname === "/my" || pathname.startsWith("/my/");
+  const isMyPersonalPage = pathname === "/my/personal" || pathname.startsWith("/my/personal/");
   const isGraduationUploadPage = pathname === "/graduation/upload";
   const isGraduationProcessingPage = pathname === "/graduation/upload/processing";
   const isGraduationResultPage = pathname === "/graduation/result" || pathname.startsWith("/graduation/result/");
@@ -157,7 +168,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const isGraduationRootPage = pathname === "/graduation";
-  const showHeader = !isSplash && !isMyPage && !isGraduationRootPage;
+  const showHeader = !isSplash && pathname !== "/my" && !isGraduationRootPage;
   const isWhiteBackgroundPage = isSplash || isMyPage || isGraduationResultPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
@@ -205,6 +216,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const showBottomBar =
     !isSplash &&
     routeShowsBottomBar &&
+    !isMyPersonalPage &&
     !keyboardActive &&
     !isGraduationUploadPage &&
     !isGraduationProcessingPage;
@@ -480,8 +492,9 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
       {showChatInput && (
         <ChatInput
           onHeightChange={onChatInputHeightChange}
-          isKeyboardOpen={isKeyboardOpen}
+          isKeyboardOpen={keyboardActive}
           keyboardHeight={effectiveKeyboardInset}
+          bottomBarHeight={bottomBarHeight}
         />
       )}
       {showBottomBar && (

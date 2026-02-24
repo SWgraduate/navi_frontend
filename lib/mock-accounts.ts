@@ -14,6 +14,23 @@ export const MOCK_LOGIN_ACCOUNT = {
   password: "Qwer1234!",
 } as const;
 
+/** 개인정보 설정 목데이터 (Navi 기본 프로필, API 연동 시 제거) */
+export const MOCK_PERSONAL_INFO: {
+  name: string;
+  studentId: string;
+  major: string;
+  secondMajor: string;
+  academicStatus: "재학생" | "휴학생";
+  yearSemester: string;
+} = {
+  name: "Navi",
+  studentId: "2000000000",
+  major: "ICT융합학부",
+  secondMajor: "없음",
+  academicStatus: "재학생",
+  yearSemester: "4학년 1학기",
+};
+
 /** 목데이터와 일치하는지 검사 (이메일·비밀번호) */
 export function matchMockAccount(email: string, password: string): boolean {
   return (

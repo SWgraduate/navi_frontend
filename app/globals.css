@@ -129,6 +129,7 @@
   --ds-color-secondary: var(--ds-gray-70);
   --ds-color-tertiary: var(--ds-gray-50);
   --ds-color-disabled: var(--ds-gray-50);
+  --ds-bg-disabled: var(--ds-gray-10);
   --ds-color-brand: var(--ds-blue-50);
   --ds-color-inverse: var(--ds-gray-0);
   /* DS 타이포 (Title / Body / Caption) – size(px), line(letterSpacing %→배수), weight */
