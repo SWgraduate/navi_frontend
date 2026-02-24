@@ -22,6 +22,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
   "/my/personal": "개인정보 설정",
+  "/my/personal/name": "이름",
   "/history": "기록",
 };
 
