@@ -6,6 +6,7 @@ import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { withViewTransition } from "@/lib/view-transition";
 import { AI_TERMS } from "../content/ai";
+import { MARKETING_TERMS } from "../content/marketing";
 import { PRIVACY_TERMS } from "../content/privacy";
 import { SERVICE_TERMS_SECTIONS } from "../content/service";
 
@@ -44,6 +45,7 @@ export default function SignupTermsPage() {
   const isService = id === "service";
   const isPrivacy = id === "privacy";
   const isAi = id === "ai";
+  const isMarketing = id === "marketing";
 
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white">
@@ -134,6 +136,31 @@ export default function SignupTermsPage() {
                 <p className="whitespace-pre-wrap">{section.body}</p>
               </section>
             ))}
+          </div>
+        ) : isMarketing ? (
+          <div className="flex flex-col gap-4 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
+            <p className="text-ds-caption-14-m font-medium text-ds-secondary">
+              {MARKETING_TERMS.intro}
+            </p>
+            {MARKETING_TERMS.sections.map((section) => (
+              <section key={section.title} className="flex flex-col gap-1">
+                <p className="text-ds-caption-14-m font-medium text-ds-secondary">
+                  {section.title}
+                </p>
+                {"body" in section ? (
+                  <p>{section.body}</p>
+                ) : (
+                  <ul className="list-disc pl-5 [&>li]:mb-1 [&>li:last-child]:mb-0">
+                    {section.items.map((item) => (
+                      <li key={item}>
+                        <span className="leading-[1.5]">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ))}
+            <p>{MARKETING_TERMS.disclaimer}</p>
           </div>
         ) : (
           <>
