@@ -1,0 +1,470 @@
+{
+  "header": {
+    "home": "NAVI",
+    "speak": "语音",
+    "login": "登录",
+    "signup": "注册",
+    "graduation": "毕业管理",
+    "graduationUpload": "毕业扫描",
+    "graduationResult": "毕业结果",
+    "my": "我的",
+    "myTerms": "条款与隐私",
+    "myLanguage": "语言",
+    "myPersonal": "个人信息",
+    "myPersonalName": "姓名",
+    "myPersonalStudentId": "学号",
+    "myPersonalMajor": "专业",
+    "myPersonalSecondMajor": "第二专业",
+    "myPersonalAcademicStatus": "学籍状态",
+    "myPersonalYearSemester": "年级 / 学期",
+    "history": "历史记录",
+    "termsService": "服务使用条款",
+    "termsPrivacyPolicy": "NAVI 隐私政策",
+    "termsPrivacy": "隐私收集与使用",
+    "termsAi": "AI服务免责声明",
+    "termsMarketing": "营销同意",
+    "termsAgree": "条款同意",
+    "edit": "修改"
+  },
+  "bottomBar": {
+    "graduation": "毕业管理",
+    "home": "NAVI",
+    "my": "我的"
+  },
+  "chatInput": {
+    "placeholder": "有什么问题请问我。"
+  },
+  "scan": {
+    "graduation": "毕业审查扫描",
+    "schedule": "最近课程表扫描"
+  },
+  "languages": {
+    "koNative": "한국어",
+    "enNative": "English",
+    "zhNative": "中文"
+  },
+  "majors": {
+    "ictConvergence": "ICT融合学部",
+    "ictDesignTech": "ICT融合学部 设计科技",
+    "ictMediaTech": "ICT融合学部 媒体科技",
+    "ictCultureTech": "ICT融合学部 文化科技",
+    "computerScience": "计算机学部",
+    "artificialIntelligence": "人工智能学部",
+    "mathDataScience": "数学数据科学系",
+    "business": "经营学系"
+  },
+  "common": {
+    "confirm": "确认",
+    "cancel": "取消",
+    "next": "下一步",
+    "complete": "完成",
+    "edit": "修改",
+    "agree": "同意",
+    "revoke": "撤回",
+    "logout": "退出登录",
+    "withdraw": "注销账号",
+    "start": "开始",
+    "hidePassword": "隐藏密码",
+    "showPassword": "显示密码",
+    "attach": "附件",
+    "close": "关闭",
+    "noResults": "无搜索结果",
+    "remove": "移除",
+    "loading": "加载中...",
+    "back": "返回",
+    "history": "历史记录",
+    "add": "新增",
+    "up": "向上",
+    "none": "无",
+    "file": "文件",
+    "secondMajorTypes": {
+      "multiple": "多专业",
+      "convergence": "融合专业",
+      "minor": "辅修",
+      "double": "双专业",
+      "linked": "联合专业",
+      "micro": "微专业"
+    }
+  },
+  "chat": {
+    "loading": "正在生成回复"
+  },
+  "splash": {
+    "loading": "正在加载 Navi"
+  },
+  "home": {
+    "welcomeName": "{{name}}，",
+    "hanyangUniv": "汉阳大学",
+    "welcomeSuffix": "的生活，更轻松"
+  },
+  "login": {
+    "emailLabel": "邮箱",
+    "emailPlaceholder": "请输入邮箱",
+    "passwordLabel": "密码",
+    "passwordPlaceholder": "请输入密码",
+    "findId": "找回账号",
+    "findPassword": "找回密码",
+    "signupLink": "注册",
+    "submit": "登录",
+    "emailError": "邮箱有误",
+    "passwordError": "密码有误"
+  },
+  "signup": {
+    "terms": {
+      "title1": "欢迎使用Navi",
+      "title2": "请同意相关条款",
+      "allRequired": "同意所有必填条款",
+      "requiredBadge": "[必填]",
+      "optionalBadge": "[选填]",
+      "service": "服务使用条款",
+      "privacy": "隐私收集与使用",
+      "ai": "AI服务免责声明",
+      "marketing": "营销同意",
+      "submit": "同意"
+    },
+    "email": {
+      "title1": "首先，请用",
+      "title2": "在校邮箱完成验证",
+      "subtitle": "此邮箱将用于登录",
+      "label": "邮箱",
+      "placeholder": "请输入邮箱",
+      "submit": "获取验证码"
+    },
+    "verify": {
+      "title1": "请输入发送至邮箱的",
+      "title2": "6位验证码",
+      "locked": "请24小时后再试。",
+      "codeGroup": "6位验证码",
+      "digitLabel": "第{{index}}位",
+      "resend": "重新发送验证码",
+      "hint1": "倒计时结束后请重新申请验证码。",
+      "hint2": "每天最多可接收5次验证码。",
+      "hint3": "连续失败5次后，请24小时后再试。",
+      "submit": "确认"
+    },
+    "name": {
+      "title": "请告诉我您的姓名",
+      "label": "姓名",
+      "placeholder": "请输入姓名",
+      "submit": "下一步"
+    },
+    "password": {
+      "title1Name": "{{name}}，很高兴认识您！",
+      "title2": "请设置密码",
+      "label": "密码",
+      "placeholder": "请输入密码",
+      "confirmLabel": "确认密码",
+      "confirmPlaceholder": "请再次输入密码",
+      "submit": "下一步",
+      "defaultName": "用户"
+    },
+    "complete": {
+      "title": "距离毕业还有多远？",
+      "subtitle": "请填写学籍信息以进行毕业审查",
+      "studentIdLabel": "学号",
+      "studentIdPlaceholder": "请输入学号（例：2026000000）",
+      "majorLabel": "专业",
+      "majorPlaceholder": "请选择专业",
+      "secondMajorTypeLabel": "第二专业类型",
+      "secondMajorTypePlaceholder": "请选择第二专业类型",
+      "secondMajorTypePickerTitle": "请选择第二专业类型",
+      "secondMajorLabel": "第二专业",
+      "secondMajorPlaceholder": "请选择专业",
+      "secondMajorPickerTitle": "请选择第二专业",
+      "academicStatusLabel": "学籍状态",
+      "enrolled": "在读",
+      "leave": "休学",
+      "yearSemesterLabel": "当前年级 / 学期",
+      "yearSemesterPlaceholder": "请选择年级 / 学期",
+      "yearSemesterPickerTitle": "请选择年级 / 学期",
+      "searchNoResults": "无搜索结果",
+      "year": "{{n}}年级",
+      "semester": "第{{n}}学期",
+      "yearSemesterDisplay": "{{y}}年级 第{{s}}学期",
+      "submit": "完成"
+    },
+    "welcome": {
+      "title": "欢迎！",
+      "subtitle": "现在开始用Navi管理您的学业吧。",
+      "submit": "开始使用Navi"
+    },
+    "termsDetail": {
+      "service": "服务使用条款",
+      "privacy": "隐私收集与使用",
+      "privacyPolicy": "NAVI 隐私政策",
+      "ai": "AI服务免责声明",
+      "marketing": "营销同意",
+      "unknown": "条款",
+      "agree": "同意",
+      "revokeButton": "撤回同意",
+      "revokeModalTitle": "撤回营销同意？",
+      "revokeConfirm": "撤回",
+      "cancel": "取消",
+      "defaultContent": "{{title}}内容将显示在此处。",
+      "notFound": "未找到条款。"
+    }
+  },
+  "graduation": {
+    "loading": "加载中",
+    "title": "智能开始毕业管理",
+    "subtitle1": "截图汉阳Portal的毕业审查结果",
+    "subtitle2": "一目了然地查看剩余要求。",
+    "start": "开始",
+    "upload": {
+      "title1": "您的照片应",
+      "title2": "包含以下内容。",
+      "caption1": "从毕业学分到通识选修，",
+      "caption2": "请截取完整屏幕以便准确分析。",
+      "caption3": "双学位学生必须包含第二专业信息。",
+      "altExample": "毕业审查表示例",
+      "altUploaded": "已上传的毕业审查截图",
+      "altReselect": "重新选择图片",
+      "camera": "拍照",
+      "next": "下一步",
+      "selectPhoto": "选择照片"
+    },
+    "processing": {
+      "confirmMessage": "请确认识别内容是否正确",
+      "altScreenshot": "毕业审查截图",
+      "validationError": "请输入{{fields}}。",
+      "submit": "确认",
+      "confirmCta": "确认一致",
+      "scanning": "正在识别图片...",
+      "major1Title": "主专业学分",
+      "major2Title": "第二专业状态",
+      "requiredTitle": "必要条件"
+    },
+    "result": {
+      "noResult": "没有保存的毕业审查结果。",
+      "major1Title": "主专业学分",
+      "major2Title": "第二专业状态",
+      "requiredTitle": "必要条件"
+    },
+    "table": {
+      "courseName": "课程名称",
+      "allocation": "分配",
+      "acquired": "已获取（剩余）",
+      "completion": "完成"
+    },
+    "fields": {
+      "enrollment": "入学及修业年限",
+      "graduation": "毕业学分",
+      "major": "专业学分",
+      "coreMajor": "核心专业",
+      "advancedMajor": "深度专业",
+      "industryCooperation": "产学合作",
+      "generalElective": "通识选修",
+      "secondMajor": "第二专业学分",
+      "secondCoreMajor": "第二核心专业",
+      "secondPrerequisite": "第二先修课",
+      "secondUncompleted": "第二未完成课程",
+      "prerequisite": "先修课",
+      "uncompleted": "未完成课程",
+      "thesis": "论文/考试/作品",
+      "englishOnly": "全英文课程",
+      "graduationGpa": "毕业GPA",
+      "socialService": "社会服务",
+      "pbl": "PBL课程",
+      "majorIcPbl": "专业IC-PBL",
+      "microMajor": "微专业完成"
+    },
+    "resultRows": {
+      "enrollment": "入学及修业年限",
+      "graduation": "毕业学分",
+      "major": "专业学分",
+      "coreMajor": "核心专业",
+      "advancedMajor": "深度专业",
+      "industryCooperation": "产学合作",
+      "generalElective": "通识选修",
+      "microMajor": "微专业完成",
+      "prerequisite": "先修课",
+      "uncompleted": "未完成课程",
+      "thesis": "论文/考试/作品",
+      "englishOnly": "全英文课程",
+      "graduationGpa": "毕业GPA",
+      "socialService": "社会服务",
+      "pbl": "PBL课程",
+      "majorIcPbl": "专业IC-PBL",
+      "secondMajor": "专业学分",
+      "secondCoreMajor": "核心专业",
+      "secondPrerequisite": "先修课",
+      "secondUncompleted": "未完成课程"
+    }
+  },
+  "history": {
+    "searchPlaceholder": "搜索历史记录...",
+    "noResults": "无搜索结果。"
+  },
+  "historyMenu": {
+    "pin": "固定",
+    "rename": "重命名",
+    "delete": "删除"
+  },
+  "attachmentMenu": {
+    "label": "附件选项",
+    "file": "文件",
+    "photo": "照片",
+    "camera": "相机"
+  },
+  "speak": {
+    "micOn": "关闭麦克风",
+    "micOff": "开启麦克风",
+    "close": "关闭",
+    "attach": "附件",
+    "permissionDenied": "需要麦克风权限。请在浏览器设置中允许。",
+    "dummyLine1": "这里会显示输入内容",
+    "dummyLine2": "这里会显示输入内容",
+    "dummyLine3": "越新的输入会越深"
+  },
+  "my": {
+    "greetingName": "{{name}}",
+    "greetingText": "您好！",
+    "personalInfo": "个人信息",
+    "language": "语言",
+    "languageValue": "中文（ZH）",
+    "terms": "条款与隐私",
+    "versionLabel": "版本",
+    "currentVersion": "v{{version}}",
+    "logout": "退出登录",
+    "withdraw": "注销账号",
+    "logoutModalTitle": "确认退出登录？",
+    "logoutModalCaption": "您随时可以重新登录",
+    "logoutConfirm": "退出登录",
+    "withdrawModalTitle": "确认注销账号？",
+    "withdrawModalCaption": "删除的数据无法恢复。\n请谨慎决定。",
+    "withdrawConfirm": "注销",
+    "cancel": "取消",
+    "languagePage": {
+      "title": "选择语言",
+      "label": "语言",
+      "submit": "保存"
+    },
+    "termsPage": {
+      "required": "必填",
+      "optional": "选填",
+      "privacy": "隐私收集与使用",
+      "privacyPolicy": "NAVI 隐私政策",
+      "service": "服务使用条款",
+      "ai": "AI服务免责声明",
+      "marketing": "营销同意"
+    },
+    "personal": {
+      "name": "姓名",
+      "studentId": "学号",
+      "major": "专业",
+      "secondMajor": "第二专业",
+      "academicStatus": "学籍状态",
+      "yearSemester": "当前年级 / 学期",
+      "namePage": {
+        "title": "请输入您的姓名",
+        "label": "姓名",
+        "placeholder": "请输入姓名",
+        "error": "请输入您的姓名。",
+        "submit": "保存"
+      },
+      "studentIdPage": {
+        "title": "请输入10位学号",
+        "label": "学号",
+        "placeholder": "请输入学号",
+        "error": "请输入10位学号",
+        "submit": "保存"
+      },
+      "majorPage": {
+        "title": "请选择您的专业",
+        "label": "专业",
+        "placeholder": "请选择专业",
+        "error": "请选择您的专业。",
+        "submit": "保存"
+      },
+      "secondMajorPage": {
+        "title": "请选择您的第二专业",
+        "typeLabel": "第二专业类型",
+        "typePlaceholder": "请选择第二专业类型",
+        "typeError": "请选择第二专业类型。",
+        "majorLabel": "第二专业",
+        "majorPlaceholder": "请选择专业",
+        "majorError": "请选择您的第二专业。",
+        "submit": "保存"
+      },
+      "academicStatusPage": {
+        "title": "请选择您的学籍状态",
+        "label": "学籍状态",
+        "enrolled": "在读",
+        "leave": "休学",
+        "error": "请选择您的学籍状态。",
+        "submit": "保存"
+      },
+      "yearSemesterPage": {
+        "title": "请选择年级 / 学期",
+        "label": "当前年级 / 学期",
+        "placeholder": "请选择年级 / 学期",
+        "error": "请选择年级 / 学期。",
+        "display": "{{y}}年级 第{{s}}学期",
+        "submit": "保存"
+      }
+    }
+  },
+  "sheets": {
+    "majorSelect": {
+      "defaultTitle": "请选择您的专业",
+      "searchPlaceholder": "搜索专业",
+      "noResults": "无搜索结果"
+    },
+    "yearSemester": {
+      "title": "请选择年级 / 学期",
+      "year": "{{n}}年级",
+      "semester": "第{{n}}学期",
+      "confirm": "完成"
+    }
+  },
+  "errors": {
+    "email": {
+      "empty": "请输入邮箱",
+      "korean": "邮箱不能包含韩文字符",
+      "uppercase": "邮箱不能包含大写字母",
+      "koreanSignup": "邮箱不能包含韩文字符。",
+      "uppercaseSignup": "邮箱不能包含大写字母。"
+    },
+    "password": {
+      "minLength": "密码至少需要8个字符",
+      "korean": "密码不能包含韩文字符",
+      "rule": "8-16位 / 须包含大小写字母、数字和特殊字符"
+    },
+    "passwordConfirm": {
+      "empty": "请再次输入密码",
+      "mismatch": "密码不一致"
+    },
+    "name": {
+      "empty": "请输入姓名"
+    },
+    "verifyCode": {
+      "length": "请输入6位验证码",
+      "numeric": "请输入6位数字",
+      "incorrect": "验证码有误，请再次确认。",
+      "expired": "验证码已过期，请重新申请。",
+      "resendLimit": "每天最多可申请5次验证码，请明天再试。"
+    },
+    "studentId": {
+      "length": "请输入10位学号",
+      "numeric": "仅限数字",
+      "format": "请输入正确的学号"
+    },
+    "yearSemester": {
+      "empty": "请选择年级 / 学期",
+      "format": "请选择年级 / 学期"
+    },
+    "major": {
+      "empty": "请选择您的专业"
+    },
+    "academicStatus": {
+      "required": "请选择您的学籍状态"
+    },
+    "secondMajor": {
+      "duplicate": "已选择为主专业"
+    },
+    "personalName": {
+      "empty": "请输入您的姓名",
+      "special": "姓名不能包含特殊字符"
+    }
+  }
+}

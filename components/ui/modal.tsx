@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface ModalProps {
   open: boolean;
@@ -38,8 +39,8 @@ function Modal({
   onOpenChange,
   title,
   caption,
-  cancelLabel = "취소",
-  confirmLabel = "실행",
+  cancelLabel,
+  confirmLabel,
   onConfirm,
   onCancel,
   confirmDisabled,
@@ -47,8 +48,11 @@ function Modal({
   className,
   children,
 }: ModalProps) {
+  const { t } = useTranslation();
   const dialogRef = React.useRef<HTMLDialogElement>(null);
   const [mounted, setMounted] = React.useState(false);
+  const resolvedCancelLabel = cancelLabel ?? t("common.cancel");
+  const resolvedConfirmLabel = confirmLabel ?? t("common.confirm");
 
   React.useEffect(() => {
     setMounted(true);
@@ -129,7 +133,7 @@ function Modal({
         {children != null && <div className="text-foreground">{children}</div>}
 
         <div className="flex justify-center gap-2 pt-1">
-          {cancelLabel != null && cancelLabel !== "" && (
+          {resolvedCancelLabel !== "" && (
             <Button
               type="button"
               variant="ghost"
@@ -137,10 +141,10 @@ function Modal({
               className="w-[120px] shrink-0 bg-(--ds-gray-5) text-ds-tertiary hover:bg-(--ds-gray-10)"
               onClick={handleCancel}
             >
-              {cancelLabel}
+              {resolvedCancelLabel}
             </Button>
           )}
-          {confirmLabel != null && confirmLabel !== "" && (
+          {resolvedConfirmLabel !== "" && (
             <Button
               type="button"
               variant={confirmVariant === "destructive" ? "primary" : "primary"}
@@ -152,7 +156,7 @@ function Modal({
               onClick={handleConfirm}
               disabled={confirmDisabled}
             >
-              {confirmLabel}
+              {resolvedConfirmLabel}
             </Button>
           )}
         </div>

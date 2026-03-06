@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const sheetOverlayVariants = {
   open: { opacity: 1 },
@@ -33,20 +34,25 @@ export function YearSemesterSheet({
   onOpenChange,
   onChange,
 }: YearSemesterSheetProps) {
+  const { t } = useTranslation();
   const dragControls = useDragControls();
   const [sheetYear, setSheetYear] = useState<number | null>(null);
   const [sheetSemester, setSheetSemester] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    if (value && value.includes("-")) {
-      const [y, s] = value.split("-").map(Number);
-      setSheetYear(y);
-      setSheetSemester(s);
-    } else {
-      setSheetYear(null);
-      setSheetSemester(null);
-    }
+    const frameId = window.requestAnimationFrame(() => {
+      if (value && value.includes("-")) {
+        const [y, s] = value.split("-").map(Number);
+        setSheetYear(y);
+        setSheetSemester(s);
+      } else {
+        setSheetYear(null);
+        setSheetSemester(null);
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
   }, [open, value]);
 
   const handleClose = () => {
@@ -111,7 +117,7 @@ export function YearSemesterSheet({
                   id="year-semester-sheet-title"
                   className="pointer-events-none text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary"
                 >
-                  학년 / 학기를 선택해주세요
+                  {t("sheets.yearSemester.title")}
                 </h2>
               </div>
             </div>
@@ -128,7 +134,7 @@ export function YearSemesterSheet({
                           (sheetYear === y ? " bg-primary/10 font-semibold text-ds-primary" : " text-ds-primary")
                         }
                       >
-                        {y}학년
+                        {t("sheets.yearSemester.year", { n: y })}
                       </button>
                     </li>
                   ))}
@@ -146,7 +152,7 @@ export function YearSemesterSheet({
                           (sheetSemester === s ? " bg-primary/10 font-semibold text-ds-primary" : " text-ds-primary")
                         }
                       >
-                        {s}학기
+                        {t("sheets.yearSemester.semester", { n: s })}
                       </button>
                     </li>
                   ))}
@@ -165,7 +171,7 @@ export function YearSemesterSheet({
                     : " bg-(--ds-bg-disabled) text-ds-disabled")
                 }
               >
-                완료
+                {t("sheets.yearSemester.confirm")}
               </button>
             </div>
           </motion.div>
@@ -174,4 +180,3 @@ export function YearSemesterSheet({
     </AnimatePresence>
   );
 }
-

@@ -1,0 +1,470 @@
+{
+  "header": {
+    "home": "NAVI",
+    "speak": "말하기",
+    "login": "로그인",
+    "signup": "회원가입",
+    "graduation": "졸업 관리",
+    "graduationUpload": "졸업사정조회 스캔",
+    "graduationResult": "졸업사정조회 결과",
+    "my": "마이",
+    "myTerms": "약관 및 개인정보 처리 동의",
+    "myLanguage": "언어설정",
+    "myPersonal": "개인정보 설정",
+    "myPersonalName": "이름",
+    "myPersonalStudentId": "학번",
+    "myPersonalMajor": "주전공",
+    "myPersonalSecondMajor": "제2전공",
+    "myPersonalAcademicStatus": "학적상태",
+    "myPersonalYearSemester": "현재 이수한 학년/학기",
+    "history": "기록",
+    "termsService": "서비스 이용약관",
+    "termsPrivacyPolicy": "NAVI 개인정보 처리방침",
+    "termsPrivacy": "개인정보 수집 및 이용",
+    "termsAi": "AI 서비스 결과 면책 동의",
+    "termsMarketing": "마케팅 정보 수신",
+    "termsAgree": "약관 동의",
+    "edit": "수정"
+  },
+  "bottomBar": {
+    "graduation": "졸업 관리",
+    "home": "NAVI",
+    "my": "마이"
+  },
+  "chatInput": {
+    "placeholder": "무엇이든 물어보세요."
+  },
+  "scan": {
+    "graduation": "졸업사정조회 스캔",
+    "schedule": "최근 시간표 스캔"
+  },
+  "languages": {
+    "koNative": "한국어",
+    "enNative": "English",
+    "zhNative": "中文"
+  },
+  "majors": {
+    "ictConvergence": "ICT융합학부",
+    "ictDesignTech": "ICT융합학부 디자인테크놀로지",
+    "ictMediaTech": "ICT융합학부 미디어테크놀로지",
+    "ictCultureTech": "ICT융합학부 컬처테크놀로지",
+    "computerScience": "컴퓨터학부",
+    "artificialIntelligence": "인공지능학부",
+    "mathDataScience": "수리데이터사이언스학과",
+    "business": "경영학과"
+  },
+  "common": {
+    "confirm": "확인",
+    "cancel": "취소",
+    "next": "다음",
+    "complete": "완료",
+    "edit": "수정",
+    "agree": "동의하기",
+    "revoke": "철회",
+    "logout": "로그아웃",
+    "withdraw": "탈퇴",
+    "start": "시작하기",
+    "hidePassword": "비밀번호 숨기기",
+    "showPassword": "비밀번호 보기",
+    "attach": "첨부",
+    "close": "닫기",
+    "noResults": "검색 결과가 없습니다",
+    "remove": "제거",
+    "loading": "로딩 중...",
+    "back": "뒤로",
+    "history": "히스토리",
+    "add": "추가",
+    "up": "위로",
+    "none": "없음",
+    "file": "파일",
+    "secondMajorTypes": {
+      "multiple": "다중전공",
+      "convergence": "융합전공",
+      "minor": "부전공",
+      "double": "복수전공",
+      "linked": "연계전공",
+      "micro": "마이크로전공"
+    }
+  },
+  "chat": {
+    "loading": "답변 생성 중"
+  },
+  "splash": {
+    "loading": "Navi 로딩"
+  },
+  "home": {
+    "welcomeName": "{{name}}님의 ",
+    "hanyangUniv": "한양대",
+    "welcomeSuffix": " 생활을 더 편하게"
+  },
+  "login": {
+    "emailLabel": "이메일",
+    "emailPlaceholder": "이메일을 입력해주세요",
+    "passwordLabel": "비밀번호",
+    "passwordPlaceholder": "비밀번호를 입력해주세요",
+    "findId": "아이디 찾기",
+    "findPassword": "비밀번호 찾기",
+    "signupLink": "회원가입",
+    "submit": "로그인",
+    "emailError": "이메일이 올바르지 않습니다",
+    "passwordError": "비밀번호가 올바르지 않습니다"
+  },
+  "signup": {
+    "terms": {
+      "title1": "나비가 처음이시군요",
+      "title2": "약관내용에 동의해주세요",
+      "allRequired": "필수 항목 모두 동의",
+      "requiredBadge": "[필수]",
+      "optionalBadge": "[선택]",
+      "service": "서비스 이용약관 동의",
+      "privacy": "개인정보 수집 및 이용 동의",
+      "ai": "AI 서비스 결과 면책 동의",
+      "marketing": "마케팅 정보 수신 동의",
+      "submit": "동의하기"
+    },
+    "email": {
+      "title1": "먼저 학교 메일로",
+      "title2": "재학생 인증을 진행할게요",
+      "subtitle": "이 메일은 앞으로 로그인에 사용돼요",
+      "label": "이메일",
+      "placeholder": "이메일을 입력해주세요",
+      "submit": "인증번호 받기"
+    },
+    "verify": {
+      "title1": "메일로 보내드린 인증번호",
+      "title2": "6자리를 입력해주세요",
+      "locked": "24시간 후에 다시 시도해 주세요.",
+      "codeGroup": "인증번호 6자리",
+      "digitLabel": "자리 {{index}}",
+      "resend": "인증번호 다시 받기",
+      "hint1": "유효시간이 지났을 경우 인증 번호를 다시 받아주세요.",
+      "hint2": "하루동안 5번까지 새로운 인증 코드를 받을 수 있습니다.",
+      "hint3": "5번 연속 코드 입력에 실패했다면 24시간 이후 시도해 주세요.",
+      "submit": "확인"
+    },
+    "name": {
+      "title": "이제 이름을 알려주세요",
+      "label": "이름",
+      "placeholder": "이름을 입력해주세요",
+      "submit": "다음"
+    },
+    "password": {
+      "title1Name": "{{name}}님 반갑습니다!",
+      "title2": "사용할 비밀번호를 입력해주세요",
+      "label": "비밀번호",
+      "placeholder": "비밀번호를 입력해주세요.",
+      "confirmLabel": "비밀번호 재확인",
+      "confirmPlaceholder": "비밀번호를 다시 입력해주세요.",
+      "submit": "다음",
+      "defaultName": "회원"
+    },
+    "complete": {
+      "title": "졸업까지 얼마나 남으셨나요?",
+      "subtitle": "졸업사정조회를 위해 현재 학적 정보를 알려주세요",
+      "studentIdLabel": "학번",
+      "studentIdPlaceholder": "학번을 입력해주세요 (예: 2026000000)",
+      "majorLabel": "주전공",
+      "majorPlaceholder": "전공을 선택해주세요",
+      "secondMajorTypeLabel": "제2전공 유형",
+      "secondMajorTypePlaceholder": "제2전공 유형을 선택해주세요",
+      "secondMajorTypePickerTitle": "제2전공 유형을 선택해주세요",
+      "secondMajorLabel": "제2전공",
+      "secondMajorPlaceholder": "전공을 선택해주세요",
+      "secondMajorPickerTitle": "제2전공을 선택해주세요",
+      "academicStatusLabel": "학적상태",
+      "enrolled": "재학생",
+      "leave": "휴학생",
+      "yearSemesterLabel": "현재 이수한 학년/학기",
+      "yearSemesterPlaceholder": "학년/학기를 선택해주세요",
+      "yearSemesterPickerTitle": "학년 / 학기를 선택해주세요",
+      "searchNoResults": "검색 결과가 없습니다",
+      "year": "{{n}}학년",
+      "semester": "{{n}}학기",
+      "yearSemesterDisplay": "{{y}}학년 {{s}}학기",
+      "submit": "완료"
+    },
+    "welcome": {
+      "title": "환영합니다!",
+      "subtitle": "이제부터 나비와 함께 학사관리를 시작해요.",
+      "submit": "나비 시작"
+    },
+    "termsDetail": {
+      "service": "서비스 이용약관",
+      "privacy": "개인정보 수집 및 이용 동의",
+      "privacyPolicy": "NAVI 개인정보 처리방침",
+      "ai": "AI 서비스 결과 면책 동의",
+      "marketing": "마케팅 정보 수신 동의",
+      "unknown": "약관",
+      "agree": "동의하기",
+      "revokeButton": "동의 철회하기",
+      "revokeModalTitle": "마케팅 정보 수신을 철회할까요?",
+      "revokeConfirm": "철회",
+      "cancel": "취소",
+      "defaultContent": "{{title}} 약관 내용이 여기에 표시됩니다.",
+      "notFound": "약관을 찾을 수 없습니다."
+    }
+  },
+  "graduation": {
+    "loading": "로딩 중",
+    "title": "졸업관리, 스마트하게 시작해요",
+    "subtitle1": "한양대 포털에서 졸업사정조회를 스크린샷하여",
+    "subtitle2": "남은 과정을 한눈에 확인하세요.",
+    "start": "시작하기",
+    "upload": {
+      "title1": "사진에 아래와 같은",
+      "title2": "항목들이 보여야해요.",
+      "caption1": "정확한 분석을 위해 졸업학점부터 교양선택까지",
+      "caption2": "전체 화면이 보이도록 캡처해주세요.",
+      "caption3": "다중전공자라면 제2전공까지 포함되어야합니다.",
+      "altExample": "졸업사정조회 표 예시",
+      "altUploaded": "업로드된 졸업사정조회 스크린샷",
+      "altReselect": "이미지 다시 선택하기",
+      "camera": "촬영하기",
+      "next": "다음",
+      "selectPhoto": "사진 선택"
+    },
+    "processing": {
+      "confirmMessage": "인식한 내용이 일치하는지 확인해주세요",
+      "altScreenshot": "졸업사정조회 스크린샷",
+      "validationError": "{{fields}}을(를) 입력해주세요.",
+      "submit": "확인",
+      "confirmCta": "일치 확인",
+      "scanning": "이미지 인식중...",
+      "major1Title": "주전공(제1전공) 학점 현황",
+      "major2Title": "제2전공 현황",
+      "requiredTitle": "필수 요건"
+    },
+    "result": {
+      "noResult": "저장된 졸업사정조회 결과가 없습니다.",
+      "major1Title": "주전공(제1전공) 학점 현황",
+      "major2Title": "제2전공 현황",
+      "requiredTitle": "필수 요건"
+    },
+    "table": {
+      "courseName": "이수명",
+      "allocation": "배당",
+      "acquired": "취득(잔여)",
+      "completion": "이수"
+    },
+    "fields": {
+      "enrollment": "재학(졸업직전) 및 수업연한 충족",
+      "graduation": "졸업학점",
+      "major": "전공학점",
+      "coreMajor": "전공핵심",
+      "advancedMajor": "전공심화",
+      "industryCooperation": "산학협력영역",
+      "generalElective": "교양선택",
+      "secondMajor": "제2전공 전공학점",
+      "secondCoreMajor": "제2전공 전공핵심",
+      "secondPrerequisite": "제2전공 선수강이수여부",
+      "secondUncompleted": "제2전공 미필과목이수여부",
+      "prerequisite": "선수강이수여부",
+      "uncompleted": "미필과목이수여부",
+      "thesis": "졸업논문/시험/작품",
+      "englishOnly": "영어전용강좌수",
+      "graduationGpa": "졸업평점",
+      "socialService": "사회봉사",
+      "pbl": "PBL강좌수",
+      "majorIcPbl": "전공IC-PBL강좌수",
+      "microMajor": "마이크로전공 이수여부"
+    },
+    "resultRows": {
+      "enrollment": "재학(졸업직전) 및 수업연한 충족",
+      "graduation": "졸업학점",
+      "major": "전공학점",
+      "coreMajor": "전공핵심",
+      "advancedMajor": "전공심화",
+      "industryCooperation": "산학협력영역",
+      "generalElective": "교양선택",
+      "microMajor": "마이크로전공 이수여부",
+      "prerequisite": "선수강이수여부",
+      "uncompleted": "미필과목이수여부",
+      "thesis": "졸업논문/시험/작품",
+      "englishOnly": "영어전용강좌수",
+      "graduationGpa": "졸업평점",
+      "socialService": "사회봉사",
+      "pbl": "PBL강좌수",
+      "majorIcPbl": "전공IC-PBL강좌수",
+      "secondMajor": "전공학점",
+      "secondCoreMajor": "전공핵심",
+      "secondPrerequisite": "선수강이수여부",
+      "secondUncompleted": "미필과목이수여부"
+    }
+  },
+  "history": {
+    "searchPlaceholder": "전공을 검색하세요.",
+    "noResults": "검색 결과가 없습니다."
+  },
+  "historyMenu": {
+    "pin": "고정",
+    "rename": "이름 변경",
+    "delete": "삭제"
+  },
+  "attachmentMenu": {
+    "label": "첨부 옵션",
+    "file": "파일",
+    "photo": "사진",
+    "camera": "카메라"
+  },
+  "speak": {
+    "micOn": "마이크 끄기",
+    "micOff": "마이크 켜기",
+    "close": "닫기",
+    "attach": "첨부",
+    "permissionDenied": "마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.",
+    "dummyLine1": "입력한 값이 보이는 곳",
+    "dummyLine2": "입력한 값이 보이는 곳",
+    "dummyLine3": "새로 입력 될 수록 진함"
+  },
+  "my": {
+    "greetingName": "{{name}}님",
+    "greetingText": "안녕하세요!",
+    "personalInfo": "개인정보 설정",
+    "language": "언어설정",
+    "languageValue": "한국어(KR)",
+    "terms": "약관 및 개인정보 처리 동의",
+    "versionLabel": "버전 정보",
+    "currentVersion": "현재 버전 {{version}}",
+    "logout": "로그아웃",
+    "withdraw": "탈퇴하기",
+    "logoutModalTitle": "로그아웃 하시겠어요?",
+    "logoutModalCaption": "언제든지 다시 로그인 할 수 있어요",
+    "logoutConfirm": "로그아웃",
+    "withdrawModalTitle": "정말 NAVI를 떠나시겠어요?",
+    "withdrawModalCaption": "삭제된 데이터는 다시 복구할 수 없으니\n신중하게 결정해 주세요",
+    "withdrawConfirm": "탈퇴",
+    "cancel": "취소",
+    "languagePage": {
+      "title": "언어설정을 선택해주세요",
+      "label": "언어설정",
+      "submit": "수정"
+    },
+    "termsPage": {
+      "required": "필수 항목",
+      "optional": "선택 항목",
+      "privacy": "개인정보 수집 및 이용 동의",
+      "privacyPolicy": "NAVI 개인정보 처리방침",
+      "service": "서비스 이용약관 동의",
+      "ai": "AI 서비스 결과 면책 동의",
+      "marketing": "마케팅 정보 수신 동의"
+    },
+    "personal": {
+      "name": "이름",
+      "studentId": "학번",
+      "major": "주전공",
+      "secondMajor": "제2전공",
+      "academicStatus": "학적상태",
+      "yearSemester": "현재 이수한 학년/학기",
+      "namePage": {
+        "title": "이름을 입력해주세요",
+        "label": "이름",
+        "placeholder": "이름을 입력해주세요",
+        "error": "이름을 입력해주세요.",
+        "submit": "수정"
+      },
+      "studentIdPage": {
+        "title": "학번을 10자리 숫자로 입력해주세요",
+        "label": "학번",
+        "placeholder": "학번을 입력해주세요",
+        "error": "학번을 10자리 숫자로 입력해주세요",
+        "submit": "수정"
+      },
+      "majorPage": {
+        "title": "주전공을 선택해주세요",
+        "label": "주전공",
+        "placeholder": "전공을 선택해주세요",
+        "error": "주전공을 선택해주세요.",
+        "submit": "수정"
+      },
+      "secondMajorPage": {
+        "title": "제2전공을 선택해주세요",
+        "typeLabel": "제2전공 유형",
+        "typePlaceholder": "제2전공 유형을 선택해주세요",
+        "typeError": "제2전공 유형을 선택해주세요.",
+        "majorLabel": "제2전공",
+        "majorPlaceholder": "전공을 선택해주세요",
+        "majorError": "제2전공을 선택해주세요.",
+        "submit": "수정"
+      },
+      "academicStatusPage": {
+        "title": "학적상태를 선택해주세요",
+        "label": "학적상태",
+        "enrolled": "재학생",
+        "leave": "휴학생",
+        "error": "학적상태를 선택해주세요.",
+        "submit": "수정"
+      },
+      "yearSemesterPage": {
+        "title": "학년/학기를 선택해주세요",
+        "label": "현재 이수한 학년/학기",
+        "placeholder": "학년/학기를 선택해주세요",
+        "error": "학년/학기를 선택해주세요.",
+        "display": "{{y}}학년 / {{s}}학기",
+        "submit": "수정"
+      }
+    }
+  },
+  "sheets": {
+    "majorSelect": {
+      "defaultTitle": "주전공을 선택해주세요",
+      "searchPlaceholder": "전공을 검색하세요",
+      "noResults": "검색 결과가 없습니다"
+    },
+    "yearSemester": {
+      "title": "학년 / 학기를 선택해주세요",
+      "year": "{{n}}학년",
+      "semester": "{{n}}학기",
+      "confirm": "완료"
+    }
+  },
+  "errors": {
+    "email": {
+      "empty": "이메일을 입력해주세요",
+      "korean": "이메일에는 한글을 사용할 수 없습니다",
+      "uppercase": "이메일에는 대문자를 사용할 수 없습니다",
+      "koreanSignup": "이메일에는 한글을 사용할 수 없어요.",
+      "uppercaseSignup": "이메일에는 대문자를 사용할 수 없어요."
+    },
+    "password": {
+      "minLength": "비밀번호는 8자 이상이어야 합니다",
+      "korean": "비밀번호에는 한글을 사용할 수 없습니다",
+      "rule": "8~16자리 / 영문 대소문자, 숫자, 특수문자로 조합해주세요"
+    },
+    "passwordConfirm": {
+      "empty": "비밀번호를 다시 입력해주세요",
+      "mismatch": "비밀번호가 일치하지 않습니다"
+    },
+    "name": {
+      "empty": "이름을 입력해주세요"
+    },
+    "verifyCode": {
+      "length": "인증번호 6자리를 입력해주세요",
+      "numeric": "숫자 6자리로 입력해주세요",
+      "incorrect": "인증번호가 맞지 않아요. 다시 확인해주세요.",
+      "expired": "유효시간이 지났어요. 인증번호를 다시 받아주세요.",
+      "resendLimit": "인증번호 재발송은 하루 5번까지 가능합니다. 내일 다시 시도해 주세요."
+    },
+    "studentId": {
+      "length": "학번 10자리를 입력해주세요",
+      "numeric": "숫자만 입력해주세요",
+      "format": "학번을 올바르게 입력해주세요"
+    },
+    "yearSemester": {
+      "empty": "이수 학년/학기를 선택해주세요",
+      "format": "학년/학기를 선택해주세요"
+    },
+    "major": {
+      "empty": "주전공을 선택해주세요"
+    },
+    "academicStatus": {
+      "required": "학적상태를 선택해주세요"
+    },
+    "secondMajor": {
+      "duplicate": "이미 주전공으로 선택했어요"
+    },
+    "personalName": {
+      "empty": "이름을 입력해주세요",
+      "special": "이름에 특수문자를 포함할 수 없어요"
+    }
+  }
+}

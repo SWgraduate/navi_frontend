@@ -9,16 +9,17 @@ import { withViewTransition } from "@/lib/view-transition";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
 import { personalAcademicStatusSchema, type PersonalAcademicStatusValue } from "@/lib/schemas/personal-info";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 /** 마이페이지 - 학적상태 수정 (재학생 / 휴학생) */
 export default function MyPersonalAcademicStatusPage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
-  const initialStatus: PersonalAcademicStatusValue | "" =
-    MOCK_PERSONAL_INFO.academicStatus === "휴학생" ? "leave" : "enrolled";
+  const initialStatus: PersonalAcademicStatusValue | "" = MOCK_PERSONAL_INFO.academicStatus;
 
   const [status, setStatus] = useState<PersonalAcademicStatusValue | "">(initialStatus);
   const [touched, setTouched] = useState(false);
@@ -42,7 +43,9 @@ export default function MyPersonalAcademicStatusPage() {
   };
 
   const labelForStatus = (value: PersonalAcademicStatusValue) =>
-    value === "enrolled" ? "재학생" : "휴학생";
+    value === "enrolled"
+      ? t("my.personal.academicStatusPage.enrolled")
+      : t("my.personal.academicStatusPage.leave");
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -58,12 +61,12 @@ export default function MyPersonalAcademicStatusPage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          학적상태를 선택해주세요
+          {t("my.personal.academicStatusPage.title")}
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
           <span className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
-            학적상태
+            {t("my.personal.academicStatusPage.label")}
           </span>
           <div className="flex gap-2">
             {(["enrolled", "leave"] as const).map((value) => (
@@ -89,7 +92,7 @@ export default function MyPersonalAcademicStatusPage() {
           </div>
           {hasError && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              학적상태를 선택해주세요.
+              {t("my.personal.academicStatusPage.error")}
             </p>
           )}
         </div>
@@ -120,11 +123,10 @@ export default function MyPersonalAcademicStatusPage() {
             }
             disabled={!canSubmit}
           >
-            수정
+            {t("my.personal.academicStatusPage.submit")}
           </Button>
         </div>
       </div>
     </div>
   );
 }
-

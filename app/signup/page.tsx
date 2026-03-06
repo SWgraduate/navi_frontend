@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 const SIGNUP_AGREED_KEY = "signup-agreed";
 
 const TERMS_ITEMS = [
-  { id: "service", label: "[필수] 서비스 이용약관 동의", required: true },
-  { id: "privacy", label: "[필수] 개인정보 수집 및 이용 동의", required: true },
-  { id: "ai", label: "[필수] AI 서비스 결과 면책 동의", required: true },
-  { id: "marketing", label: "[선택] 마케팅 정보 수신 동의", required: false },
+  { id: "service", required: true },
+  { id: "privacy", required: true },
+  { id: "ai", required: true },
+  { id: "marketing", required: false },
 ] as const;
 
 const DEFAULT_AGREED: Record<string, boolean> = {
@@ -26,23 +28,22 @@ const DEFAULT_AGREED: Record<string, boolean> = {
 /** Figma 1192-11134: 회원가입 1/6 - 약관 동의 */
 export default function SignupPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   useHeaderBackground("white");
 
-  const [agreed, setAgreed] = useState<Record<string, boolean>>(DEFAULT_AGREED);
-
-  // 약관 상세에서 동의 후 돌아왔을 때 체크 반영
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const [agreed, setAgreed] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return DEFAULT_AGREED;
     try {
       const stored = sessionStorage.getItem(SIGNUP_AGREED_KEY);
-      if (!stored) return;
+      if (!stored) return DEFAULT_AGREED;
       const parsed = JSON.parse(stored) as Record<string, boolean>;
       sessionStorage.removeItem(SIGNUP_AGREED_KEY);
-      setAgreed((prev) => ({ ...prev, ...parsed }));
+      return { ...DEFAULT_AGREED, ...parsed };
     } catch {
       sessionStorage.removeItem(SIGNUP_AGREED_KEY);
+      return DEFAULT_AGREED;
     }
-  }, []);
+  });
 
   const agreeAll = useMemo(
     () => TERMS_ITEMS.filter((t) => t.required).every((t) => agreed[t.id]),
@@ -92,10 +93,10 @@ export default function SignupPage() {
         </p>
         <div className="flex flex-col gap-2">
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            나비가 처음이시군요
+            {t("signup.terms.title1")}
           </h1>
           <p className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            약관내용에 동의해주세요
+            {t("signup.terms.title2")}
           </p>
         </div>
 
@@ -123,7 +124,7 @@ export default function SignupPage() {
                 </svg>
               )}
             </span>
-            <span>필수 항목 모두 동의</span>
+            <span>{t("signup.terms.allRequired")}</span>
           </button>
 
           {TERMS_ITEMS.map((item, index) => (
@@ -142,7 +143,7 @@ export default function SignupPage() {
                   borderColor: agreed[item.id] ? "var(--primary)" : "var(--ds-gray-30)",
                   backgroundColor: agreed[item.id] ? "var(--primary)" : "transparent",
                 }}
-                aria-label={item.label}
+                aria-label={t(`signup.terms.${item.id}`)}
                 aria-pressed={agreed[item.id]}
               >
                 {agreed[item.id] && (
@@ -159,11 +160,14 @@ export default function SignupPage() {
                 <span className={cn("min-w-0 flex-1", item.required ? "" : "text-ds-tertiary")}>
                   {item.required ? (
                     <>
-                      <span className="text-ds-brand">[필수]</span>{" "}
-                      {item.label.replace("[필수] ", "")}
+                      <span className="text-ds-brand">{t("signup.terms.requiredBadge")}</span>{" "}
+                      {t(`signup.terms.${item.id}`)}
                     </>
                   ) : (
-                    item.label
+                    <>
+                      <span>{t("signup.terms.optionalBadge")}</span>{" "}
+                      {t(`signup.terms.${item.id}`)}
+                    </>
                   )}
                 </span>
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center text-ds-tertiary" aria-hidden>
@@ -209,7 +213,7 @@ export default function SignupPage() {
           disabled={!allRequiredAgreed}
           onClick={handleAgreeSubmit}
         >
-          동의하기
+          {t("signup.terms.submit")}
         </Button>
       </div>
     </div>

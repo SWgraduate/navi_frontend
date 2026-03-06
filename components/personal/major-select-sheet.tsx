@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 /** top/bottom으로 열고 닫아서 transform 미사용 → 모바일 터치 좌표 어긋남 방지 */
 const sheetOverlayVariants = {
@@ -15,10 +16,12 @@ const sheetPanelVariants = {
   closed: { top: "100%", bottom: "auto" as const },
 };
 
+type MajorSelectOption = string | { value: string; label: string };
+
 type MajorSelectSheetProps = {
   open: boolean;
   selected: string;
-  options: readonly string[];
+  options: readonly MajorSelectOption[];
   onOpenChange: (open: boolean) => void;
   onSelect: (value: string) => void;
   title?: string;
@@ -33,16 +36,25 @@ export function MajorSelectSheet({
   options,
   onOpenChange,
   onSelect,
-  title = "주전공을 선택해주세요",
+  title,
 }: MajorSelectSheetProps) {
+  const { t } = useTranslation();
   const dragControls = useDragControls();
   const [search, setSearch] = useState("");
+  const resolvedTitle = title ?? t("sheets.majorSelect.defaultTitle");
+  const normalizedOptions = useMemo(
+    () =>
+      options.map((option) =>
+        typeof option === "string" ? { value: option, label: option } : option
+      ),
+    [options]
+  );
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return options;
+    if (!search.trim()) return normalizedOptions;
     const q = search.trim().toLowerCase();
-    return options.filter((m) => m.toLowerCase().includes(q));
-  }, [options, search]);
+    return normalizedOptions.filter((option) => option.label.toLowerCase().includes(q));
+  }, [normalizedOptions, search]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -82,7 +94,7 @@ export function MajorSelectSheet({
             className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] h-fit flex-col rounded-t-xl bg-white shadow-lg pb-[max(1rem,env(safe-area-inset-bottom))]"
             role="dialog"
             aria-modal
-            aria-label={title}
+            aria-label={resolvedTitle}
             variants={sheetPanelVariants}
             initial="closed"
             animate="open"
@@ -103,7 +115,7 @@ export function MajorSelectSheet({
               >
                 <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
                 <h2 className="pointer-events-none text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-                  {title}
+                  {resolvedTitle}
                 </h2>
               </div>
               <div className="relative flex min-h-[48px] items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
@@ -113,7 +125,7 @@ export function MajorSelectSheet({
                 />
                 <input
                   type="search"
-                  placeholder="전공을 검색하세요"
+                  placeholder={t("sheets.majorSelect.searchPlaceholder")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full min-h-[48px] rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0 touch-manipulation"
@@ -121,20 +133,20 @@ export function MajorSelectSheet({
               </div>
             </div>
             <ul className="flex flex-col gap-1.5 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
-              {filtered.map((m) => (
-                <li key={m} className="flex">
+              {filtered.map((option) => (
+                <li key={option.value} className="flex">
                   <button
                     type="button"
-                    onClick={() => handleSelect(m)}
+                    onClick={() => handleSelect(option.value)}
                     className="w-full min-h-[48px] cursor-pointer select-none py-3.5 px-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-(--ds-gray-10) touch-manipulation"
                   >
-                    {m}
+                    {option.label}
                   </button>
                 </li>
               ))}
               {filtered.length === 0 && (
                 <li className="py-4 text-center text-ds-caption-14-r text-ds-tertiary">
-                  검색 결과가 없습니다
+                  {t("sheets.majorSelect.noResults")}
                 </li>
               )}
             </ul>
@@ -144,4 +156,3 @@ export function MajorSelectSheet({
     </AnimatePresence>
   );
 }
-

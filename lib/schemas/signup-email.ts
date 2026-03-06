@@ -8,9 +8,9 @@ export const signupEmailFormSchema = z.object({
   emailPart: z
     .string()
     .trim()
-    .min(1, "이메일을 입력해주세요")
-    .refine((v) => !hasKorean(v), "이메일에는 한글을 사용할 수 없어요.")
-    .refine((v) => v === v.toLowerCase(), "이메일에는 대문자를 사용할 수 없어요."),
+    .min(1, "errors.email.empty")
+    .refine((v) => !hasKorean(v), "errors.email.koreanSignup")
+    .refine((v) => v === v.toLowerCase(), "errors.email.uppercaseSignup"),
 });
 
 export type SignupEmailFormValues = z.infer<typeof signupEmailFormSchema>;

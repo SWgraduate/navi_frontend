@@ -7,6 +7,8 @@ import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { cn } from "@/lib/utils";
 import { useChat } from "@/contexts/chat-context";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 export interface ChatInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> {
@@ -40,6 +42,7 @@ function ChatInput({
   ...inputProps
 }: ChatInputProps) {
   const { sendMessage } = useChat();
+  const { t } = useTranslation();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const clipButtonRef = React.useRef<HTMLButtonElement>(null);
@@ -182,7 +185,7 @@ function ChatInput({
         <input
           ref={inputRef}
           type="text"
-          placeholder="무엇이든 물어보세요."
+          placeholder={t("chatInput.placeholder")}
           className="w-full bg-transparent pb-4 text-base text-foreground placeholder:text-ds-tertiary focus:outline-none"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}

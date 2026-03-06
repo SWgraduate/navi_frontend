@@ -9,13 +9,13 @@ export const loginFormSchema = z
     emailPart: z
       .string()
       .trim()
-      .min(1, "이메일을 입력해주세요")
-      .refine((v) => !hasKorean(v), "이메일에는 한글을 사용할 수 없습니다")
-      .refine((v) => v === v.toLowerCase(), "이메일에는 대문자를 사용할 수 없습니다"),
+      .min(1, "errors.email.empty")
+      .refine((v) => !hasKorean(v), "errors.email.korean")
+      .refine((v) => v === v.toLowerCase(), "errors.email.uppercase"),
     password: z
       .string()
-      .min(8, "비밀번호는 8자 이상이어야 합니다")
-      .refine((v) => !hasKorean(v), "비밀번호에는 한글을 사용할 수 없습니다"),
+      .min(8, "errors.password.minLength")
+      .refine((v) => !hasKorean(v), "errors.password.korean"),
   });
 
 export type LoginFormValues = z.infer<typeof loginFormSchema>;

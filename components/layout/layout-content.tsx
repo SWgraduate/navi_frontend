@@ -11,27 +11,29 @@ import { ChatInput } from "@/components/layout/chat-input";
 import { useChat } from "@/contexts/chat-context";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
-const HEADER_TITLE: Record<string, string> = {
-  "/home": "NAVI",
-  "/speak": "말하기",
-  "/login": "로그인",
-  "/signup": "회원가입",
-  "/graduation": "졸업 관리",
-  "/graduation/upload": "졸업사정조회 스캔",
-  "/graduation/upload/processing": "졸업사정조회 스캔",
-  "/graduation/result": "졸업사정조회 결과",
-  "/my": "마이",
-  "/my/terms": "약관 및 개인정보 처리 동의",
-  "/my/language": "언어설정",
-  "/my/personal": "개인정보 설정",
-  "/my/personal/name": "이름",
-  "/my/personal/student-id": "학번",
-  "/my/personal/major": "주전공",
-  "/my/personal/second-major": "제2전공",
-  "/my/personal/academic-status": "학적상태",
-  "/my/personal/year-semester": "현재 이수한 학년/학기",
-  "/history": "기록",
+const HEADER_TITLE_KEYS: Record<string, string> = {
+  "/home": "header.home",
+  "/speak": "header.speak",
+  "/login": "header.login",
+  "/signup": "header.signup",
+  "/graduation": "header.graduation",
+  "/graduation/upload": "header.graduationUpload",
+  "/graduation/upload/processing": "header.graduationUpload",
+  "/graduation/result": "header.graduationResult",
+  "/my": "header.my",
+  "/my/terms": "header.myTerms",
+  "/my/language": "header.myLanguage",
+  "/my/personal": "header.myPersonal",
+  "/my/personal/name": "header.myPersonalName",
+  "/my/personal/student-id": "header.myPersonalStudentId",
+  "/my/personal/major": "header.myPersonalMajor",
+  "/my/personal/second-major": "header.myPersonalSecondMajor",
+  "/my/personal/academic-status": "header.myPersonalAcademicStatus",
+  "/my/personal/year-semester": "header.myPersonalYearSemester",
+  "/history": "header.history",
 };
 
 const ROUTES_WITH_BOTTOM_BAR = ["/home", "/graduation", "/my"] as const;
@@ -94,24 +96,25 @@ function AppHeaderWithSearchParams({
   setScanMenuOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
 }) {
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const headerTitle =
     pathname === "/signup/terms/service"
-      ? "서비스 이용약관"
+      ? t("header.termsService")
       : pathname === "/signup/terms/privacy-policy"
-        ? "NAVI 개인정보 처리방침"
+        ? t("header.termsPrivacyPolicy")
         : pathname === "/signup/terms/privacy"
-          ? "개인정보 수집 및 이용"
+          ? t("header.termsPrivacy")
           : pathname === "/signup/terms/ai"
-          ? "AI 서비스 결과 면책 동의"
+          ? t("header.termsAi")
           : pathname === "/signup/terms/marketing"
-            ? "마케팅 정보 수신"
+            ? t("header.termsMarketing")
             : pathname.startsWith("/signup/terms")
-              ? "약관 동의"
+              ? t("header.termsAgree")
               : pathname === "/signup" || pathname.startsWith("/signup/")
-                ? "회원가입"
+                ? t("header.signup")
                 : pathname === "/graduation/upload/processing" && searchParams.get("edit")
-                  ? "수정"
-                  : HEADER_TITLE[pathname] ?? "NAVI";
+                  ? t("header.edit")
+                  : t(HEADER_TITLE_KEYS[pathname] ?? "header.home");
 
   const isMySection = pathname === "/my" || pathname.startsWith("/my/");
 
@@ -168,6 +171,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { startNewChat } = useChat();
+  const { t } = useTranslation();
   const isHome = pathname === "/home";
   const isSplash = pathname === "/";
   const routeShowsBottomBar = pathHasBottomBar(pathname);
@@ -484,7 +488,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     >
       {showHeader && (
         <div ref={headerRef}>
-          <Suspense fallback={<AppHeader title={HEADER_TITLE[pathname] ?? "NAVI"} showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage} showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons} showHistory={false} showAdd={false} scrolled={scrolled} />}>
+          <Suspense fallback={<AppHeader title="NAVI" showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage} showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons} showHistory={false} showAdd={false} scrolled={scrolled} />}>
             <AppHeaderWithSearchParams
               pathname={pathname}
               isLoginPage={isLoginPage}
@@ -575,7 +579,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
                       withViewTransition(() => router.push("/graduation/upload"));
                     }}
                   >
-                    졸업사정조회 스캔
+                    {t("scan.graduation")}
                   </button>
                   <button
                     type="button"
@@ -583,7 +587,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
                     className="whitespace-nowrap px-4 py-3 text-left text-ds-body-16-r text-ds-primary hover:bg-ds-tertiary/10 active:bg-ds-tertiary/15"
                     onClick={() => setScanMenuOpen(false)}
                   >
-                    최근 시간표 스캔
+                    {t("scan.schedule")}
                   </button>
                 </motion.div>
               </>

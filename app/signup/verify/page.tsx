@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { signupVerifyResendSchema, signupVerifySubmitSchema } from "@/lib/schemas/signup-verify";
 import { Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 const CODE_LENGTH = 6;
 const INITIAL_TIMER_SECONDS = 180; // 03:00
@@ -67,6 +69,7 @@ function isLockedNow(): boolean {
 /** Figma 3/6: 회원가입 - 인증번호 6자리 입력 */
 export default function SignupVerifyPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   useHeaderBackground("white");
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
@@ -113,7 +116,6 @@ export default function SignupVerifyPage() {
   };
 
   const setDigit = useCallback((index: number, value: string) => {
-    // 한 글자만: 숫자만 허용, 빈 문자열이면 해당 칸 비우기 (maxLength=1이라 value 길이는 0 또는 1)
     const single = value === "" ? "" : value.replace(/\D/g, "").slice(-1);
     setDigits((prev) => {
       const next = [...prev];
@@ -151,7 +153,7 @@ export default function SignupVerifyPage() {
   const handleResend = () => {
     const parsed = signupVerifyResendSchema.safeParse({ resendCount });
     if (!parsed.success) {
-      setSubmitError(parsed.error.issues[0]?.message ?? parsed.error.message);
+      setSubmitError(t(parsed.error.issues[0]?.message ?? parsed.error.message));
       return;
     }
     setSubmitError(null);
@@ -169,7 +171,7 @@ export default function SignupVerifyPage() {
     const parsed = signupVerifySubmitSchema.safeParse({ code, timerSeconds });
     if (!parsed.success) {
       const msg = parsed.error.issues[0]?.message ?? parsed.error.message;
-      setSubmitError(msg);
+      setSubmitError(t(msg));
       const isTimerExpired = parsed.error.issues[0]?.path?.[0] === "timerSeconds";
       if (!isTimerExpired) {
         const next = consecutiveFail + 1;
@@ -200,10 +202,10 @@ export default function SignupVerifyPage() {
         </p>
         <div className="flex flex-col gap-1">
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            메일로 보내드린 인증번호
+            {t("signup.verify.title1")}
           </h1>
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            6자리를 입력해주세요
+            {t("signup.verify.title2")}
           </h1>
         </div>
 
@@ -214,12 +216,12 @@ export default function SignupVerifyPage() {
 
         {isLocked && (
           <p className="text-ds-body-16-r leading-ds-body-16-r text-destructive">
-            24시간 후에 다시 시도해 주세요.
+            {t("signup.verify.locked")}
           </p>
         )}
 
         <form id="signup-verify-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex gap-2" role="group" aria-label="인증번호 6자리">
+          <div className="flex gap-2" role="group" aria-label={t("signup.verify.codeGroup")}>
             {digits.map((d, i) => (
               <input
                 key={i}
@@ -241,7 +243,7 @@ export default function SignupVerifyPage() {
                   fontSize: "var(--ds-typo-title-24-m-size)",
                   lineHeight: "var(--ds-typo-title-24-m-line)",
                 }}
-                aria-label={`자리 ${i + 1}`}
+                aria-label={t("signup.verify.digitLabel", { index: i + 1 })}
                 aria-invalid={!!submitError}
               />
             ))}
@@ -265,13 +267,13 @@ export default function SignupVerifyPage() {
               <path d="M21 12C21 13.78 20.4722 15.5201 19.4832 17.0001C18.4943 18.4802 17.0887 19.6337 15.4442 20.3149C13.7996 20.9961 11.99 21.1743 10.2442 20.8271C8.49836 20.4798 6.89472 19.6226 5.63604 18.364C4.37737 17.1053 3.5202 15.5016 3.17294 13.7558C2.82567 12.01 3.0039 10.2004 3.68509 8.55585C4.36628 6.91131 5.51983 5.50571 6.99987 4.51677C8.47991 3.52784 10.22 3 12 3C14.52 3 16.93 4 18.74 5.74L21 8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M21 3V8H16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span>인증번호 다시 받기</span>
+            <span>{t("signup.verify.resend")}</span>
           </button>
 
           <div className="flex flex-col gap-1 text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
-            <p>유효시간이 지났을 경우 인증 번호를 다시 받아주세요.</p>
-            <p>하루동안 5번까지 새로운 인증 코드를 받을 수 있습니다.</p>
-            <p>5번 연속 코드 입력에 실패했다면 24시간 이후 시도해 주세요.</p>
+            <p>{t("signup.verify.hint1")}</p>
+            <p>{t("signup.verify.hint2")}</p>
+            <p>{t("signup.verify.hint3")}</p>
           </div>
         </form>
       </div>
@@ -300,7 +302,7 @@ export default function SignupVerifyPage() {
           )}
           disabled={!canSubmit}
         >
-          확인
+          {t("signup.verify.submit")}
         </Button>
       </div>
     </div>

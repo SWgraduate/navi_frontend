@@ -3,8 +3,9 @@
 import * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
-function getFileTypeLabel(file: File): string {
+function getFileTypeLabel(file: File, fallback: string): string {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
   const typeMap: Record<string, string> = {
     pdf: "PDF",
@@ -20,7 +21,7 @@ function getFileTypeLabel(file: File): string {
     gif: "GIF",
     webp: "WEBP",
   };
-  return (typeMap[ext] ?? ext.toUpperCase()) || "파일";
+  return (typeMap[ext] ?? ext.toUpperCase()) || fallback;
 }
 
 /** Figma 1650-15560: 파일 첨부 카드 - 파일명(shrink) + 파일형식 + X버튼(우상단) */
@@ -37,6 +38,7 @@ export function AttachmentFileCard({
   progress?: number;
   className?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -53,14 +55,14 @@ export function AttachmentFileCard({
           {file.name}
         </p>
         <p className="shrink-0 text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary tracking-[-0.35px]">
-          {getFileTypeLabel(file)}
+          {getFileTypeLabel(file, t("common.file"))}
         </p>
       </div>
       <button
         type="button"
         onClick={onRemove}
         className="absolute right-0.5 top-0.5 flex size-6 shrink-0 items-center justify-center rounded text-ds-tertiary hover:bg-(--ds-gray-5) active:opacity-80"
-        aria-label="제거"
+        aria-label={t("common.remove")}
       >
         <X className="size-4" strokeWidth={1.5} />
       </button>
@@ -85,6 +87,7 @@ export function AttachmentImageCard({
   progress?: number;
   className?: string;
 }) {
+  const { t } = useTranslation();
   React.useEffect(() => {
     return () => {
       if (previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
@@ -108,7 +111,7 @@ export function AttachmentImageCard({
         type="button"
         onClick={onRemove}
         className="absolute right-0.5 top-0.5 flex size-6 shrink-0 items-center justify-center rounded bg-white/90 text-ds-tertiary hover:bg-white active:opacity-80"
-        aria-label="제거"
+        aria-label={t("common.remove")}
       >
         <X className="size-4" strokeWidth={1.5} />
       </button>

@@ -6,10 +6,13 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { hasGraduationResult } from "@/lib/mock-accounts";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 /** Figma 1212-11510: 졸업 관리 시작하기 화면 */
 export default function GraduationPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +43,7 @@ export default function GraduationPage() {
         <div
           className="rounded-full bg-ds-gray-30 animate-pulse-scale"
           style={{ width: 32, height: 32 }}
-          aria-label="로딩 중"
+          aria-label={t("graduation.loading")}
         />
       </div>
     );
@@ -57,12 +60,12 @@ export default function GraduationPage() {
         aria-hidden
       />
       <h1 className="mt-6 text-center text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-        졸업관리, 스마트하게 시작해요
+        {t("graduation.title")}
       </h1>
       <p className="mt-3 text-center text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
-        한양대 포털에서 졸업사정조회를 스크린샷하여
+        {t("graduation.subtitle1")}
         <br />
-        남은 과정을 한눈에 확인하세요.
+        {t("graduation.subtitle2")}
       </p>
       <Button
         type="button"
@@ -71,7 +74,7 @@ export default function GraduationPage() {
         className="mt-8 w-full max-w-[320px] text-white"
         onClick={handleStart}
       >
-        시작하기
+        {t("graduation.start")}
       </Button>
     </div>
   );

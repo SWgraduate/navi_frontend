@@ -6,18 +6,20 @@ import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 import { AI_TERMS } from "../content/ai";
 import { MARKETING_TERMS } from "../content/marketing";
 import { PRIVACY_POLICY_INTRO, PRIVACY_POLICY_SECTIONS } from "../content/privacy-policy";
 import { PRIVACY_TERMS } from "../content/privacy";
 import { SERVICE_TERMS_SECTIONS } from "../content/service";
 
-const TERMS_META: Record<string, { title: string }> = {
-  service: { title: "서비스 이용약관" },
-  privacy: { title: "개인정보 수집 및 이용 동의" },
-  "privacy-policy": { title: "NAVI 개인정보 처리방침" },
-  ai: { title: "AI 서비스 결과 면책 동의" },
-  marketing: { title: "마케팅 정보 수신 동의" },
+const TERMS_META: Record<string, { titleKey: string }> = {
+  service: { titleKey: "signup.termsDetail.service" },
+  privacy: { titleKey: "signup.termsDetail.privacy" },
+  "privacy-policy": { titleKey: "signup.termsDetail.privacyPolicy" },
+  ai: { titleKey: "signup.termsDetail.ai" },
+  marketing: { titleKey: "signup.termsDetail.marketing" },
 };
 
 /** 회원가입 - 약관 동의 상세 페이지 (Figma 1292-9411: 서비스 이용약관) */
@@ -26,12 +28,13 @@ export default function SignupTermsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = typeof params.id === "string" ? params.id : "";
+  const { t } = useTranslation();
   useHeaderBackground("white");
 
   const fromMy = searchParams.get("from") === "my";
 
   const meta = id && TERMS_META[id];
-  const title = (meta && "title" in meta ? meta.title : undefined) ?? "약관";
+  const title = (meta && "titleKey" in meta ? t(meta.titleKey) : undefined) ?? t("signup.termsDetail.unknown");
 
   const handleBack = () => {
     if (showAgreeButton && id && typeof window !== "undefined") {
@@ -219,8 +222,8 @@ export default function SignupTermsPage() {
             <div className="mt-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
               <p className="whitespace-pre-wrap">
                 {id && meta
-                  ? `${title} 약관 내용이 여기에 표시됩니다.`
-                  : "약관을 찾을 수 없습니다."}
+                  ? t("signup.termsDetail.defaultContent", { title })
+                  : t("signup.termsDetail.notFound")}
               </p>
             </div>
           </div>
@@ -254,7 +257,7 @@ export default function SignupTermsPage() {
                 className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb bg-(--ds-bg-disabled) text-ds-disabled cursor-pointer hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)"
                 onClick={() => setRevokeModalOpen(true)}
               >
-                동의 철회하기
+                {t("signup.termsDetail.revokeButton")}
               </Button>
             ) : (
               <Button
@@ -264,7 +267,7 @@ export default function SignupTermsPage() {
                 className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white"
                 onClick={handleBack}
               >
-                동의하기
+                {t("signup.termsDetail.agree")}
               </Button>
             )}
           </div>
@@ -274,9 +277,9 @@ export default function SignupTermsPage() {
       <Modal
         open={revokeModalOpen}
         onOpenChange={setRevokeModalOpen}
-        title="마케팅 정보 수신을 철회할까요?"
-        cancelLabel="취소"
-        confirmLabel="철회"
+        title={t("signup.termsDetail.revokeModalTitle")}
+        cancelLabel={t("signup.termsDetail.cancel")}
+        confirmLabel={t("signup.termsDetail.revokeConfirm")}
         onConfirm={handleRevokeConfirm}
         confirmVariant="primary"
       />

@@ -2,6 +2,7 @@
 
 import { Pin, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface HistoryItemPopoverProps {
   /** 팝오버 좌표 (뷰포트 기준) */
@@ -33,6 +34,8 @@ export function HistoryItemPopover({
   onDelete,
   className,
 }: HistoryItemPopoverProps) {
+  const { t } = useTranslation();
+
   const handleAction = (fn: (() => void) | undefined) => {
     fn?.();
     onClose();
@@ -68,7 +71,7 @@ export function HistoryItemPopover({
             onClick={() => handleAction(onPin)}
           >
             <Pin className="shrink-0 text-ds-tertiary" style={{ width: 24, height: 24 }} />
-            고정
+            {t("historyMenu.pin")}
           </button>
         )}
         {onRename != null && (
@@ -79,7 +82,7 @@ export function HistoryItemPopover({
             onClick={() => handleAction(onRename)}
           >
             <Pencil className="shrink-0 text-ds-tertiary" style={{ width: 24, height: 24 }} />
-            이름 변경
+            {t("historyMenu.rename")}
           </button>
         )}
         {onDelete != null && (
@@ -90,7 +93,7 @@ export function HistoryItemPopover({
             onClick={() => handleAction(onDelete)}
           >
             <Trash2 className="shrink-0 text-ds-tertiary" style={{ width: 24, height: 24 }} />
-            삭제
+            {t("historyMenu.delete")}
           </button>
         )}
       </div>

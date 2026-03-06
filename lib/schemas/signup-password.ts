@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const PASSWORD_RULE_MESSAGE = "8~16자리 / 영문 대소문자, 숫자, 특수문자로 조합해주세요";
+export const PASSWORD_RULE_MESSAGE = "errors.password.rule";
 
 /** 회원가입 5단계 비밀번호 (8~16자, 영문 대소문자·숫자·특수문자 + 재확인) */
 export const signupPasswordFormSchema = z
@@ -20,12 +20,11 @@ export const signupPasswordFormSchema = z
         },
         { message: PASSWORD_RULE_MESSAGE }
       ),
-    passwordConfirm: z.string().min(1, "비밀번호를 다시 입력해주세요"),
+    passwordConfirm: z.string().min(1, "errors.passwordConfirm.empty"),
   })
   .refine((data) => data.password === data.passwordConfirm, {
-    message: "비밀번호가 일치하지 않습니다",
+    message: "errors.passwordConfirm.mismatch",
     path: ["passwordConfirm"],
   });
 
 export type SignupPasswordFormValues = z.infer<typeof signupPasswordFormSchema>;
-export { PASSWORD_RULE_MESSAGE };

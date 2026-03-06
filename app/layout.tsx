@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { LayoutContent } from "@/components/layout/layout-content";
 import { PwaRegister } from "@/components/pwa-register";
 import { ChatProvider } from "@/contexts/chat-context";
+import { I18nProvider } from "@/contexts/i18n-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,9 +40,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} h-full overflow-hidden font-sans antialiased`}
       >
         <PwaRegister />
-        <ChatProvider>
-          <LayoutContent>{children}</LayoutContent>
-        </ChatProvider>
+        <I18nProvider>
+          <ChatProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </ChatProvider>
+        </I18nProvider>
       </body>
     </html>
   );

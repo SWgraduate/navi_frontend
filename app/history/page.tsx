@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { HistoryItemPopover } from "@/components/history/history-item-popover";
 import { HistoryRow } from "@/components/history/history-row";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
 interface HistoryItem {
@@ -35,6 +37,7 @@ const MOCK_HISTORY: HistoryItem[] = [
 ];
 
 export default function HistoryPage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [popover, setPopover] = useState<{
     item: HistoryItem;
@@ -100,7 +103,7 @@ export default function HistoryPage() {
           </div>
           <input
             type="text"
-            placeholder="전공을 검색하세요."
+            placeholder={t("history.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-lg bg-secondary py-4 pl-12 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-body-16-r placeholder:leading-ds-body-16-r placeholder:text-ds-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -113,7 +116,7 @@ export default function HistoryPage() {
         {filteredHistory.length === 0 ? (
           <div className="py-8 text-center">
             <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-gray-50">
-              검색 결과가 없습니다.
+              {t("history.noResults")}
             </p>
           </div>
         ) : (

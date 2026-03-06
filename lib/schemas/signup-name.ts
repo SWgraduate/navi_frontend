@@ -5,7 +5,7 @@ export const signupNameFormSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "이름을 입력해주세요"),
+    .min(1, "errors.name.empty"),
 });
 
 export type SignupNameFormValues = z.infer<typeof signupNameFormSchema>;

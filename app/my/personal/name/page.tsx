@@ -8,25 +8,26 @@ import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
 import { personalNameSchema } from "@/lib/schemas/personal-info";
+import { useTranslation } from "react-i18next";
 
 /** Figma 1091-7200: 마이페이지 - 이름 수정 */
 export default function MyPersonalNamePage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
   const [name, setName] = useState<string>(MOCK_PERSONAL_INFO.name);
   const [touched, setTouched] = useState(false);
+  const validationResult = useMemo(() => personalNameSchema.safeParse(name), [name]);
 
-  const hasError = useMemo(
-    () => touched && !personalNameSchema.safeParse(name).success,
-    [name, touched]
-  );
-  const canSubmit = useMemo(
-    () => personalNameSchema.safeParse(name).success,
-    [name]
-  );
+  const hasError = touched && !validationResult.success;
+  const canSubmit = validationResult.success;
+  const errorMessage =
+    hasError && !validationResult.success
+      ? t(validationResult.error.issues[0]?.message ?? "my.personal.namePage.error")
+      : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +52,7 @@ export default function MyPersonalNamePage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          이름을 입력해주세요
+          {t("my.personal.namePage.title")}
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
@@ -59,7 +60,7 @@ export default function MyPersonalNamePage() {
             htmlFor="personal-name"
             className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
           >
-            이름
+            {t("my.personal.namePage.label")}
           </label>
           <div className="flex items-center rounded-md border border-border bg-(--ds-gray-5)">
             <input
@@ -70,12 +71,12 @@ export default function MyPersonalNamePage() {
               onChange={(e) => setName(e.target.value)}
               onBlur={() => setTouched(true)}
               className="min-w-0 flex-1 bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
-              placeholder="이름을 입력해주세요"
+              placeholder={t("my.personal.namePage.placeholder")}
             />
           </div>
-          {hasError && (
+          {errorMessage && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              이름을 입력해주세요.
+              {errorMessage}
             </p>
           )}
         </div>
@@ -104,11 +105,10 @@ export default function MyPersonalNamePage() {
               : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
           }
           disabled={!canSubmit}
-        >
-          수정
+          >
+          {t("my.personal.namePage.submit")}
         </Button>
       </div>
     </div>
   );
 }
-

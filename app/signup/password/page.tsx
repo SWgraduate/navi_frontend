@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { PASSWORD_RULE_MESSAGE, signupPasswordFormSchema } from "@/lib/schemas/signup-password";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 const BUTTON_AREA_HEIGHT = 80;
 const SIGNUP_NAME_KEY = "signup_name";
@@ -16,6 +18,7 @@ const SIGNUP_NAME_KEY = "signup_name";
 /** Figma 5/6: 회원가입 - 비밀번호 설정 (첫 입력 후 재확인 필드 표시) */
 export default function SignupPasswordPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   useHeaderBackground("white");
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
@@ -65,7 +68,7 @@ export default function SignupPasswordPage() {
     withViewTransition(() => router.push("/signup/complete"));
   };
 
-  const displayName = signupName.trim() || "회원";
+  const displayName = signupName.trim() || t("signup.password.defaultName");
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -82,10 +85,10 @@ export default function SignupPasswordPage() {
         </p>
         <div className="flex flex-col gap-2">
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            {displayName}님 반갑습니다!
+            {t("signup.password.title1Name", { name: displayName })}
           </h1>
           <p className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            사용할 비밀번호를 입력해주세요
+            {t("signup.password.title2")}
           </p>
         </div>
 
@@ -95,7 +98,7 @@ export default function SignupPasswordPage() {
               htmlFor="signup-password"
               className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
             >
-              비밀번호
+              {t("signup.password.label")}
             </label>
             <div
               className={cn(
@@ -109,7 +112,7 @@ export default function SignupPasswordPage() {
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
-                placeholder="비밀번호를 입력해주세요."
+                placeholder={t("signup.password.placeholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onFocus={() => setShowPasswordHint(true)}
@@ -126,7 +129,7 @@ export default function SignupPasswordPage() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-md text-ds-tertiary active:bg-ds-gray-10"
-                aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                aria-label={showPassword ? t("common.hidePassword") : t("common.showPassword")}
               >
                 {showPassword ? (
                   <EyeOff className="h-6 w-6" aria-hidden />
@@ -149,8 +152,8 @@ export default function SignupPasswordPage() {
                 }}
               >
                 {touched.password && fieldErrors.password
-                  ? fieldErrors.password
-                  : PASSWORD_RULE_MESSAGE}
+                  ? t(fieldErrors.password)
+                  : t(PASSWORD_RULE_MESSAGE)}
               </p>
             )}
           </div>
@@ -161,7 +164,7 @@ export default function SignupPasswordPage() {
                 htmlFor="signup-password-confirm"
                 className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
               >
-                비밀번호 재확인
+                {t("signup.password.confirmLabel")}
               </label>
               <div
                 className={cn(
@@ -175,7 +178,7 @@ export default function SignupPasswordPage() {
                   id="signup-password-confirm"
                   type={showPasswordConfirm ? "text" : "password"}
                   autoComplete="new-password"
-                  placeholder="비밀번호를 다시 입력해주세요."
+                  placeholder={t("signup.password.confirmPlaceholder")}
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   onBlur={() => setTouched((t) => ({ ...t, passwordConfirm: true }))}
@@ -190,7 +193,7 @@ export default function SignupPasswordPage() {
                   type="button"
                   onClick={() => setShowPasswordConfirm((v) => !v)}
                   className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-md text-ds-tertiary active:bg-ds-gray-10"
-                  aria-label={showPasswordConfirm ? "비밀번호 숨기기" : "비밀번호 보기"}
+                  aria-label={showPasswordConfirm ? t("common.hidePassword") : t("common.showPassword")}
                 >
                   {showPasswordConfirm ? (
                     <EyeOff className="h-6 w-6" aria-hidden />
@@ -207,7 +210,7 @@ export default function SignupPasswordPage() {
                     lineHeight: "var(--ds-typo-caption-14-m-line)",
                   }}
                 >
-                  {fieldErrors.passwordConfirm}
+                  {t(fieldErrors.passwordConfirm ?? "")}
                 </p>
               )}
             </div>
@@ -239,7 +242,7 @@ export default function SignupPasswordPage() {
           )}
           disabled={!canSubmit}
         >
-          다음
+          {t("signup.password.submit")}
         </Button>
       </div>
     </div>

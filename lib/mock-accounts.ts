@@ -3,6 +3,13 @@
  * API 연동 시 제거하고 실제 데이터로 교체.
  */
 
+import type {
+  AcademicStatusCode,
+  MajorCode,
+  SecondMajorTypeCode,
+  YearSemesterCode,
+} from "@/lib/academic-options";
+
 // ===== 로그인 목데이터 =====
 
 export const MOCK_LOGIN_ACCOUNT = {
@@ -18,17 +25,19 @@ export const MOCK_LOGIN_ACCOUNT = {
 export const MOCK_PERSONAL_INFO: {
   name: string;
   studentId: string;
-  major: string;
-  secondMajor: string;
-  academicStatus: "재학생" | "휴학생";
-  yearSemester: string;
+  major: MajorCode;
+  secondMajorType: SecondMajorTypeCode | "";
+  secondMajor: MajorCode | "";
+  academicStatus: AcademicStatusCode;
+  yearSemester: YearSemesterCode;
 } = {
   name: "Navi",
   studentId: "2000000000",
-  major: "ICT융합학부",
-  secondMajor: "없음",
-  academicStatus: "재학생",
-  yearSemester: "4학년 1학기",
+  major: "ict-convergence",
+  secondMajorType: "",
+  secondMajor: "",
+  academicStatus: "enrolled",
+  yearSemester: "4-1",
 };
 
 /** 목데이터와 일치하는지 검사 (이메일·비밀번호) */
