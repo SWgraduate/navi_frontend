@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import {
   getGraduationResult,
@@ -8,7 +10,10 @@ import {
   type CreditKey,
   type Credits,
 } from "@/lib/mock-accounts";
+import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
+
+const SKIP_SAVED_RESULT_KEY = "navi_skip_saved_graduation_result_once";
 
 function extractNumber(value: string): number | null {
   if (!value || value.trim() === "") return null;
@@ -79,10 +84,25 @@ const CELL_STYLE = {
 
 /** 졸업사정조회 결과 페이지: Navi 사용자 데이터 표시 (로컬스토리지에서 조회) */
 export default function GraduationResultPage() {
+  const router = useRouter();
   useHeaderBackground("white");
   const { t } = useTranslation();
   const saved = getGraduationResult();
   const rowLabel = (key: CreditKey) => t(`graduation.resultRows.${key}`);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    window.history.pushState({ graduationResultGuard: true }, "", window.location.href);
+
+    const handlePopState = () => {
+      sessionStorage.setItem(SKIP_SAVED_RESULT_KEY, "1");
+      withViewTransition(() => router.replace("/graduation"));
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [router]);
   
   if (!saved) {
     return (

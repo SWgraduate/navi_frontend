@@ -37,9 +37,13 @@ const HEADER_TITLE_KEYS: Record<string, string> = {
 };
 
 const ROUTES_WITH_BOTTOM_BAR = ["/home", "/graduation", "/my"] as const;
+const SKIP_SAVED_RESULT_KEY = "navi_skip_saved_graduation_result_once";
 
 function pathHasBottomBar(pathname: string): boolean {
-  return ROUTES_WITH_BOTTOM_BAR.some((route) => pathname === route);
+  return ROUTES_WITH_BOTTOM_BAR.some((route) => {
+    if (route === "/home" || route === "/my") return pathname === route;
+    return pathname === route || pathname.startsWith(route + "/");
+  });
 }
 
 function isFocusableInput(el: EventTarget | null): boolean {
@@ -112,11 +116,26 @@ function AppHeaderWithSearchParams({
                   : t(HEADER_TITLE_KEYS[pathname] ?? "header.home");
 
   const isMySection = pathname === "/my" || pathname.startsWith("/my/");
+  const handleBack =
+    isGraduationResultPage
+      ? () => {
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem(SKIP_SAVED_RESULT_KEY, "1");
+          }
+          withViewTransition(() => router.replace("/graduation"));
+        }
+      : undefined;
 
   return (
     <AppHeader
       title={headerTitle}
-      showBack={pathname !== "/home" && pathname !== "/my" && !isLoginPage}
+      showBack={
+        pathname !== "/home" &&
+        pathname !== "/my" &&
+        !isLoginPage &&
+        !isGraduationResultPage
+      }
+      onBack={handleBack}
       showTitle={pathname !== "/home" && pathname !== "/my" && !isGraduationHeaderWithIcons}
       showHistory={
         !isHistoryPage &&
@@ -191,6 +210,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isWhiteBackgroundPage =
     isSplash ||
     isMyPage ||
+    isGraduationUploadPage ||
+    isGraduationProcessingPage ||
     isGraduationResultPage ||
     pathname === "/speak" ||
     isSignupTermsPage ||

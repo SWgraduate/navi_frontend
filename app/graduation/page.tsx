@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { hasGraduationResult } from "@/lib/mock-accounts";
@@ -9,16 +9,28 @@ import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
-/** Figma 1212-11510: 졸업 관리 시작하기 화면 */
-export default function GraduationPage() {
+const SKIP_SAVED_RESULT_KEY = "navi_skip_saved_graduation_result_once";
+
+function GraduationContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
+  const skipSavedResult = searchParams.get("skipSavedResult") === "1";
 
   useEffect(() => {
     // 로컬스토리지 확인 후 라우팅 결정
     const checkAndRoute = () => {
-      if (hasGraduationResult()) {
+      const shouldSkipSavedResult =
+        skipSavedResult ||
+        (typeof window !== "undefined" &&
+          sessionStorage.getItem(SKIP_SAVED_RESULT_KEY) === "1");
+
+      if (typeof window !== "undefined" && shouldSkipSavedResult) {
+        sessionStorage.removeItem(SKIP_SAVED_RESULT_KEY);
+      }
+
+      if (!shouldSkipSavedResult && hasGraduationResult()) {
         // 저장된 데이터가 있으면 result 페이지로 리다이렉트
         withViewTransition(() => router.push("/graduation/result"));
       } else {
@@ -30,7 +42,7 @@ export default function GraduationPage() {
     // 약간의 지연을 두어 로딩 상태를 보여줌
     const timer = setTimeout(checkAndRoute, 100);
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, skipSavedResult]);
 
   const handleStart = () => {
     withViewTransition(() => router.push("/graduation/upload"));
@@ -77,5 +89,24 @@ export default function GraduationPage() {
         {t("graduation.start")}
       </Button>
     </div>
+  );
+}
+
+/** Figma 1212-11510: 졸업 관리 시작하기 화면 */
+export default function GraduationPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-full w-full items-center justify-center bg-background">
+          <div
+            className="rounded-full bg-ds-gray-30 animate-pulse-scale"
+            style={{ width: 32, height: 32 }}
+            aria-label="Loading"
+          />
+        </div>
+      }
+    >
+      <GraduationContent />
+    </Suspense>
   );
 }
