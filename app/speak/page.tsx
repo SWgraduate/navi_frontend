@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Paperclip, X } from "lucide-react";
+import { X } from "lucide-react";
 import { withViewTransition } from "@/lib/view-transition";
 import { cn } from "@/lib/utils";
 import { ScrollFade } from "@/components/ui/scroll-fade";
+import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
 
 /** mic-on.svg 기반 - currentColor로 brand 색상 적용 가능 */
@@ -98,6 +100,8 @@ const DUMMY_SPEECH_LINES = [
 export default function SpeakPage() {
   const router = useRouter();
   const [micOn, setMicOn] = useState(true);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const clipButtonRef = useRef<HTMLButtonElement>(null);
 
   const { wavePulse, waveHeights, permissionState, errorMessage } =
     useVoiceAnalyser(micOn);
@@ -225,12 +229,24 @@ export default function SpeakPage() {
       >
         {/* Btn/Clip - 첨부 */}
         <button
+          ref={clipButtonRef}
           type="button"
+          onClick={() => setAttachMenuOpen((o) => !o)}
           className={cn(btnBase, "text-ds-tertiary")}
           aria-label="첨부"
+          aria-expanded={attachMenuOpen}
+          aria-haspopup="menu"
         >
-          <Paperclip className="size-6" strokeWidth={1.5} />
+          <Image src="/icons/clip.svg" alt="" width={24} height={24} className="size-6 shrink-0" />
         </button>
+        <AttachmentMenu
+          anchorRef={clipButtonRef}
+          open={attachMenuOpen}
+          onClose={() => setAttachMenuOpen(false)}
+          onFile={() => {}}
+          onPhoto={() => {}}
+          onCamera={() => {}}
+        />
 
         {/* Btn - 마이크 (on/off 토글) */}
         <button

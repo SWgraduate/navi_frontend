@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { VoiceModeButton } from "@/components/ui/icon-buttons";
+import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { cn } from "@/lib/utils";
 import { useChat } from "@/contexts/chat-context";
 
@@ -10,6 +11,9 @@ export interface ChatInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> {
   className?: string;
   onAttachClick?: () => void;
+  onFileAttach?: () => void;
+  onPhotoAttach?: () => void;
+  onCameraAttach?: () => void;
   onSpeakClick?: () => void;
   onHeightChange?: (height: number) => void;
   isKeyboardOpen?: boolean;
@@ -21,6 +25,9 @@ export interface ChatInputProps
 function ChatInput({
   className,
   onAttachClick,
+  onFileAttach,
+  onPhotoAttach,
+  onCameraAttach,
   onSpeakClick,
   onHeightChange,
   isKeyboardOpen = false,
@@ -31,7 +38,9 @@ function ChatInput({
   const { sendMessage } = useChat();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const clipButtonRef = React.useRef<HTMLButtonElement>(null);
   const [inputValue, setInputValue] = React.useState("");
+  const [attachMenuOpen, setAttachMenuOpen] = React.useState(false);
 
   // 컨테이너 높이를 상위 레이아웃에 전달 (메인 영역 하단 여백 계산에 사용)
   React.useEffect(() => {
@@ -103,10 +112,13 @@ function ChatInput({
         />
         <div className="flex items-center justify-between">
           <button
+            ref={clipButtonRef}
             type="button"
-            onClick={onAttachClick}
+            onClick={() => setAttachMenuOpen((o) => !o)}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ds-tertiary hover:bg-(--ds-gray-10)"
             aria-label="첨부"
+            aria-expanded={attachMenuOpen}
+            aria-haspopup="menu"
           >
             <Image
               src="/icons/clip.svg"
@@ -115,6 +127,14 @@ function ChatInput({
               height={24}
             />
           </button>
+          <AttachmentMenu
+            anchorRef={clipButtonRef}
+            open={attachMenuOpen}
+            onClose={() => setAttachMenuOpen(false)}
+            onFile={onFileAttach ?? onAttachClick}
+            onPhoto={onPhotoAttach ?? onAttachClick}
+            onCamera={onCameraAttach ?? onAttachClick}
+          />
           <VoiceModeButton onClick={onSpeakClick} className="shrink-0" />
         </div>
       </div>
