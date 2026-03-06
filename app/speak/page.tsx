@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { ScrollFade } from "@/components/ui/scroll-fade";
 import { AttachmentMenu } from "@/components/ui/attachment-menu";
+import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
 
 /** mic-on.svg 기반 - currentColor로 brand 색상 적용 가능 */
@@ -101,14 +102,32 @@ export default function SpeakPage() {
   const router = useRouter();
   const [micOn, setMicOn] = useState(true);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [attachments, setAttachments] = useState<
+    { id: string; file: File; previewUrl?: string }[]
+  >([]);
   const clipButtonRef = useRef<HTMLButtonElement>(null);
 
   const { wavePulse, waveHeights, permissionState, errorMessage } =
     useVoiceAnalyser(micOn);
 
   const handleFileSelect = (files: File[]) => {
-    setAttachedFiles((prev) => [...prev, ...files]);
+    setAttachments((prev) => [
+      ...prev,
+      ...files.map((file) => {
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const previewUrl =
+          file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined;
+        return { id, file, previewUrl };
+      }),
+    ]);
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => {
+      const item = prev.find((a) => a.id === id);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((a) => a.id !== id);
+    });
   };
 
   const handleClose = () => {
@@ -223,6 +242,33 @@ export default function SpeakPage() {
         </p>
       )}
 
+      {/* Figma 1650-15068: 첨부 카드 영역 - 파일/이미지 카드 가로 스크롤 */}
+      {attachments.length > 0 && (
+        <div
+          className="fixed bottom-[calc(8rem+var(--safe-area-inset-bottom))] left-1/2 z-10 flex -translate-x-1/2 gap-1 overflow-x-auto px-4"
+          style={{
+            maxWidth: "var(--app-max-width)",
+            width: "100%",
+          }}
+        >
+          {attachments.map(({ id, file, previewUrl }) =>
+            previewUrl ? (
+              <AttachmentImageCard
+                key={id}
+                previewUrl={previewUrl}
+                onRemove={() => removeAttachment(id)}
+              />
+            ) : (
+              <AttachmentFileCard
+                key={id}
+                file={file}
+                onRemove={() => removeAttachment(id)}
+              />
+            )
+          )}
+        </div>
+      )}
+
       {/* 하단 액션 바: Clip | Mic | X (모바일 safe area 대응, fixed로 항상 노출) */}
       <div
         className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between bg-white px-4 pt-4"
@@ -233,27 +279,17 @@ export default function SpeakPage() {
         }}
       >
         {/* Btn/Clip - 첨부 (메뉴: 파일/앨범/카메라) */}
-        <div className="relative">
-          <button
-            ref={clipButtonRef}
-            type="button"
-            onClick={() => setAttachMenuOpen((o) => !o)}
-            className={cn(btnBase, "text-ds-tertiary")}
-            aria-label="첨부"
-            aria-expanded={attachMenuOpen}
-            aria-haspopup="menu"
-          >
-            <Image src="/icons/clip.svg" alt="" width={24} height={24} className="size-6 shrink-0" />
-          </button>
-          {attachedFiles.length > 0 && (
-            <span
-              className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-ds-brand text-[10px] font-medium text-white"
-              aria-label={`${attachedFiles.length}개 첨부됨`}
-            >
-              {attachedFiles.length}
-            </span>
-          )}
-        </div>
+        <button
+          ref={clipButtonRef}
+          type="button"
+          onClick={() => setAttachMenuOpen((o) => !o)}
+          className={cn(btnBase, "text-ds-tertiary")}
+          aria-label="첨부"
+          aria-expanded={attachMenuOpen}
+          aria-haspopup="menu"
+        >
+          <Image src="/icons/clip.svg" alt="" width={24} height={24} className="size-6 shrink-0" />
+        </button>
         <AttachmentMenu
           anchorRef={clipButtonRef}
           open={attachMenuOpen}

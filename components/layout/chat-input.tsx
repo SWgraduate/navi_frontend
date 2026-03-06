@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { VoiceModeButton } from "@/components/ui/icon-buttons";
 import { AttachmentMenu } from "@/components/ui/attachment-menu";
+import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { cn } from "@/lib/utils";
 import { useChat } from "@/contexts/chat-context";
 
@@ -44,6 +45,9 @@ function ChatInput({
   const clipButtonRef = React.useRef<HTMLButtonElement>(null);
   const [inputValue, setInputValue] = React.useState("");
   const [attachMenuOpen, setAttachMenuOpen] = React.useState(false);
+  const [attachments, setAttachments] = React.useState<
+    { id: string; file: File; previewUrl?: string }[]
+  >([]);
 
   // 컨테이너 높이를 상위 레이아웃에 전달 (메인 영역 하단 여백 계산에 사용)
   React.useEffect(() => {
@@ -87,16 +91,35 @@ function ChatInput({
     }
   };
 
+  const addAttachments = React.useCallback((files: File[]) => {
+    setAttachments((prev) => [
+      ...prev,
+      ...files.map((file) => {
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const previewUrl =
+          file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined;
+        return { id, file, previewUrl };
+      }),
+    ]);
+  }, []);
+
+  const removeAttachment = React.useCallback((id: string) => {
+    setAttachments((prev) => {
+      const item = prev.find((a) => a.id === id);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((a) => a.id !== id);
+    });
+  }, []);
+
   const handleFileSelect = React.useCallback(
     (files: File[]) => {
       if (onFileSelect) {
         onFileSelect(files);
       } else {
-        const names = files.map((f) => f.name).join(", ");
-        setInputValue((prev) => (prev ? `${prev} [${names}]` : `[${names}]`));
+        addAttachments(files);
       }
     },
-    [onFileSelect]
+    [onFileSelect, addAttachments]
   );
 
   const handlePhotoSelect = React.useCallback(
@@ -104,11 +127,10 @@ function ChatInput({
       if (onPhotoSelect) {
         onPhotoSelect(files);
       } else {
-        const names = files.map((f) => f.name).join(", ");
-        setInputValue((prev) => (prev ? `${prev} [${names}]` : `[${names}]`));
+        addAttachments(files);
       }
     },
-    [onPhotoSelect]
+    [onPhotoSelect, addAttachments]
   );
 
   const handleCameraCapture = React.useCallback(
@@ -116,11 +138,10 @@ function ChatInput({
       if (onCameraCapture) {
         onCameraCapture(files);
       } else {
-        const names = files.map((f) => f.name).join(", ");
-        setInputValue((prev) => (prev ? `${prev} [${names}]` : `[${names}]`));
+        addAttachments(files);
       }
     },
-    [onCameraCapture]
+    [onCameraCapture, addAttachments]
   );
 
   return (
@@ -139,6 +160,25 @@ function ChatInput({
       }}
     >
       <div className="flex flex-col rounded-xl bg-(--ds-gray-5) p-4">
+        {attachments.length > 0 && (
+          <div className="mb-3 flex gap-1 overflow-x-auto pb-1">
+            {attachments.map(({ id, file, previewUrl }) =>
+              previewUrl ? (
+                <AttachmentImageCard
+                  key={id}
+                  previewUrl={previewUrl}
+                  onRemove={() => removeAttachment(id)}
+                />
+              ) : (
+                <AttachmentFileCard
+                  key={id}
+                  file={file}
+                  onRemove={() => removeAttachment(id)}
+                />
+              )
+            )}
+          </div>
+        )}
         <input
           ref={inputRef}
           type="text"
