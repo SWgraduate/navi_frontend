@@ -14,6 +14,7 @@ import { withViewTransition } from "@/lib/view-transition";
 
 const HEADER_TITLE: Record<string, string> = {
   "/home": "NAVI",
+  "/speak": "말하기",
   "/login": "로그인",
   "/signup": "회원가입",
   "/graduation": "졸업 관리",
@@ -168,8 +169,13 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const isGraduationRootPage = pathname === "/graduation";
-  const showHeader = !isSplash && pathname !== "/my" && !isGraduationRootPage;
-  const isWhiteBackgroundPage = isSplash || isMyPage || isGraduationResultPage;
+  const showHeader =
+    !isSplash &&
+    pathname !== "/my" &&
+    pathname !== "/speak" &&
+    !isGraduationRootPage;
+  const isWhiteBackgroundPage =
+    isSplash || isMyPage || isGraduationResultPage || pathname === "/speak";
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
@@ -492,6 +498,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
       {showChatInput && (
         <ChatInput
           onHeightChange={onChatInputHeightChange}
+          onSpeakClick={() => withViewTransition(() => router.push("/speak"))}
           isKeyboardOpen={keyboardActive}
           keyboardHeight={effectiveKeyboardInset}
           bottomBarHeight={bottomBarHeight}
