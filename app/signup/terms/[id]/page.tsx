@@ -2,7 +2,9 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
+import { Button } from "@/components/ui/button";
 import { withViewTransition } from "@/lib/view-transition";
+import { SERVICE_TERMS_SECTIONS } from "../content/service";
 
 const TERMS_META: Record<string, { title: string }> = {
   service: { title: "서비스 이용약관" },
@@ -11,7 +13,7 @@ const TERMS_META: Record<string, { title: string }> = {
   marketing: { title: "마케팅 정보 수신 동의" },
 };
 
-/** 회원가입 - 약관 동의 상세 페이지 */
+/** 회원가입 - 약관 동의 상세 페이지 (Figma 1292-9411: 서비스 이용약관) */
 export default function SignupTermsPage() {
   const router = useRouter();
   const params = useParams();
@@ -22,43 +24,89 @@ export default function SignupTermsPage() {
   const title = (meta && "title" in meta ? meta.title : undefined) ?? "약관";
 
   const handleBack = () => {
+    // 동의한 약관 id를 sessionStorage에 저장 → 회원가입 페이지에서 체크 반영
+    if (id && typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem("signup-agreed");
+        const agreed = stored ? (JSON.parse(stored) as Record<string, boolean>) : {};
+        agreed[id] = true;
+        sessionStorage.setItem("signup-agreed", JSON.stringify(agreed));
+      } catch {
+        sessionStorage.setItem("signup-agreed", JSON.stringify({ [id]: true }));
+      }
+    }
     withViewTransition(() => router.back());
   };
 
+  const isService = id === "service";
+
   return (
-    <div className="flex min-h-full flex-col bg-white">
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white">
+      {/* 스크롤 영역: 동의하기 버튼 바로 위까지 */}
       <div
-        className="min-h-0 flex-1 overflow-y-auto px-4 py-4"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
-          paddingBottom: "calc(2rem + var(--safe-area-inset-bottom, 0px))",
+          paddingTop: "1rem",
+          paddingBottom: "calc(6rem + env(safe-area-inset-bottom, 0px))",
         }}
       >
-        <h1 className="text-ds-title-20-sb leading-ds-title-20-sb font-semibold text-ds-primary">
-          {title}
-        </h1>
-        <div className="mt-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
-          <p className="whitespace-pre-wrap">
-            {id && meta
-              ? `${title} 약관 내용이 여기에 표시됩니다.`
-              : "약관을 찾을 수 없습니다."}
-          </p>
-        </div>
+        {isService ? (
+          <div className="flex flex-col gap-4 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
+            {SERVICE_TERMS_SECTIONS.map((section) => (
+              <section key={section.title} className="flex flex-col gap-1">
+                <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
+                  {section.title}
+                </p>
+                <p className="whitespace-pre-wrap">
+                  {section.body}
+                </p>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <>
+            <h1 className="text-ds-title-20-sb leading-ds-title-20-sb font-semibold text-ds-primary">
+              {title}
+            </h1>
+            <div className="mt-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
+              <p className="whitespace-pre-wrap">
+                {id && meta
+                  ? `${title} 약관 내용이 여기에 표시됩니다.`
+                  : "약관을 찾을 수 없습니다."}
+              </p>
+            </div>
+          </>
+        )}
       </div>
+
+      {/* 스크롤 영역이 버튼 바로 위까지이도록 하단 공간 확보 */}
       <div
-        className="shrink-0 border-t border-(--ds-gray-10) bg-white px-4 py-4"
+        className="shrink-0"
         style={{
-          paddingBottom: "max(1rem, var(--safe-area-inset-bottom, 0px))",
+          height: "calc(3.5rem + 1rem + max(1rem, env(safe-area-inset-bottom, 0px)))",
+        }}
+        aria-hidden
+      />
+
+      {/* 하단 고정 버튼 */}
+      <div
+        className="fixed left-0 right-0 z-10 bg-white px-4 pt-4"
+        style={{
+          bottom: "env(safe-area-inset-bottom, 0px)",
+          paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
           maxWidth: "var(--app-max-width)",
           margin: "0 auto",
         }}
       >
-        <button
+        <Button
           type="button"
+          variant="primary"
+          size="lg"
+          className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white"
           onClick={handleBack}
-          className="w-full rounded-sm border border-(--ds-gray-10) bg-white py-3 text-ds-body-16-sb text-ds-primary active:opacity-80"
         >
-          뒤로
-        </button>
+          동의하기
+        </Button>
       </div>
     </div>
   );

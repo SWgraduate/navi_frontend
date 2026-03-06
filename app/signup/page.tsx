@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
+
+const SIGNUP_AGREED_KEY = "signup-agreed";
 
 const TERMS_ITEMS = [
   { id: "service", label: "[필수] 서비스 이용약관 동의", required: true },
@@ -14,17 +16,33 @@ const TERMS_ITEMS = [
   { id: "marketing", label: "[선택] 마케팅 정보 수신 동의", required: false },
 ] as const;
 
+const DEFAULT_AGREED: Record<string, boolean> = {
+  service: false,
+  privacy: false,
+  ai: false,
+  marketing: false,
+};
+
 /** Figma 1192-11134: 회원가입 1/6 - 약관 동의 */
 export default function SignupPage() {
   const router = useRouter();
   useHeaderBackground("white");
 
-  const [agreed, setAgreed] = useState<Record<string, boolean>>({
-    service: false,
-    privacy: false,
-    ai: false,
-    marketing: false,
-  });
+  const [agreed, setAgreed] = useState<Record<string, boolean>>(DEFAULT_AGREED);
+
+  // 약관 상세에서 동의 후 돌아왔을 때 체크 반영
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = sessionStorage.getItem(SIGNUP_AGREED_KEY);
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as Record<string, boolean>;
+      sessionStorage.removeItem(SIGNUP_AGREED_KEY);
+      setAgreed((prev) => ({ ...prev, ...parsed }));
+    } catch {
+      sessionStorage.removeItem(SIGNUP_AGREED_KEY);
+    }
+  }, []);
 
   const agreeAll = useMemo(
     () => TERMS_ITEMS.filter((t) => t.required).every((t) => agreed[t.id]),
@@ -48,6 +66,10 @@ export default function SignupPage() {
   };
 
   const handleGoToTerms = (id: string) => {
+    // 약관 상세에서 돌아올 때 현재 체크 상태 복원용으로 저장
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(SIGNUP_AGREED_KEY, JSON.stringify(agreed));
+    }
     withViewTransition(() => router.push(`/signup/terms/${id}`));
   };
 
