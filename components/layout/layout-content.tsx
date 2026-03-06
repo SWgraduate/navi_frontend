@@ -94,11 +94,13 @@ function AppHeaderWithSearchParams({
 }) {
   const searchParams = useSearchParams();
   const headerTitle =
-    pathname === "/signup" || pathname.startsWith("/signup/")
-      ? "회원가입"
-      : pathname === "/graduation/upload/processing" && searchParams.get("edit")
-        ? "수정"
-        : HEADER_TITLE[pathname] ?? "NAVI";
+    pathname.startsWith("/signup/terms")
+      ? "약관 동의"
+      : pathname === "/signup" || pathname.startsWith("/signup/")
+        ? "회원가입"
+        : pathname === "/graduation/upload/processing" && searchParams.get("edit")
+          ? "수정"
+          : HEADER_TITLE[pathname] ?? "NAVI";
 
   const isMySection = pathname === "/my" || pathname.startsWith("/my/");
 

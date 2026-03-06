@@ -47,6 +47,10 @@ export default function SignupPage() {
     setAgreed((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleGoToTerms = (id: string) => {
+    withViewTransition(() => router.push(`/signup/terms/${id}`));
+  };
+
   const handleAgreeSubmit = () => {
     if (!allRequiredAgreed) return;
     withViewTransition(() => router.push("/signup/email"));
@@ -100,47 +104,53 @@ export default function SignupPage() {
           </button>
 
           {TERMS_ITEMS.map((item, index) => (
-            <button
+            <div
               key={item.id}
-              type="button"
-              onClick={() => handleToggle(item.id)}
               className={cn(
-                "flex items-center gap-3 py-4 pr-4 pl-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:opacity-70",
+                "flex items-center gap-3 py-4 pr-4 pl-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary",
                 index === TERMS_ITEMS.length - 1 && "rounded-b-md"
               )}
             >
-              <span
-                className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-                  agreed[item.id]
-                    ? "border-primary bg-primary"
-                    : "border-[var(--ds-gray-30)] bg-transparent"
-                )}
-                aria-hidden
+              <button
+                type="button"
+                onClick={() => handleToggle(item.id)}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 active:opacity-70 focus:outline-none"
+                style={{
+                  borderColor: agreed[item.id] ? "var(--primary)" : "var(--ds-gray-30)",
+                  backgroundColor: agreed[item.id] ? "var(--primary)" : "transparent",
+                }}
+                aria-label={item.label}
+                aria-pressed={agreed[item.id]}
               >
                 {agreed[item.id] && (
                   <svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden>
                     <path d="M1 5L4.5 8.5L11 1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
-              </span>
-              <span className={cn("min-w-0 flex-1", item.required ? "" : "text-ds-tertiary")}>
-                {item.required ? (
-                  <>
-                    <span className="text-ds-brand">[필수]</span>{" "}
-                    {item.label.replace("[필수] ", "")}
-                  </>
-                ) : (
-                  item.label
-                )}
-              </span>
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center text-ds-tertiary" aria-hidden>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12H19" />
-                  <path d="M12 5L19 12L12 19" />
-                </svg>
-              </span>
-            </button>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleGoToTerms(item.id)}
+                className="min-w-0 flex-1 flex items-center gap-3 text-left active:opacity-70 focus:outline-none"
+              >
+                <span className={cn("min-w-0 flex-1", item.required ? "" : "text-ds-tertiary")}>
+                  {item.required ? (
+                    <>
+                      <span className="text-ds-brand">[필수]</span>{" "}
+                      {item.label.replace("[필수] ", "")}
+                    </>
+                  ) : (
+                    item.label
+                  )}
+                </span>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center text-ds-tertiary" aria-hidden>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12H19" />
+                    <path d="M12 5L19 12L12 19" />
+                  </svg>
+                </span>
+              </button>
+            </div>
           ))}
         </div>
       </div>
