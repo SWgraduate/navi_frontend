@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Paperclip, X } from "lucide-react";
 import { withViewTransition } from "@/lib/view-transition";
 import { cn } from "@/lib/utils";
+import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
 
 /** mic-on.svg 기반 - currentColor로 brand 색상 적용 가능 */
 function MicOnIcon({ className }: { className?: string }) {
@@ -90,6 +91,14 @@ export default function SpeakPage() {
   const router = useRouter();
   const [micOn, setMicOn] = useState(true);
 
+  const {
+    barHeights,
+    audioLevel,
+    permissionState,
+    errorMessage,
+    requestPermission,
+  } = useVoiceAnalyser(micOn);
+
   const handleClose = () => {
     withViewTransition(() => router.push("/home"));
   };
@@ -98,47 +107,104 @@ export default function SpeakPage() {
     setMicOn((prev) => !prev);
   };
 
+  const handleStartVoice = () => {
+    requestPermission();
+  };
+
   return (
-    <div className="flex min-h-full flex-col bg-white">
-      {/* 음성 비주얼라이저 - 헤더 위치 */}
+    <div
+      className="flex min-h-full flex-col bg-white"
+      style={{
+        paddingBottom: "calc(5rem + var(--safe-area-inset-bottom))",
+      }}
+    >
+      {/* 음성 비주얼라이저 - 헤더 위치, 사용자 음성에 따라 파도형 애니메이션 */}
       <div
-        className="flex items-center justify-center px-4 pb-4 pt-[calc(3rem+1rem+var(--safe-area-inset-top))]"
+        className="flex flex-col items-center px-4 pb-4 pt-[calc(3rem+1rem+var(--safe-area-inset-top))]"
         data-name="VoiceVisualizer"
-        aria-hidden
       >
-        <div className="flex items-center justify-center gap-1">
-          {Array.from({ length: 10 }).map((_, i) => (
+        <div className="flex h-6 items-end justify-center gap-1" aria-hidden>
+          {barHeights.map((h, i) => (
             <div
               key={i}
-              className="h-1 w-0.5 shrink-0 rounded-[10px] bg-primary/50"
+              className="w-0.5 shrink-0 rounded-[10px] bg-primary/50 transition-[height] duration-75 ease-out"
+              style={{ height: h }}
               data-name="VoiceVisualizer/el"
             />
           ))}
         </div>
+        {/* 음성 수신 확인: 권한 허용 시 상태 표시 */}
+        {permissionState === "granted" && (
+          <p className="mt-2 text-center text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
+            음성 수신 중
+            <span className="ml-1.5 font-medium text-ds-brand">
+              {audioLevel}%
+            </span>
+          </p>
+        )}
       </div>
 
       {/* 나머지 공간 */}
       <div className="flex-1" />
 
-      {/* 화면 중앙 원 애니메이션 (뷰포트 기준 fixed) */}
+      {/* 화면 중앙 원 애니메이션: 144→192→144 크기 반복 */}
       <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center">
         <motion.div
-          className="size-[160px] shrink-0 rounded-full bg-primary"
+          className="size-[144px] shrink-0 rounded-full bg-primary"
           initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          animate={{
+            y: 0,
+            opacity: 1,
+            scale: [1, 192 / 144, 1],
+          }}
           transition={{
-            duration: 0.5,
-            ease: [0.25, 0.1, 0.25, 1],
+            y: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
+            opacity: { duration: 0.5 },
+            scale: {
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
           }}
           aria-hidden
         />
       </div>
 
-      {/* 하단 액션 바: Clip | Mic | X */}
+      {/* 모바일: 권한 팝업이 사용자 제스처 직후에만 뜨므로, 탭 시 권한 요청 */}
+      {(permissionState === "idle" || permissionState === "requesting") &&
+        micOn && (
+          <button
+            type="button"
+            onClick={handleStartVoice}
+            disabled={permissionState === "requesting"}
+            className="fixed inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-white/90 px-6 py-8"
+            aria-label="음성 사용 시작"
+          >
+            <span className="text-center text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
+              {permissionState === "requesting"
+                ? "마이크 권한 요청 중..."
+                : "음성 사용을 시작하려면\n화면을 탭하세요"}
+            </span>
+          </button>
+        )}
+      {permissionState === "denied" && (
+        <p className="absolute left-4 right-4 top-1/2 z-10 -translate-y-1/2 text-center text-sm text-ds-tertiary">
+          마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.
+        </p>
+      )}
+      {permissionState === "error" && errorMessage && (
+        <p className="absolute left-4 right-4 top-1/2 z-10 -translate-y-1/2 text-center text-sm text-destructive">
+          {errorMessage}
+        </p>
+      )}
+
+      {/* 하단 액션 바: Clip | Mic | X (모바일 safe area 대응, fixed로 항상 노출) */}
       <div
-        className="flex items-center justify-between px-4 pb-8 pt-4"
+        className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between bg-white px-4 pt-4"
         style={{
-          paddingBottom: "calc(2rem + var(--safe-area-inset-bottom))",
+          paddingBottom: "max(2rem, env(safe-area-inset-bottom))",
+          maxWidth: "var(--app-max-width)",
+          margin: "0 auto",
         }}
       >
         {/* Btn/Clip - 첨부 */}
@@ -150,10 +216,16 @@ export default function SpeakPage() {
           <Paperclip className="size-6" strokeWidth={1.5} />
         </button>
 
-        {/* Btn - 마이크 (on/off 토글) */}
+        {/* Btn - 마이크 (on/off 토글). 아직 권한 요청 전이면 탭 시 권한 요청 후 분석 시작 */}
         <button
           type="button"
-          onClick={handleMicToggle}
+          onClick={() => {
+            if (permissionState === "idle" && micOn) {
+              handleStartVoice();
+              return;
+            }
+            handleMicToggle();
+          }}
           className={cn(
             btnBase,
             micOn ? "text-ds-brand" : "text-ds-tertiary"
