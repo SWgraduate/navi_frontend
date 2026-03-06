@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
+
+const SIGNUP_AGREED_KEY = "signup-agreed";
 
 const TERMS_ITEMS = [
   { id: "service", label: "[필수] 서비스 이용약관 동의", required: true },
@@ -14,17 +16,33 @@ const TERMS_ITEMS = [
   { id: "marketing", label: "[선택] 마케팅 정보 수신 동의", required: false },
 ] as const;
 
+const DEFAULT_AGREED: Record<string, boolean> = {
+  service: false,
+  privacy: false,
+  ai: false,
+  marketing: false,
+};
+
 /** Figma 1192-11134: 회원가입 1/6 - 약관 동의 */
 export default function SignupPage() {
   const router = useRouter();
   useHeaderBackground("white");
 
-  const [agreed, setAgreed] = useState<Record<string, boolean>>({
-    service: false,
-    privacy: false,
-    ai: false,
-    marketing: false,
-  });
+  const [agreed, setAgreed] = useState<Record<string, boolean>>(DEFAULT_AGREED);
+
+  // 약관 상세에서 동의 후 돌아왔을 때 체크 반영
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = sessionStorage.getItem(SIGNUP_AGREED_KEY);
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as Record<string, boolean>;
+      sessionStorage.removeItem(SIGNUP_AGREED_KEY);
+      setAgreed((prev) => ({ ...prev, ...parsed }));
+    } catch {
+      sessionStorage.removeItem(SIGNUP_AGREED_KEY);
+    }
+  }, []);
 
   const agreeAll = useMemo(
     () => TERMS_ITEMS.filter((t) => t.required).every((t) => agreed[t.id]),
@@ -47,17 +65,26 @@ export default function SignupPage() {
     setAgreed((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleGoToTerms = (id: string) => {
+    // 약관 상세에서 돌아올 때 현재 체크 상태 복원용으로 저장
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(SIGNUP_AGREED_KEY, JSON.stringify(agreed));
+    }
+    withViewTransition(() => router.push(`/signup/terms/${id}`));
+  };
+
   const handleAgreeSubmit = () => {
     if (!allRequiredAgreed) return;
     withViewTransition(() => router.push("/signup/email"));
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
+      {/* 스크롤 영역: 동의하기 버튼 바로 위까지 */}
       <div
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 pt-4 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
-          paddingBottom: "calc(112px + var(--safe-area-inset-bottom, 0px) + 8px)",
+          paddingBottom: "calc(6rem + env(safe-area-inset-bottom, 0px))",
         }}
       >
         <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
@@ -72,7 +99,7 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-6 rounded-md overflow-hidden">
+        <div className="mt-6 flex flex-col gap-2 rounded-md overflow-hidden">
           <button
             type="button"
             onClick={handleAgreeAll}
@@ -100,50 +127,65 @@ export default function SignupPage() {
           </button>
 
           {TERMS_ITEMS.map((item, index) => (
-            <button
+            <div
               key={item.id}
-              type="button"
-              onClick={() => handleToggle(item.id)}
               className={cn(
-                "flex items-center gap-3 py-4 pr-4 pl-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:opacity-70",
+                "flex items-center gap-3 py-4 pr-4 pl-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary",
                 index === TERMS_ITEMS.length - 1 && "rounded-b-md"
               )}
             >
-              <span
-                className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-                  agreed[item.id]
-                    ? "border-primary bg-primary"
-                    : "border-[var(--ds-gray-30)] bg-transparent"
-                )}
-                aria-hidden
+              <button
+                type="button"
+                onClick={() => handleToggle(item.id)}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 active:opacity-70 focus:outline-none"
+                style={{
+                  borderColor: agreed[item.id] ? "var(--primary)" : "var(--ds-gray-30)",
+                  backgroundColor: agreed[item.id] ? "var(--primary)" : "transparent",
+                }}
+                aria-label={item.label}
+                aria-pressed={agreed[item.id]}
               >
                 {agreed[item.id] && (
                   <svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden>
                     <path d="M1 5L4.5 8.5L11 1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
-              </span>
-              <span className={cn("min-w-0 flex-1", item.required ? "" : "text-ds-tertiary")}>
-                {item.required ? (
-                  <>
-                    <span className="text-ds-brand">[필수]</span>{" "}
-                    {item.label.replace("[필수] ", "")}
-                  </>
-                ) : (
-                  item.label
-                )}
-              </span>
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center text-ds-tertiary" aria-hidden>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12H19" />
-                  <path d="M12 5L19 12L12 19" />
-                </svg>
-              </span>
-            </button>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleGoToTerms(item.id)}
+                className="min-w-0 flex-1 flex items-center gap-3 text-left active:opacity-70 focus:outline-none"
+              >
+                <span className={cn("min-w-0 flex-1", item.required ? "" : "text-ds-tertiary")}>
+                  {item.required ? (
+                    <>
+                      <span className="text-ds-brand">[필수]</span>{" "}
+                      {item.label.replace("[필수] ", "")}
+                    </>
+                  ) : (
+                    item.label
+                  )}
+                </span>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center text-ds-tertiary" aria-hidden>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12H19" />
+                    <path d="M12 5L19 12L12 19" />
+                  </svg>
+                </span>
+              </button>
+            </div>
           ))}
         </div>
       </div>
+
+      {/* 스크롤 영역이 버튼 바로 위까지이도록 하단 공간 확보 */}
+      <div
+        className="shrink-0"
+        style={{
+          height: "calc(4rem + 8px + max(8px, env(safe-area-inset-bottom, 0px)))",
+        }}
+        aria-hidden
+      />
 
       <div
         className="fixed left-0 right-0 z-10 bg-white px-4 pt-8 pb-8"

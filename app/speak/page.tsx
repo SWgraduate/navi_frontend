@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Paperclip, X } from "lucide-react";
+import { X } from "lucide-react";
 import { withViewTransition } from "@/lib/view-transition";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { ScrollFade } from "@/components/ui/scroll-fade";
+import { AttachmentMenu } from "@/components/ui/attachment-menu";
+import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
 
 /** mic-on.svg 기반 - currentColor로 brand 색상 적용 가능 */
@@ -86,18 +90,45 @@ function MicOffIcon({ className }: { className?: string }) {
 const btnBase =
   "flex size-14 shrink-0 items-center justify-center rounded-[28px] bg-(--ds-gray-5) hover:bg-(--ds-gray-10) active:opacity-80";
 
+/** Figma 1460-5250: 음성 인식 텍스트 더미 (STT 연동 전), 3줄만 노출·이상은 하단 페이드 */
+const DUMMY_SPEECH_LINES = [
+  { text: "입력한 값이 보이는 곳", color: "text-ds-tertiary" },
+  { text: "입력한 값이 보이는 곳", color: "text-ds-secondary" },
+  { text: "새로 입력 될 수록 진함", color: "text-ds-primary" },
+] as const;
+
 /** Figma 1433-13978: 졸업 캡스톤 - 음성 말하기 화면 */
 export default function SpeakPage() {
   const router = useRouter();
   const [micOn, setMicOn] = useState(true);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const [attachments, setAttachments] = useState<
+    { id: string; file: File; previewUrl?: string }[]
+  >([]);
+  const clipButtonRef = useRef<HTMLButtonElement>(null);
 
-  const {
-    barHeights,
-    audioLevel,
-    permissionState,
-    errorMessage,
-    requestPermission,
-  } = useVoiceAnalyser(micOn);
+  const { wavePulse, waveHeights, permissionState, errorMessage } =
+    useVoiceAnalyser(micOn);
+
+  const handleFileSelect = (files: File[]) => {
+    setAttachments((prev) => [
+      ...prev,
+      ...files.map((file) => {
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const previewUrl =
+          file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined;
+        return { id, file, previewUrl };
+      }),
+    ]);
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => {
+      const item = prev.find((a) => a.id === id);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((a) => a.id !== id);
+    });
+  };
 
   const handleClose = () => {
     withViewTransition(() => router.push("/home"));
@@ -107,47 +138,78 @@ export default function SpeakPage() {
     setMicOn((prev) => !prev);
   };
 
-  const handleStartVoice = () => {
-    requestPermission();
-  };
-
   return (
     <div
-      className="flex min-h-full flex-col bg-white"
+      className="relative flex min-h-full flex-col bg-white"
       style={{
         paddingBottom: "calc(5rem + var(--safe-area-inset-bottom))",
       }}
     >
-      {/* 음성 비주얼라이저 - 헤더 위치, 사용자 음성에 따라 파도형 애니메이션 */}
+      {/* 음성 비주얼라이저 - 음성 감지 시 Figma 파도가 나타났다 사라지는 1회 애니메이션 */}
       <div
         className="flex flex-col items-center px-4 pb-4 pt-[calc(3rem+1rem+var(--safe-area-inset-top))]"
         data-name="VoiceVisualizer"
       >
-        <div className="flex h-6 items-end justify-center gap-1" aria-hidden>
-          {barHeights.map((h, i) => (
-            <div
-              key={i}
-              className="w-0.5 shrink-0 rounded-[10px] bg-primary/50 transition-[height] duration-75 ease-out"
+        <div className="flex h-8 items-center justify-center gap-1" aria-hidden>
+          {waveHeights.map((h, i) => (
+            <motion.div
+              key={
+                micOn && wavePulse > 0 ? `pulse-${wavePulse}-${i}` : `idle-${i}`
+              }
+              className="w-0.5 shrink-0 rounded-[10px] bg-primary/50 origin-center"
+              initial={{ scaleY: 0.15, opacity: 1 }}
+              animate={
+                micOn && wavePulse > 0
+                  ? {
+                      scaleY: [0.15, 1, 1, 0.15],
+                      opacity: [1, 1, 1, 1],
+                    }
+                  : { scaleY: 0.15, opacity: 1 }
+              }
+              transition={{
+                duration: micOn ? 0.85 : 0.2,
+                times: micOn ? [0, 0.22, 0.55, 0.85] : undefined,
+                ease: "easeOut",
+              }}
               style={{ height: h }}
               data-name="VoiceVisualizer/el"
             />
           ))}
         </div>
-        {/* 음성 수신 확인: 권한 허용 시 상태 표시 */}
-        {permissionState === "granted" && (
-          <p className="mt-2 text-center text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
-            음성 수신 중
-            <span className="ml-1.5 font-medium text-ds-brand">
-              {audioLevel}%
-            </span>
-          </p>
-        )}
       </div>
 
-      {/* 나머지 공간 */}
-      <div className="flex-1" />
+      {/* 음성 인식 텍스트: 비주얼라이저·원 중간(절대 위치), 3줄만 노출 */}
+      <div
+        className="absolute left-0 right-0 z-1 flex justify-center px-4"
+        style={{
+          top: "calc(3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem + (50vh - (3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem)) * 0.2)",
+          transform: "translateY(-50%)",
+        }}
+      >
+        <ScrollFade
+          axis="y"
+          fadeSize={24}
+          fadeColor="white"
+          showBottom={false}
+          className="relative flex max-h-18 w-full max-w-(--app-max-width) flex-col items-center justify-center overflow-hidden"
+        >
+          <div className="flex flex-col items-center justify-center gap-0">
+            {DUMMY_SPEECH_LINES.map((line, i) => (
+              <p
+                key={i}
+                className={cn(
+                  "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
+                  line.color
+                )}
+              >
+                {line.text}
+              </p>
+            ))}
+          </div>
+        </ScrollFade>
+      </div>
 
-      {/* 화면 중앙 원 애니메이션: 144→192→144 크기 반복 */}
+      {/* 화면 중앙 원: mic On일 때만 144→192→144 크기 반복, Off일 때 정지 */}
       <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center">
         <motion.div
           className="size-[144px] shrink-0 rounded-full bg-primary"
@@ -155,38 +217,20 @@ export default function SpeakPage() {
           animate={{
             y: 0,
             opacity: 1,
-            scale: [1, 192 / 144, 1],
+            scale: micOn ? [1, 192 / 144, 1] : 1,
           }}
           transition={{
             y: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
             opacity: { duration: 0.5 },
-            scale: {
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            },
+            scale: micOn
+              ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
+              : { duration: 0.3 },
           }}
           aria-hidden
         />
       </div>
 
-      {/* 모바일: 권한 팝업이 사용자 제스처 직후에만 뜨므로, 탭 시 권한 요청 */}
-      {(permissionState === "idle" || permissionState === "requesting") &&
-        micOn && (
-          <button
-            type="button"
-            onClick={handleStartVoice}
-            disabled={permissionState === "requesting"}
-            className="fixed inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-white/90 px-6 py-8"
-            aria-label="음성 사용 시작"
-          >
-            <span className="text-center text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
-              {permissionState === "requesting"
-                ? "마이크 권한 요청 중..."
-                : "음성 사용을 시작하려면\n화면을 탭하세요"}
-            </span>
-          </button>
-        )}
+      {/* 마이크 권한 에러/거부 시 안내 (필요 시 노출) */}
       {permissionState === "denied" && (
         <p className="absolute left-4 right-4 top-1/2 z-10 -translate-y-1/2 text-center text-sm text-ds-tertiary">
           마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.
@@ -198,6 +242,33 @@ export default function SpeakPage() {
         </p>
       )}
 
+      {/* Figma 1650-15068: 첨부 카드 영역 - 파일/이미지 카드 가로 스크롤 */}
+      {attachments.length > 0 && (
+        <div
+          className="fixed bottom-[calc(8rem+var(--safe-area-inset-bottom))] left-1/2 z-10 flex -translate-x-1/2 gap-1 overflow-x-auto px-4"
+          style={{
+            maxWidth: "var(--app-max-width)",
+            width: "100%",
+          }}
+        >
+          {attachments.map(({ id, file, previewUrl }) =>
+            previewUrl ? (
+              <AttachmentImageCard
+                key={id}
+                previewUrl={previewUrl}
+                onRemove={() => removeAttachment(id)}
+              />
+            ) : (
+              <AttachmentFileCard
+                key={id}
+                file={file}
+                onRemove={() => removeAttachment(id)}
+              />
+            )
+          )}
+        </div>
+      )}
+
       {/* 하단 액션 바: Clip | Mic | X (모바일 safe area 대응, fixed로 항상 노출) */}
       <div
         className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between bg-white px-4 pt-4"
@@ -207,25 +278,31 @@ export default function SpeakPage() {
           margin: "0 auto",
         }}
       >
-        {/* Btn/Clip - 첨부 */}
+        {/* Btn/Clip - 첨부 (메뉴: 파일/앨범/카메라) */}
         <button
+          ref={clipButtonRef}
           type="button"
+          onClick={() => setAttachMenuOpen((o) => !o)}
           className={cn(btnBase, "text-ds-tertiary")}
           aria-label="첨부"
+          aria-expanded={attachMenuOpen}
+          aria-haspopup="menu"
         >
-          <Paperclip className="size-6" strokeWidth={1.5} />
+          <Image src="/icons/clip.svg" alt="" width={24} height={24} className="size-6 shrink-0" />
         </button>
+        <AttachmentMenu
+          anchorRef={clipButtonRef}
+          open={attachMenuOpen}
+          onClose={() => setAttachMenuOpen(false)}
+          onFileSelect={handleFileSelect}
+          onPhotoSelect={handleFileSelect}
+          onCameraCapture={handleFileSelect}
+        />
 
-        {/* Btn - 마이크 (on/off 토글). 아직 권한 요청 전이면 탭 시 권한 요청 후 분석 시작 */}
+        {/* Btn - 마이크 (on/off 토글) */}
         <button
           type="button"
-          onClick={() => {
-            if (permissionState === "idle" && micOn) {
-              handleStartVoice();
-              return;
-            }
-            handleMicToggle();
-          }}
+          onClick={handleMicToggle}
           className={cn(
             btnBase,
             micOn ? "text-ds-brand" : "text-ds-tertiary"

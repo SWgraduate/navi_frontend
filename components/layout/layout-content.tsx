@@ -22,6 +22,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/graduation/upload/processing": "졸업사정조회 스캔",
   "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
+  "/my/terms": "약관 및 개인정보 처리 동의",
   "/my/language": "언어설정",
   "/my/personal": "개인정보 설정",
   "/my/personal/name": "이름",
@@ -94,11 +95,23 @@ function AppHeaderWithSearchParams({
 }) {
   const searchParams = useSearchParams();
   const headerTitle =
-    pathname === "/signup" || pathname.startsWith("/signup/")
-      ? "회원가입"
-      : pathname === "/graduation/upload/processing" && searchParams.get("edit")
-        ? "수정"
-        : HEADER_TITLE[pathname] ?? "NAVI";
+    pathname === "/signup/terms/service"
+      ? "서비스 이용약관"
+      : pathname === "/signup/terms/privacy-policy"
+        ? "NAVI 개인정보 처리방침"
+        : pathname === "/signup/terms/privacy"
+          ? "개인정보 수집 및 이용"
+          : pathname === "/signup/terms/ai"
+          ? "AI 서비스 결과 면책 동의"
+          : pathname === "/signup/terms/marketing"
+            ? "마케팅 정보 수신"
+            : pathname.startsWith("/signup/terms")
+              ? "약관 동의"
+              : pathname === "/signup" || pathname.startsWith("/signup/")
+                ? "회원가입"
+                : pathname === "/graduation/upload/processing" && searchParams.get("edit")
+                  ? "수정"
+                  : HEADER_TITLE[pathname] ?? "NAVI";
 
   const isMySection = pathname === "/my" || pathname.startsWith("/my/");
 
@@ -169,13 +182,20 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const isGraduationRootPage = pathname === "/graduation";
+  const isSignupTermsPage = pathname.startsWith("/signup/terms");
+  const isSignupTermsAgreePage = pathname === "/signup";
   const showHeader =
     !isSplash &&
     pathname !== "/my" &&
     pathname !== "/speak" &&
     !isGraduationRootPage;
   const isWhiteBackgroundPage =
-    isSplash || isMyPage || isGraduationResultPage || pathname === "/speak";
+    isSplash ||
+    isMyPage ||
+    isGraduationResultPage ||
+    pathname === "/speak" ||
+    isSignupTermsPage ||
+    isSignupTermsAgreePage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
@@ -331,29 +351,41 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!showHeader) return;
 
-    const headerEl = headerRef.current;
-    if (!headerEl) return;
+    const wrapperEl = headerRef.current;
+    if (!wrapperEl) return;
 
     const updateHeaderHeight = () => {
-      setHeaderHeight(headerEl.offsetHeight);
+      // fixed 헤더는 wrapper에서 공간을 차지하지 않으므로, 실제 header 요소를 측정
+      const headerEl = wrapperEl.querySelector("header") as HTMLElement | null;
+      const height = headerEl?.offsetHeight ?? 0;
+      setHeaderHeight(height);
     };
 
     updateHeaderHeight();
+    // pathname 변경 후 DOM 업데이트 대기 (클라이언트 네비게이션 시 헤더 겹침 방지)
+    const retryId = setTimeout(updateHeaderHeight, 0);
+    const retryId2 = setTimeout(updateHeaderHeight, 100);
     window.addEventListener("resize", updateHeaderHeight);
 
     if (typeof ResizeObserver !== "undefined") {
       const resizeObserver = new ResizeObserver(updateHeaderHeight);
-      resizeObserver.observe(headerEl);
+      resizeObserver.observe(wrapperEl);
+      const headerEl = wrapperEl.querySelector("header");
+      if (headerEl) resizeObserver.observe(headerEl);
       return () => {
+        clearTimeout(retryId);
+        clearTimeout(retryId2);
         window.removeEventListener("resize", updateHeaderHeight);
         resizeObserver.disconnect();
       };
     }
 
     return () => {
+      clearTimeout(retryId);
+      clearTimeout(retryId2);
       window.removeEventListener("resize", updateHeaderHeight);
     };
-  }, [showHeader]);
+  }, [showHeader, pathname]);
 
   useEffect(() => {
     // 하단바가 숨겨지면 높이를 0으로 설정 (비동기로 처리해 set-state-in-effect 규칙 준수)
@@ -438,7 +470,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     }
 
     if (showBottomBar) return `${bottomBarHeight}px`;
-    return "0px";
+    return "var(--safe-area-inset-bottom)";
   }, [bottomBarHeight, chatInputHeight, keyboardActive, showBottomBar, showChatInput, isGraduationRootPage]);
 
   if (isSplash) {
@@ -476,7 +508,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         onScroll={onScroll}
         tabIndex={-1}
-        className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden focus:outline-none${isGraduationRootPage ? " flex items-center justify-center" : ""}`}
+        className={`min-h-0 flex-1 overflow-x-hidden focus:outline-none${isGraduationRootPage ? " flex items-center justify-center" : ""}${isSignupTermsPage || isSignupTermsAgreePage ? " overflow-y-hidden" : " overflow-y-auto"}`}
         suppressHydrationWarning
         style={{
           height: mainHeight != null ? `${mainHeight}px` : undefined,
@@ -484,9 +516,9 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           paddingTop: resolvedPaddingTop,
           paddingBottom: resolvedPaddingBottom,
           transition: "height 220ms ease, max-height 220ms ease, padding-bottom 220ms ease",
-          touchAction: isGraduationRootPage ? "none" : "pan-y", // 졸업관리 루트 페이지는 스크롤 비활성화
-          WebkitOverflowScrolling: isGraduationRootPage ? "auto" : "touch", // iOS 부드러운 스크롤
-          overflowY: isGraduationRootPage ? "hidden" : "scroll", // 졸업관리 루트 페이지는 스크롤 비활성화
+          touchAction: isGraduationRootPage || isSignupTermsPage || isSignupTermsAgreePage ? "none" : "pan-y",
+          WebkitOverflowScrolling: isGraduationRootPage || isSignupTermsPage || isSignupTermsAgreePage ? "auto" : "touch",
+          overflowY: isGraduationRootPage || isSignupTermsPage || isSignupTermsAgreePage ? "hidden" : "scroll",
           overflowX: "hidden",
           position: "relative", // 스크롤 컨테이너로 명확히 지정
           background: "var(--header-bg, var(--background))", // 페이지에서 설정한 헤더 배경색을 main도 따라감
