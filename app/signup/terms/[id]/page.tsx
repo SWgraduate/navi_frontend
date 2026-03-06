@@ -1,9 +1,10 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { withViewTransition } from "@/lib/view-transition";
 import { AI_TERMS } from "../content/ai";
 import { MARKETING_TERMS } from "../content/marketing";
@@ -52,6 +53,13 @@ export default function SignupTermsPage() {
   const isAi = id === "ai";
   const isMarketing = id === "marketing";
   const showAgreeButton = !fromMy && !isPrivacyPolicy;
+  const showMarketingRevokeButton = fromMy && isMarketing;
+  const [revokeModalOpen, setRevokeModalOpen] = useState(false);
+
+  const handleRevokeConfirm = () => {
+    setRevokeModalOpen(false);
+    withViewTransition(() => router.back());
+  };
 
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white">
@@ -60,7 +68,10 @@ export default function SignupTermsPage() {
         className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
           paddingTop: "1rem",
-          paddingBottom: fromMy || isPrivacyPolicy ? "calc(3rem + env(safe-area-inset-bottom, 0px))" : undefined,
+          paddingBottom:
+            fromMy || isPrivacyPolicy || showMarketingRevokeButton
+              ? "calc(3rem + env(safe-area-inset-bottom, 0px))"
+              : undefined,
         }}
       >
         {isService ? (
@@ -216,7 +227,7 @@ export default function SignupTermsPage() {
         )}
       </div>
 
-      {showAgreeButton && (
+      {(showAgreeButton || showMarketingRevokeButton) && (
         <>
           {/* 버튼 + 하단 여백 (스크롤 밖 고정) */}
           <div
@@ -236,18 +247,39 @@ export default function SignupTermsPage() {
               margin: "0 auto",
             }}
           >
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white"
-              onClick={handleBack}
-            >
-              동의하기
-            </Button>
+            {showMarketingRevokeButton ? (
+              <Button
+                type="button"
+                size="lg"
+                className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb bg-(--ds-bg-disabled) text-ds-disabled cursor-pointer hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)"
+                onClick={() => setRevokeModalOpen(true)}
+              >
+                동의 철회하기
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white"
+                onClick={handleBack}
+              >
+                동의하기
+              </Button>
+            )}
           </div>
         </>
       )}
+
+      <Modal
+        open={revokeModalOpen}
+        onOpenChange={setRevokeModalOpen}
+        title="마케팅 정보 수신을 철회할까요?"
+        cancelLabel="취소"
+        confirmLabel="철회"
+        onConfirm={handleRevokeConfirm}
+        confirmVariant="primary"
+      />
     </div>
   );
 }
