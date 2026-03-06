@@ -250,16 +250,16 @@ export default function SignupTermsPage() {
           <div
             className="shrink-0 bg-white"
             style={{
-              height: "calc(3.5rem + 1rem + 2rem + max(1rem, env(safe-area-inset-bottom, 0px)))",
+              height: "calc(4rem + 8px + max(8px, env(safe-area-inset-bottom, 0px)))",
             }}
             aria-hidden
           />
           {/* 하단 고정 버튼 */}
           <div
-            className="fixed left-0 right-0 z-10 bg-white px-4 pt-4"
+            className="fixed left-0 right-0 z-10 bg-white px-4 pt-8 pb-8"
             style={{
-              bottom: "env(safe-area-inset-bottom, 0px)",
-              paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
+              bottom: "calc(32px + var(--safe-area-inset-bottom, 0px))",
+              paddingBottom: "8px",
               maxWidth: "var(--app-max-width)",
               margin: "0 auto",
             }}
@@ -268,7 +268,7 @@ export default function SignupTermsPage() {
               <Button
                 type="button"
                 size="lg"
-                className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb bg-(--ds-bg-disabled) text-ds-disabled cursor-pointer hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)"
+                className="h-auto w-full rounded-sm py-4 text-ds-body-16-sb leading-ds-body-16-sb bg-(--ds-bg-disabled) text-ds-disabled cursor-pointer hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)"
                 onClick={() => setRevokeModalOpen(true)}
               >
                 {t("signup.termsDetail.revokeButton")}
@@ -278,7 +278,7 @@ export default function SignupTermsPage() {
                 type="button"
                 variant="primary"
                 size="lg"
-                className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white"
+                className="h-auto w-full rounded-sm py-4 text-ds-body-16-sb leading-ds-body-16-sb text-white"
                 onClick={handleBack}
               >
                 {t("signup.termsDetail.agree")}

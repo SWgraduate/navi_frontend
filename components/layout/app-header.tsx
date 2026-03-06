@@ -9,6 +9,8 @@ export interface AppHeaderProps {
   title?: string;
   /** [좌] 뒤로가기 노출 */
   showBack?: boolean;
+  /** [좌] 커스텀 뒤로가기 클릭 핸들러 */
+  onBack?: () => void;
   /** [중] 타이틀 영역 노출 */
   showTitle?: boolean;
   /** [우] 히스토리 버튼 노출 */
@@ -31,6 +33,7 @@ export interface AppHeaderProps {
 function AppHeader({
   title = "",
   showBack = true,
+  onBack,
   showTitle = true,
   showHistory = true,
   showAdd = true,
@@ -42,7 +45,7 @@ function AppHeader({
   onAdd,
 }: AppHeaderProps) {
   const router = useRouter();
-  const handleBack = () => withViewTransition(() => router.back());
+  const handleBack = onBack ?? (() => withViewTransition(() => router.back()));
 
   return (
     <Header
