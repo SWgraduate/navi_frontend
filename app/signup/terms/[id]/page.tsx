@@ -1,9 +1,11 @@
 "use client";
 
+import { Fragment } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { withViewTransition } from "@/lib/view-transition";
+import { PRIVACY_TERMS } from "../content/privacy";
 import { SERVICE_TERMS_SECTIONS } from "../content/service";
 
 const TERMS_META: Record<string, { title: string }> = {
@@ -39,6 +41,7 @@ export default function SignupTermsPage() {
   };
 
   const isService = id === "service";
+  const isPrivacy = id === "privacy";
 
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white">
@@ -62,6 +65,57 @@ export default function SignupTermsPage() {
                 </p>
               </section>
             ))}
+          </div>
+        ) : isPrivacy ? (
+          <div className="flex flex-col gap-4 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
+            <p>{PRIVACY_TERMS.intro}</p>
+            <div
+              className="grid w-full overflow-hidden rounded-md border border-border"
+              style={{
+                gridTemplateColumns: "1fr 135px 110px",
+              }}
+            >
+              {/* 헤더 행 */}
+              <div className="flex items-center border-b border-r border-border bg-muted px-2 py-2">
+                <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
+                  {PRIVACY_TERMS.table.headers[0]}
+                </p>
+              </div>
+              <div className="flex items-center border-b border-r border-border bg-muted px-2 py-2">
+                <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
+                  {PRIVACY_TERMS.table.headers[1]}
+                </p>
+              </div>
+              <div className="flex items-center border-b border-border bg-muted px-2 py-2">
+                <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
+                  {PRIVACY_TERMS.table.headers[2]}
+                </p>
+              </div>
+              {/* 데이터 행 - 가로 라인 맞춤, 보유기간 하나로 통일 */}
+              {PRIVACY_TERMS.table.rows.map((row, i) => (
+                <Fragment key={i}>
+                  <div
+                    className={`flex min-h-10 items-center border-r border-border px-2 py-2 ${i < PRIVACY_TERMS.table.rows.length - 1 ? "border-b" : ""}`}
+                  >
+                    <p className="whitespace-pre-wrap">{row.purpose}</p>
+                  </div>
+                  <div
+                    className={`flex min-h-10 items-center border-r border-border px-2 py-2 ${i < PRIVACY_TERMS.table.rows.length - 1 ? "border-b" : ""}`}
+                  >
+                    <p>{row.items}</p>
+                  </div>
+                  {i === 0 && (
+                    <div
+                      className="flex min-h-0 items-center justify-center border-b border-border px-2 py-2"
+                      style={{ gridRow: "span 3" }}
+                    >
+                      <p>{PRIVACY_TERMS.table.retention}</p>
+                    </div>
+                  )}
+                </Fragment>
+              ))}
+            </div>
+            <p>{PRIVACY_TERMS.disclaimer}</p>
           </div>
         ) : (
           <>
