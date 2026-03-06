@@ -12,6 +12,10 @@ interface ScrollFadeProps extends React.HTMLAttributes<HTMLDivElement> {
   fadeSize?: number;
   /** 스크롤 영역 배경색(페이드와 맞출 색). 기본 design system surface */
   fadeColor?: string;
+  /** 상단 페이드 표시 여부 (axis 기준 기본값) */
+  showTop?: boolean;
+  /** 하단 페이드 표시 여부 (axis 기준 기본값) */
+  showBottom?: boolean;
   children: React.ReactNode;
 }
 
@@ -26,6 +30,8 @@ const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(
       axis = "both",
       fadeSize = 24,
       fadeColor = "var(--ds-gray-5)",
+      showTop,
+      showBottom,
       children,
       style,
       ...props
@@ -46,8 +52,8 @@ const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(
 
     const showLeft = axis === "x" || axis === "both";
     const showRight = axis === "x" || axis === "both";
-    const showTop = axis === "y" || axis === "both";
-    const showBottom = axis === "y" || axis === "both";
+    const showTopEdge = showTop ?? (axis === "y" || axis === "both");
+    const showBottomEdge = showBottom ?? (axis === "y" || axis === "both");
 
     return (
       <div
@@ -78,7 +84,7 @@ const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(
             aria-hidden
           />
         )}
-        {showTop && (
+        {showTopEdge && (
           <div
             className="pointer-events-none absolute left-0 right-0 top-0 z-1"
             style={{
@@ -88,7 +94,7 @@ const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(
             aria-hidden
           />
         )}
-        {showBottom && (
+        {showBottomEdge && (
           <div
             className="pointer-events-none absolute bottom-0 left-0 right-0 z-1"
             style={{
