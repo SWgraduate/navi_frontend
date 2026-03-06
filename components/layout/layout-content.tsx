@@ -94,8 +94,10 @@ function AppHeaderWithSearchParams({
 }) {
   const searchParams = useSearchParams();
   const headerTitle =
-    pathname.startsWith("/signup/terms")
-      ? "약관 동의"
+    pathname === "/signup/terms/privacy"
+      ? "개인정보 수집 및 이용"
+      : pathname.startsWith("/signup/terms")
+        ? "약관 동의"
       : pathname === "/signup" || pathname.startsWith("/signup/")
         ? "회원가입"
         : pathname === "/graduation/upload/processing" && searchParams.get("edit")
@@ -172,6 +174,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isSignupPage = pathname === "/signup" || pathname.startsWith("/signup/");
   const isGraduationRootPage = pathname === "/graduation";
   const isSignupTermsPage = pathname.startsWith("/signup/terms");
+  const isSignupTermsAgreePage = pathname === "/signup";
   const showHeader =
     !isSplash &&
     pathname !== "/my" &&
@@ -479,7 +482,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         onScroll={onScroll}
         tabIndex={-1}
-        className={`min-h-0 flex-1 overflow-x-hidden focus:outline-none${isGraduationRootPage ? " flex items-center justify-center" : ""}${isSignupTermsPage ? " overflow-y-hidden" : " overflow-y-auto"}`}
+        className={`min-h-0 flex-1 overflow-x-hidden focus:outline-none${isGraduationRootPage ? " flex items-center justify-center" : ""}${isSignupTermsPage || isSignupTermsAgreePage ? " overflow-y-hidden" : " overflow-y-auto"}`}
         suppressHydrationWarning
         style={{
           height: mainHeight != null ? `${mainHeight}px` : undefined,
@@ -487,9 +490,9 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
           paddingTop: resolvedPaddingTop,
           paddingBottom: resolvedPaddingBottom,
           transition: "height 220ms ease, max-height 220ms ease, padding-bottom 220ms ease",
-          touchAction: isGraduationRootPage || isSignupTermsPage ? "none" : "pan-y",
-          WebkitOverflowScrolling: isGraduationRootPage || isSignupTermsPage ? "auto" : "touch",
-          overflowY: isGraduationRootPage || isSignupTermsPage ? "hidden" : "scroll",
+          touchAction: isGraduationRootPage || isSignupTermsPage || isSignupTermsAgreePage ? "none" : "pan-y",
+          WebkitOverflowScrolling: isGraduationRootPage || isSignupTermsPage || isSignupTermsAgreePage ? "auto" : "touch",
+          overflowY: isGraduationRootPage || isSignupTermsPage || isSignupTermsAgreePage ? "hidden" : "scroll",
           overflowX: "hidden",
           position: "relative", // 스크롤 컨테이너로 명확히 지정
           background: "var(--header-bg, var(--background))", // 페이지에서 설정한 헤더 배경색을 main도 따라감

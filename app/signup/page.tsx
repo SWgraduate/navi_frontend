@@ -79,11 +79,12 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
+      {/* 스크롤 영역: 동의하기 버튼 바로 위까지 */}
       <div
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 pt-4 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
-          paddingBottom: "calc(112px + var(--safe-area-inset-bottom, 0px) + 8px)",
+          paddingBottom: "calc(6rem + env(safe-area-inset-bottom, 0px))",
         }}
       >
         <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
@@ -98,7 +99,7 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-6 rounded-md overflow-hidden">
+        <div className="mt-6 flex flex-col gap-2 rounded-md overflow-hidden">
           <button
             type="button"
             onClick={handleAgreeAll}
@@ -176,6 +177,15 @@ export default function SignupPage() {
           ))}
         </div>
       </div>
+
+      {/* 스크롤 영역이 버튼 바로 위까지이도록 하단 공간 확보 */}
+      <div
+        className="shrink-0"
+        style={{
+          height: "calc(4rem + 8px + max(8px, env(safe-area-inset-bottom, 0px)))",
+        }}
+        aria-hidden
+      />
 
       <div
         className="fixed left-0 right-0 z-10 bg-white px-4 pt-8 pb-8"
