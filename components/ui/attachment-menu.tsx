@@ -12,12 +12,12 @@ export interface AttachmentMenuProps {
   open: boolean;
   /** 닫기 콜백 */
   onClose: () => void;
-  /** 파일 선택 클릭 */
-  onFile?: () => void;
-  /** 사진 선택 클릭 */
-  onPhoto?: () => void;
-  /** 카메라 클릭 */
-  onCamera?: () => void;
+  /** 파일 선택 완료 (선택된 파일들) */
+  onFileSelect?: (files: File[]) => void;
+  /** 사진(앨범) 선택 완료 */
+  onPhotoSelect?: (files: File[]) => void;
+  /** 카메라 촬영 완료 */
+  onCameraCapture?: (files: File[]) => void;
   className?: string;
 }
 
@@ -32,12 +32,60 @@ export function AttachmentMenu({
   anchorRef,
   open,
   onClose,
-  onFile,
-  onPhoto,
-  onCamera,
+  onFileSelect,
+  onPhotoSelect,
+  onCameraCapture,
   className,
 }: AttachmentMenuProps) {
   const [position, setPosition] = React.useState({ top: 0, left: 0 });
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const photoInputRef = React.useRef<HTMLInputElement>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileInputChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      onFileSelect?.(files);
+      e.target.value = "";
+      onClose();
+    },
+    [onFileSelect, onClose]
+  );
+
+  const handlePhotoInputChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      onPhotoSelect?.(files);
+      e.target.value = "";
+      onClose();
+    },
+    [onPhotoSelect, onClose]
+  );
+
+  const handleCameraInputChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      onCameraCapture?.(files);
+      e.target.value = "";
+      onClose();
+    },
+    [onCameraCapture, onClose]
+  );
+
+  const triggerFile = React.useCallback(() => {
+    onClose();
+    requestAnimationFrame(() => fileInputRef.current?.click());
+  }, [onClose]);
+
+  const triggerPhoto = React.useCallback(() => {
+    onClose();
+    requestAnimationFrame(() => photoInputRef.current?.click());
+  }, [onClose]);
+
+  const triggerCamera = React.useCallback(() => {
+    onClose();
+    requestAnimationFrame(() => cameraInputRef.current?.click());
+  }, [onClose]);
 
   React.useEffect(() => {
     if (!open || !anchorRef.current) return;
@@ -70,14 +118,7 @@ export function AttachmentMenu({
     };
   }, [open, anchorRef]);
 
-  const handleAction = (fn: (() => void) | undefined) => {
-    fn?.();
-    onClose();
-  };
-
-  if (!open || typeof document === "undefined") return null;
-
-  const content = (
+  const content = !open || typeof document === "undefined" ? null : (
     <>
       <div
         className="fixed inset-0 z-40"
@@ -105,7 +146,7 @@ export function AttachmentMenu({
           type="button"
           role="menuitem"
           className={ITEM_CLASS}
-          onClick={() => handleAction(onFile)}
+          onClick={triggerFile}
         >
           <Image
             src="/icons/file.svg"
@@ -120,7 +161,7 @@ export function AttachmentMenu({
           type="button"
           role="menuitem"
           className={ITEM_CLASS}
-          onClick={() => handleAction(onPhoto)}
+          onClick={triggerPhoto}
         >
           <Image
             src="/icons/image.svg"
@@ -135,7 +176,7 @@ export function AttachmentMenu({
           type="button"
           role="menuitem"
           className={ITEM_CLASS}
-          onClick={() => handleAction(onCamera)}
+          onClick={triggerCamera}
         >
           <Image
             src="/icons/camera.svg"
@@ -150,5 +191,36 @@ export function AttachmentMenu({
     </>
   );
 
-  return createPortal(content, document.body);
+  return (
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="*/*"
+        multiple
+        className="sr-only"
+        aria-hidden
+        onChange={handleFileInputChange}
+      />
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="sr-only"
+        aria-hidden
+        onChange={handlePhotoInputChange}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        aria-hidden
+        onChange={handleCameraInputChange}
+      />
+      {content != null && createPortal(content, document.body)}
+    </>
+  );
 }

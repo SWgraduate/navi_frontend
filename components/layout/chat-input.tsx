@@ -11,9 +11,12 @@ export interface ChatInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> {
   className?: string;
   onAttachClick?: () => void;
-  onFileAttach?: () => void;
-  onPhotoAttach?: () => void;
-  onCameraAttach?: () => void;
+  /** 파일 선택 완료 (파일 피커) */
+  onFileSelect?: (files: File[]) => void;
+  /** 사진 선택 완료 (앨범) */
+  onPhotoSelect?: (files: File[]) => void;
+  /** 카메라 촬영 완료 */
+  onCameraCapture?: (files: File[]) => void;
   onSpeakClick?: () => void;
   onHeightChange?: (height: number) => void;
   isKeyboardOpen?: boolean;
@@ -25,9 +28,9 @@ export interface ChatInputProps
 function ChatInput({
   className,
   onAttachClick,
-  onFileAttach,
-  onPhotoAttach,
-  onCameraAttach,
+  onFileSelect,
+  onPhotoSelect,
+  onCameraCapture,
   onSpeakClick,
   onHeightChange,
   isKeyboardOpen = false,
@@ -84,6 +87,42 @@ function ChatInput({
     }
   };
 
+  const handleFileSelect = React.useCallback(
+    (files: File[]) => {
+      if (onFileSelect) {
+        onFileSelect(files);
+      } else {
+        const names = files.map((f) => f.name).join(", ");
+        setInputValue((prev) => (prev ? `${prev} [${names}]` : `[${names}]`));
+      }
+    },
+    [onFileSelect]
+  );
+
+  const handlePhotoSelect = React.useCallback(
+    (files: File[]) => {
+      if (onPhotoSelect) {
+        onPhotoSelect(files);
+      } else {
+        const names = files.map((f) => f.name).join(", ");
+        setInputValue((prev) => (prev ? `${prev} [${names}]` : `[${names}]`));
+      }
+    },
+    [onPhotoSelect]
+  );
+
+  const handleCameraCapture = React.useCallback(
+    (files: File[]) => {
+      if (onCameraCapture) {
+        onCameraCapture(files);
+      } else {
+        const names = files.map((f) => f.name).join(", ");
+        setInputValue((prev) => (prev ? `${prev} [${names}]` : `[${names}]`));
+      }
+    },
+    [onCameraCapture]
+  );
+
   return (
     <div
       ref={containerRef}
@@ -120,20 +159,15 @@ function ChatInput({
             aria-expanded={attachMenuOpen}
             aria-haspopup="menu"
           >
-            <Image
-              src="/icons/clip.svg"
-              alt=""
-              width={24}
-              height={24}
-            />
+            <Image src="/icons/clip.svg" alt="" width={24} height={24} />
           </button>
           <AttachmentMenu
             anchorRef={clipButtonRef}
             open={attachMenuOpen}
             onClose={() => setAttachMenuOpen(false)}
-            onFile={onFileAttach ?? onAttachClick}
-            onPhoto={onPhotoAttach ?? onAttachClick}
-            onCamera={onCameraAttach ?? onAttachClick}
+            onFileSelect={handleFileSelect}
+            onPhotoSelect={handlePhotoSelect}
+            onCameraCapture={handleCameraCapture}
           />
           <VoiceModeButton onClick={onSpeakClick} className="shrink-0" />
         </div>

@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { withViewTransition } from "@/lib/view-transition";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { ScrollFade } from "@/components/ui/scroll-fade";
 import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
@@ -101,10 +101,15 @@ export default function SpeakPage() {
   const router = useRouter();
   const [micOn, setMicOn] = useState(true);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const clipButtonRef = useRef<HTMLButtonElement>(null);
 
   const { wavePulse, waveHeights, permissionState, errorMessage } =
     useVoiceAnalyser(micOn);
+
+  const handleFileSelect = (files: File[]) => {
+    setAttachedFiles((prev) => [...prev, ...files]);
+  };
 
   const handleClose = () => {
     withViewTransition(() => router.push("/home"));
@@ -227,25 +232,35 @@ export default function SpeakPage() {
           margin: "0 auto",
         }}
       >
-        {/* Btn/Clip - 첨부 */}
-        <button
-          ref={clipButtonRef}
-          type="button"
-          onClick={() => setAttachMenuOpen((o) => !o)}
-          className={cn(btnBase, "text-ds-tertiary")}
-          aria-label="첨부"
-          aria-expanded={attachMenuOpen}
-          aria-haspopup="menu"
-        >
-          <Image src="/icons/clip.svg" alt="" width={24} height={24} className="size-6 shrink-0" />
-        </button>
+        {/* Btn/Clip - 첨부 (메뉴: 파일/앨범/카메라) */}
+        <div className="relative">
+          <button
+            ref={clipButtonRef}
+            type="button"
+            onClick={() => setAttachMenuOpen((o) => !o)}
+            className={cn(btnBase, "text-ds-tertiary")}
+            aria-label="첨부"
+            aria-expanded={attachMenuOpen}
+            aria-haspopup="menu"
+          >
+            <Image src="/icons/clip.svg" alt="" width={24} height={24} className="size-6 shrink-0" />
+          </button>
+          {attachedFiles.length > 0 && (
+            <span
+              className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-ds-brand text-[10px] font-medium text-white"
+              aria-label={`${attachedFiles.length}개 첨부됨`}
+            >
+              {attachedFiles.length}
+            </span>
+          )}
+        </div>
         <AttachmentMenu
           anchorRef={clipButtonRef}
           open={attachMenuOpen}
           onClose={() => setAttachMenuOpen(false)}
-          onFile={() => {}}
-          onPhoto={() => {}}
-          onCamera={() => {}}
+          onFileSelect={handleFileSelect}
+          onPhotoSelect={handleFileSelect}
+          onCameraCapture={handleFileSelect}
         />
 
         {/* Btn - 마이크 (on/off 토글) */}
