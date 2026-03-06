@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { withViewTransition } from "@/lib/view-transition";
+import { AI_TERMS } from "../content/ai";
 import { PRIVACY_TERMS } from "../content/privacy";
 import { SERVICE_TERMS_SECTIONS } from "../content/service";
 
@@ -42,6 +43,7 @@ export default function SignupTermsPage() {
 
   const isService = id === "service";
   const isPrivacy = id === "privacy";
+  const isAi = id === "ai";
 
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white">
@@ -116,6 +118,22 @@ export default function SignupTermsPage() {
               ))}
             </div>
             <p>{PRIVACY_TERMS.disclaimer}</p>
+          </div>
+        ) : isAi ? (
+          <div className="flex flex-col gap-4 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
+            <div className="rounded-lg bg-destructive/10 px-4 py-2">
+              <p className="text-ds-caption-14-m font-medium text-destructive">
+                {AI_TERMS.notice}
+              </p>
+            </div>
+            {AI_TERMS.sections.map((section) => (
+              <section key={section.title} className="flex flex-col gap-1">
+                <p className="text-ds-caption-14-m font-medium text-ds-secondary">
+                  {section.title}
+                </p>
+                <p className="whitespace-pre-wrap">{section.body}</p>
+              </section>
+            ))}
           </div>
         ) : (
           <>

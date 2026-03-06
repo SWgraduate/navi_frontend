@@ -96,7 +96,9 @@ function AppHeaderWithSearchParams({
   const headerTitle =
     pathname === "/signup/terms/privacy"
       ? "개인정보 수집 및 이용"
-      : pathname.startsWith("/signup/terms")
+      : pathname === "/signup/terms/ai"
+        ? "AI 서비스 결과 면책 동의"
+        : pathname.startsWith("/signup/terms")
         ? "약관 동의"
       : pathname === "/signup" || pathname.startsWith("/signup/")
         ? "회원가입"
