@@ -22,6 +22,7 @@ const HEADER_TITLE: Record<string, string> = {
   "/graduation/upload/processing": "졸업사정조회 스캔",
   "/graduation/result": "졸업사정조회 결과",
   "/my": "마이",
+  "/my/terms": "약관 및 개인정보 처리 동의",
   "/my/language": "언어설정",
   "/my/personal": "개인정보 설정",
   "/my/personal/name": "이름",
@@ -94,19 +95,23 @@ function AppHeaderWithSearchParams({
 }) {
   const searchParams = useSearchParams();
   const headerTitle =
-    pathname === "/signup/terms/privacy"
-      ? "개인정보 수집 및 이용"
-      : pathname === "/signup/terms/ai"
-        ? "AI 서비스 결과 면책 동의"
-        : pathname === "/signup/terms/marketing"
-          ? "마케팅 정보 수신"
-          : pathname.startsWith("/signup/terms")
-        ? "약관 동의"
-      : pathname === "/signup" || pathname.startsWith("/signup/")
-        ? "회원가입"
-        : pathname === "/graduation/upload/processing" && searchParams.get("edit")
-          ? "수정"
-          : HEADER_TITLE[pathname] ?? "NAVI";
+    pathname === "/signup/terms/service"
+      ? "서비스 이용약관"
+      : pathname === "/signup/terms/privacy-policy"
+        ? "NAVI 개인정보 처리방침"
+        : pathname === "/signup/terms/privacy"
+          ? "개인정보 수집 및 이용"
+          : pathname === "/signup/terms/ai"
+          ? "AI 서비스 결과 면책 동의"
+          : pathname === "/signup/terms/marketing"
+            ? "마케팅 정보 수신"
+            : pathname.startsWith("/signup/terms")
+              ? "약관 동의"
+              : pathname === "/signup" || pathname.startsWith("/signup/")
+                ? "회원가입"
+                : pathname === "/graduation/upload/processing" && searchParams.get("edit")
+                  ? "수정"
+                  : HEADER_TITLE[pathname] ?? "NAVI";
 
   const isMySection = pathname === "/my" || pathname.startsWith("/my/");
 
@@ -185,7 +190,12 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     pathname !== "/speak" &&
     !isGraduationRootPage;
   const isWhiteBackgroundPage =
-    isSplash || isMyPage || isGraduationResultPage || pathname === "/speak";
+    isSplash ||
+    isMyPage ||
+    isGraduationResultPage ||
+    pathname === "/speak" ||
+    isSignupTermsPage ||
+    isSignupTermsAgreePage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
@@ -341,29 +351,41 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!showHeader) return;
 
-    const headerEl = headerRef.current;
-    if (!headerEl) return;
+    const wrapperEl = headerRef.current;
+    if (!wrapperEl) return;
 
     const updateHeaderHeight = () => {
-      setHeaderHeight(headerEl.offsetHeight);
+      // fixed 헤더는 wrapper에서 공간을 차지하지 않으므로, 실제 header 요소를 측정
+      const headerEl = wrapperEl.querySelector("header") as HTMLElement | null;
+      const height = headerEl?.offsetHeight ?? 0;
+      setHeaderHeight(height);
     };
 
     updateHeaderHeight();
+    // pathname 변경 후 DOM 업데이트 대기 (클라이언트 네비게이션 시 헤더 겹침 방지)
+    const retryId = setTimeout(updateHeaderHeight, 0);
+    const retryId2 = setTimeout(updateHeaderHeight, 100);
     window.addEventListener("resize", updateHeaderHeight);
 
     if (typeof ResizeObserver !== "undefined") {
       const resizeObserver = new ResizeObserver(updateHeaderHeight);
-      resizeObserver.observe(headerEl);
+      resizeObserver.observe(wrapperEl);
+      const headerEl = wrapperEl.querySelector("header");
+      if (headerEl) resizeObserver.observe(headerEl);
       return () => {
+        clearTimeout(retryId);
+        clearTimeout(retryId2);
         window.removeEventListener("resize", updateHeaderHeight);
         resizeObserver.disconnect();
       };
     }
 
     return () => {
+      clearTimeout(retryId);
+      clearTimeout(retryId2);
       window.removeEventListener("resize", updateHeaderHeight);
     };
-  }, [showHeader]);
+  }, [showHeader, pathname]);
 
   useEffect(() => {
     // 하단바가 숨겨지면 높이를 0으로 설정 (비동기로 처리해 set-state-in-effect 규칙 준수)
