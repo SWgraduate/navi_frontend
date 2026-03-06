@@ -10,6 +10,13 @@ import { withViewTransition } from "@/lib/view-transition";
 import { signupCompleteFormSchema } from "@/lib/schemas/signup-complete";
 import { Search } from "lucide-react";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
+import { useTranslation } from "react-i18next";
+import {
+  getMajorOptions,
+  getSecondMajorTypeOptions,
+  type MajorCode,
+  type SecondMajorTypeCode,
+} from "@/lib/academic-options";
 
 function UpDownIcon({ className }: { className?: string }) {
   return (
@@ -95,41 +102,22 @@ const sheetPanelVariants = {
   closed: { top: "100%", bottom: "auto" as const },
 };
 
-export const MAJOR_OPTIONS = [
-  "ICT융합학부",
-  "ICT융합학부 디자인테크놀로지",
-  "ICT융합학부 미디어테크놀로지",
-  "ICT융합학부 컬처테크놀로지",
-  "컴퓨터학부",
-  "인공지능학부",
-  "수리데이터사이언스학과",
-  "경영학과",
-] as const;
-
-export const SECOND_MAJOR_OPTIONS = [
-  "다중전공",
-  "융합전공",
-  "부전공",
-  "복수전공",
-  "연계전공",
-  "마이크로전공",
-] as const;
-
 type AcademicStatus = "enrolled" | "leave";
 
 /** Figma 6/6: 회원가입 - 학적 정보 입력 */
 export default function SignupCompletePage() {
   const router = useRouter();
+  const { t } = useTranslation();
   useHeaderBackground("white");
 
   const [studentId, setStudentId] = useState("");
-  const [major, setMajor] = useState("");
-  const [secondMajorType, setSecondMajorType] = useState("");
+  const [major, setMajor] = useState<MajorCode | "">("");
+  const [secondMajorType, setSecondMajorType] = useState<SecondMajorTypeCode | "">("");
   const [academicStatus, setAcademicStatus] = useState<AcademicStatus | "">("");
   const [yearSemester, setYearSemester] = useState("");
   const [majorSheetOpen, setMajorSheetOpen] = useState(false);
   const [secondMajorSheetOpen, setSecondMajorSheetOpen] = useState(false);
-  const [secondMajor, setSecondMajor] = useState("");
+  const [secondMajor, setSecondMajor] = useState<MajorCode | "">("");
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
   const [secondMajorPickerSearch, setSecondMajorPickerSearch] = useState("");
   const [yearSemesterSheetOpen, setYearSemesterSheetOpen] = useState(false);
@@ -151,6 +139,13 @@ export default function SignupCompletePage() {
 
   const YEAR_OPTIONS = [1, 2, 3, 4] as const;
   const SEMESTER_OPTIONS = [1, 2] as const;
+  const majorOptions = useMemo(() => getMajorOptions(t), [t]);
+  const secondMajorTypeOptions = useMemo(() => getSecondMajorTypeOptions(t), [t]);
+  const selectedSecondMajorTypeLabel =
+    secondMajorTypeOptions.find((option) => option.value === secondMajorType)?.label ?? "";
+  const selectedMajorLabel = majorOptions.find((option) => option.value === major)?.label ?? "";
+  const selectedSecondMajorLabel =
+    majorOptions.find((option) => option.value === secondMajor)?.label ?? "";
 
   const openYearSemesterSheet = () => {
     if (yearSemester) {
@@ -176,7 +171,7 @@ export default function SignupCompletePage() {
     yearSemester && yearSemester.includes("-")
       ? (() => {
           const [y, s] = yearSemester.split("-").map(Number);
-          return `${y}학년 ${s}학기`;
+          return t("signup.complete.yearSemesterDisplay", { y, s });
         })()
       : "";
 
@@ -186,10 +181,10 @@ export default function SignupCompletePage() {
   }, []);
 
   const filteredSecondMajors = useMemo(() => {
-    if (!secondMajorPickerSearch.trim()) return MAJOR_OPTIONS;
+    if (!secondMajorPickerSearch.trim()) return majorOptions;
     const q = secondMajorPickerSearch.trim().toLowerCase();
-    return MAJOR_OPTIONS.filter((m) => m.toLowerCase().includes(q));
-  }, [secondMajorPickerSearch]);
+    return majorOptions.filter((option) => option.label.toLowerCase().includes(q));
+  }, [majorOptions, secondMajorPickerSearch]);
 
   const canSubmit =
     studentId.trim().length > 0 &&
@@ -238,10 +233,10 @@ export default function SignupCompletePage() {
         </p>
         <div className="flex flex-col gap-2">
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            졸업까지 얼마나 남으셨나요?
+            {t("signup.complete.title")}
           </h1>
           <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
-            졸업사정조회를 위해 현재 학적 정보를 알려주세요
+            {t("signup.complete.subtitle")}
           </p>
         </div>
 
@@ -255,13 +250,13 @@ export default function SignupCompletePage() {
               htmlFor="signup-student-id"
               className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
             >
-              학번 <span className="text-destructive">*</span>
+              {t("signup.complete.studentIdLabel")} <span className="text-destructive">*</span>
             </label>
             <input
               id="signup-student-id"
               type="text"
               inputMode="numeric"
-              placeholder="학번을 입력해주세요 (예: 2026000000)"
+              placeholder={t("signup.complete.studentIdPlaceholder")}
               value={studentId}
               onChange={(e) => {
                 setStudentId(e.target.value);
@@ -273,7 +268,7 @@ export default function SignupCompletePage() {
               )}
             />
             {formErrors.studentId && (
-              <p className="text-ds-caption-14-r text-destructive">{formErrors.studentId}</p>
+              <p className="text-ds-caption-14-r text-destructive">{t(formErrors.studentId)}</p>
             )}
           </div>
 
@@ -282,7 +277,7 @@ export default function SignupCompletePage() {
               htmlFor="signup-major-trigger"
               className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
             >
-              주전공 <span className="text-destructive">*</span>
+              {t("signup.complete.majorLabel")} <span className="text-destructive">*</span>
             </label>
             <button
               id="signup-major-trigger"
@@ -297,12 +292,12 @@ export default function SignupCompletePage() {
               )}
             >
               <span className={cn(major ? "text-ds-gray-90" : "text-ds-tertiary")}>
-                {major || "전공을 선택해주세요"}
+                {selectedMajorLabel || t("signup.complete.majorPlaceholder")}
               </span>
               <UpDownIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
             </button>
             {formErrors.major && (
-              <p className="text-ds-caption-14-r text-destructive">{formErrors.major}</p>
+              <p className="text-ds-caption-14-r text-destructive">{t(formErrors.major)}</p>
             )}
           </div>
 
@@ -310,10 +305,10 @@ export default function SignupCompletePage() {
           <MajorSelectSheet
             open={majorSheetOpen}
             selected={major}
-            options={MAJOR_OPTIONS}
+            options={majorOptions}
             onOpenChange={setMajorSheetOpen}
             onSelect={(next) => {
-              setMajor(next);
+              setMajor(next as MajorCode | "");
               if (formErrors.major) setFormErrors((p) => ({ ...p, major: "" }));
             }}
           />
@@ -323,7 +318,7 @@ export default function SignupCompletePage() {
               htmlFor="signup-second-major-trigger"
               className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
             >
-              제2전공 유형
+              {t("signup.complete.secondMajorTypeLabel")}
             </label>
             <button
               id="signup-second-major-trigger"
@@ -334,7 +329,7 @@ export default function SignupCompletePage() {
                 secondMajorType ? "text-ds-gray-90" : "text-ds-tertiary"
               )}
             >
-              <span>{secondMajorType || "제2전공 유형을 선택해주세요"}</span>
+              <span>{selectedSecondMajorTypeLabel || t("signup.complete.secondMajorTypePlaceholder")}</span>
               {secondMajorSheetOpen ? (
                 <DropdownUpIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
               ) : (
@@ -382,27 +377,27 @@ export default function SignupCompletePage() {
                   >
                     <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
                     <h2 id="second-major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
-                      제2전공 유형을 선택해주세요
+                      {t("signup.complete.secondMajorTypePickerTitle")}
                     </h2>
                   </div>
                 </div>
                 <ul className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
-                  {SECOND_MAJOR_OPTIONS.map((option) => (
-                    <li key={option} className="flex">
+                  {secondMajorTypeOptions.map((option) => (
+                    <li key={option.value} className="flex">
                       <button
                         type="button"
                         onClick={() => {
-                          if (secondMajorType === option) {
+                          if (secondMajorType === option.value) {
                             setSecondMajorType("");
                             setSecondMajor("");
                           } else {
-                            setSecondMajorType(option);
+                            setSecondMajorType(option.value as SecondMajorTypeCode);
                           }
                           setSecondMajorSheetOpen(false);
                         }}
                         className="w-full min-h-[52px] cursor-pointer select-none py-5 px-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                       >
-                        {option}
+                        {option.label}
                       </button>
                     </li>
                   ))}
@@ -418,7 +413,7 @@ export default function SignupCompletePage() {
                 htmlFor="signup-second-major-picker-trigger"
                 className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
               >
-                제2전공
+                {t("signup.complete.secondMajorLabel")}
               </label>
               <button
                 id="signup-second-major-picker-trigger"
@@ -435,11 +430,11 @@ export default function SignupCompletePage() {
                   secondMajor ? "text-ds-gray-90" : "text-ds-tertiary"
                 )}
               >
-                <span>{secondMajor || "전공을 선택해주세요"}</span>
+                <span>{selectedSecondMajorLabel || t("signup.complete.secondMajorPlaceholder")}</span>
                 <UpDownIcon className="absolute right-3 h-6 w-6 shrink-0 text-ds-tertiary" />
               </button>
               {formErrors.secondMajor && (
-                <p className="text-ds-caption-14-r text-destructive">{formErrors.secondMajor}</p>
+                <p className="text-ds-caption-14-r text-destructive">{t(formErrors.secondMajor)}</p>
               )}
             </div>
           )}
@@ -483,14 +478,14 @@ export default function SignupCompletePage() {
                     >
                       <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
                       <h2 id="second-major-picker-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
-                        제2전공을 선택해주세요
+                        {t("signup.complete.secondMajorPickerTitle")}
                       </h2>
                     </div>
                     <div className="relative flex min-h-[48px] items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
                       <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary pointer-events-none" aria-hidden />
                       <input
                         type="search"
-                        placeholder="전공을 검색하세요"
+                        placeholder={t("sheets.majorSelect.searchPlaceholder")}
                         value={secondMajorPickerSearch}
                         onChange={(e) => setSecondMajorPickerSearch(e.target.value)}
                         className="w-full min-h-[48px] rounded-md bg-transparent py-3 pl-10 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-tertiary focus:outline-none focus:ring-0 touch-manipulation"
@@ -498,25 +493,25 @@ export default function SignupCompletePage() {
                     </div>
                   </div>
                   <ul className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
-                    {filteredSecondMajors.map((m) => (
-                      <li key={m} className="flex">
+                    {filteredSecondMajors.map((option) => (
+                      <li key={option.value} className="flex">
                         <button
                           type="button"
                           onClick={() => {
-                            setSecondMajor(secondMajor === m ? "" : m);
+                            setSecondMajor(secondMajor === option.value ? "" : option.value);
                             setSecondMajorPickerOpen(false);
                             setSecondMajorPickerSearch("");
                             if (formErrors.secondMajor) setFormErrors((p) => ({ ...p, secondMajor: "" }));
                           }}
                           className="w-full min-h-[52px] cursor-pointer select-none py-5 px-4 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:bg-ds-gray-10 touch-manipulation"
                         >
-                          {m}
+                          {option.label}
                         </button>
                       </li>
                     ))}
                     {filteredSecondMajors.length === 0 && (
                       <li className="py-4 text-center text-ds-caption-14-r text-ds-tertiary">
-                        검색 결과가 없습니다
+                        {t("sheets.majorSelect.noResults")}
                       </li>
                     )}
                   </ul>
@@ -527,7 +522,7 @@ export default function SignupCompletePage() {
 
           <div className="flex flex-col gap-2">
             <span className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
-              학적상태 <span className="text-destructive">*</span>
+              {t("signup.complete.academicStatusLabel")} <span className="text-destructive">*</span>
             </span>
             <div className="flex gap-2">
               <button
@@ -545,7 +540,7 @@ export default function SignupCompletePage() {
                       : "border-transparent bg-secondary text-ds-tertiary"
                 )}
               >
-                재학생
+                {t("signup.complete.enrolled")}
               </button>
               <button
                 type="button"
@@ -562,11 +557,11 @@ export default function SignupCompletePage() {
                       : "border-transparent bg-secondary text-ds-tertiary"
                 )}
               >
-                휴학생
+                {t("signup.complete.leave")}
               </button>
             </div>
             {formErrors.academicStatus && (
-              <p className="text-ds-caption-14-r text-destructive">{formErrors.academicStatus}</p>
+              <p className="text-ds-caption-14-r text-destructive">{t(formErrors.academicStatus)}</p>
             )}
           </div>
 
@@ -575,7 +570,7 @@ export default function SignupCompletePage() {
               htmlFor="signup-year-semester-trigger"
               className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
             >
-              현재 이수한 학년/학기 <span className="text-destructive">*</span>
+              {t("signup.complete.yearSemesterLabel")} <span className="text-destructive">*</span>
             </label>
             <button
               id="signup-year-semester-trigger"
@@ -590,10 +585,10 @@ export default function SignupCompletePage() {
                 yearSemesterDisplay ? "text-ds-gray-90" : "text-ds-tertiary"
               )}
             >
-              <span>{yearSemesterDisplay || "학년/학기를 선택해주세요"}</span>
+              <span>{yearSemesterDisplay || t("signup.complete.yearSemesterPlaceholder")}</span>
             </button>
             {formErrors.yearSemester && (
-              <p className="text-ds-caption-14-r text-destructive">{formErrors.yearSemester}</p>
+              <p className="text-ds-caption-14-r text-destructive">{t(formErrors.yearSemester)}</p>
             )}
           </div>
 
@@ -636,7 +631,7 @@ export default function SignupCompletePage() {
                     >
                       <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
                       <h2 id="year-semester-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
-                        학년 / 학기를 선택해주세요
+                        {t("signup.complete.yearSemesterPickerTitle")}
                       </h2>
                     </div>
                   </div>
@@ -655,7 +650,7 @@ export default function SignupCompletePage() {
                                   : "text-ds-gray-90"
                               )}
                             >
-                              {y}학년
+                              {t("signup.complete.year", { n: y })}
                             </button>
                           </li>
                         ))}
@@ -675,7 +670,7 @@ export default function SignupCompletePage() {
                                   : "text-ds-gray-90"
                               )}
                             >
-                              {s}학기
+                              {t("signup.complete.semester", { n: s })}
                             </button>
                           </li>
                         ))}
@@ -694,7 +689,7 @@ export default function SignupCompletePage() {
                           : "bg-(--ds-bg-disabled) text-ds-disabled"
                       )}
                     >
-                      완료
+                      {t("signup.complete.submit")}
                     </button>
                   </div>
                 </motion.div>
@@ -714,7 +709,7 @@ export default function SignupCompletePage() {
             )}
             disabled={!canSubmit}
           >
-            완료
+            {t("signup.complete.submit")}
           </Button>
         </form>
         </div>

@@ -12,28 +12,23 @@ import {
   type PersonalYearSemesterValue,
 } from "@/lib/schemas/personal-info";
 import { YearSemesterSheet } from "@/components/personal/year-semester-sheet";
+import { useTranslation } from "react-i18next";
 
 /** 마이페이지 - 현재 이수한 학년/학기 수정 */
 export default function MyPersonalYearSemesterPage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
-
-  const parseDisplayToValue = (display: string): PersonalYearSemesterValue | "" => {
-    const match = display.match(/([1-4])학년\s*\/?\s*([1-2])학기/);
-    if (!match) return "";
-    const [, y, s] = match;
-    return `${y}-${s}` as PersonalYearSemesterValue;
-  };
 
   const formatValueToDisplay = (value: string): string => {
     if (!value || !value.includes("-")) return "";
     const [y, s] = value.split("-").map(Number);
-    return `${y}학년 / ${s}학기`;
+    return t("my.personal.yearSemesterPage.display", { y, s });
   };
 
-  const initialValue = parseDisplayToValue(MOCK_PERSONAL_INFO.yearSemester);
+  const initialValue = MOCK_PERSONAL_INFO.yearSemester;
 
   const [yearSemester, setYearSemester] = useState<PersonalYearSemesterValue | "">(initialValue);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -73,7 +68,7 @@ export default function MyPersonalYearSemesterPage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          학년/학기를 선택해주세요
+          {t("my.personal.yearSemesterPage.title")}
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
@@ -81,7 +76,7 @@ export default function MyPersonalYearSemesterPage() {
             htmlFor="personal-year-semester-trigger"
             className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
           >
-            현재 이수한 학년/학기
+            {t("my.personal.yearSemesterPage.label")}
           </label>
           <button
             id="personal-year-semester-trigger"
@@ -90,12 +85,12 @@ export default function MyPersonalYearSemesterPage() {
             className="flex w-full items-center rounded-md border border-border bg-(--ds-gray-5) p-4 text-left text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0"
           >
             <span className={display ? "text-ds-primary" : "text-ds-tertiary"}>
-              {display || "학년/학기를 선택해주세요"}
+              {display || t("my.personal.yearSemesterPage.placeholder")}
             </span>
           </button>
           {hasError && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              학년/학기를 선택해주세요.
+              {t("my.personal.yearSemesterPage.error")}
             </p>
           )}
         </div>
@@ -137,11 +132,10 @@ export default function MyPersonalYearSemesterPage() {
             }
             disabled={!canSubmit}
           >
-            수정
+            {t("my.personal.yearSemesterPage.submit")}
           </Button>
         </div>
       </div>
     </div>
   );
 }
-

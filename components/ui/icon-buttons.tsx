@@ -3,6 +3,7 @@
 import { Camera, AudioLines, ChevronUp } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 /** 24×24 (디자인 시스템) */
 const iconSize = "size-6";
@@ -10,9 +11,11 @@ const iconSize = "size-6";
 /** Btn/VoiceMode - 파란 버튼 + 음파 아이콘(24×24) + "말하기", 흰색 텍스트/아이콘, 라운딩 축소 */
 function VoiceModeButton({
   className,
-  children = "말하기",
+  children,
   ...props
 }: Omit<ButtonProps, "variant" | "leftIcon"> & { children?: React.ReactNode }) {
+  const { t } = useTranslation();
+
   return (
     <Button
       variant="primary"
@@ -24,7 +27,7 @@ function VoiceModeButton({
       )}
       {...props}
     >
-      {children}
+      {children ?? t("header.speak")}
     </Button>
   );
 }
@@ -54,12 +57,14 @@ function ArrowUpIconButton({
 }: Omit<ButtonProps, "size" | "children"> & {
   variant?: "outline" | "primary";
 }) {
+  const { t } = useTranslation();
+
   return (
     <Button
       variant={variant}
       size="icon"
       className={cn("[&_svg]:size-6!", className)}
-      aria-label="위로"
+      aria-label={t("common.up")}
       {...props}
     >
       <ChevronUp className={iconSize} />

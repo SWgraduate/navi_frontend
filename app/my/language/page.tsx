@@ -5,40 +5,44 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
+import i18n from "@/lib/i18n";
+import { getStoredLanguage, setStoredLanguage, type Language } from "@/lib/i18n-storage";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 
 const LANGUAGE_OPTIONS = [
-  { code: "ko", label: "한국어" },
-  { code: "en", label: "English" },
-  { code: "zh", label: "中文" },
+  { code: "ko", labelKey: "languages.koNative" },
+  { code: "en", labelKey: "languages.enNative" },
+  { code: "zh", labelKey: "languages.zhNative" },
 ] as const;
 
 /** 마이페이지 - 언어설정 (Figma 1115-10894) */
 export default function MyLanguagePage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
-  const initialCode: (typeof LANGUAGE_OPTIONS)[number]["code"] = "ko";
-  const [languageCode, setLanguageCode] = useState<(typeof LANGUAGE_OPTIONS)[number]["code"]>(
-    initialCode
-  );
+  const [initialCode, setInitialCode] = useState<Language>(() => getStoredLanguage());
+  const [languageCode, setLanguageCode] = useState<Language>(() => getStoredLanguage());
 
   const canSubmit = languageCode !== initialCode;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     if (!canSubmit) return;
 
-    // TODO: 실제 API 연동 및 언어 설정 저장
-    withViewTransition(() => router.back());
+    setStoredLanguage(languageCode);
+    document.documentElement.lang = languageCode;
+    await i18n.changeLanguage(languageCode);
+    setInitialCode(languageCode);
+    withViewTransition(() => router.push("/my"));
   };
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <form
-        onSubmit={handleSubmit}
+        id="language-form"
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4 pb-4 transition-[padding-bottom] duration-250 ease-out"
         style={{
           paddingBottom:
@@ -48,12 +52,12 @@ export default function MyLanguagePage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          언어설정을 선택해주세요
+          {t("my.languagePage.title")}
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
           <span className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
-            언어설정
+            {t("my.languagePage.label")}
           </span>
           <div className="flex flex-col gap-2">
             {LANGUAGE_OPTIONS.map((opt) => (
@@ -76,7 +80,7 @@ export default function MyLanguagePage() {
                     <span className="block h-2.5 w-2.5 rounded-full bg-primary" />
                   )}
                 </span>
-                <span>{opt.label}</span>
+                <span>{t(opt.labelKey)}</span>
               </button>
             ))}
           </div>
@@ -96,10 +100,10 @@ export default function MyLanguagePage() {
       >
         <div className="px-4">
           <Button
-            type="submit"
-            form="language-form"
+            type="button"
             variant="primary"
             size="lg"
+            onClick={handleSave}
             className={
               "h-auto w-full rounded-md py-3 text-ds-body-16-sb leading-ds-body-16-sb" +
               (canSubmit
@@ -108,11 +112,10 @@ export default function MyLanguagePage() {
             }
             disabled={!canSubmit}
           >
-            수정
+            {t("my.languagePage.submit")}
           </Button>
         </div>
       </div>
     </div>
   );
 }
-

@@ -8,6 +8,7 @@ import {
   type CreditKey,
   type Credits,
 } from "@/lib/mock-accounts";
+import { useTranslation } from "react-i18next";
 
 function extractNumber(value: string): number | null {
   if (!value || value.trim() === "") return null;
@@ -79,13 +80,15 @@ const CELL_STYLE = {
 /** 졸업사정조회 결과 페이지: Navi 사용자 데이터 표시 (로컬스토리지에서 조회) */
 export default function GraduationResultPage() {
   useHeaderBackground("white");
+  const { t } = useTranslation();
   const saved = getGraduationResult();
+  const rowLabel = (key: CreditKey) => t(`graduation.resultRows.${key}`);
   
   if (!saved) {
     return (
       <div className="flex h-full w-full items-center justify-center px-4 py-10">
         <p className="text-center text-ds-body-16-r text-ds-tertiary">
-          저장된 졸업사정조회 결과가 없습니다.
+          {t("graduation.result.noResult")}
         </p>
       </div>
     );
@@ -145,37 +148,37 @@ export default function GraduationResultPage() {
         {/* 주전공(제1전공) 학점 현황 */}
         <div className="shrink-0">
           <h2 className="mb-3 break-keep text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-            주전공(제1전공) 학점 현황
+            {t("graduation.result.major1Title")}
           </h2>
           <div className="overflow-x-auto rounded-lg border border-[#EEEFF1] bg-white">
             <table className="w-full border-collapse border-spacing-0" style={{ borderSpacing: 0 }}>
               <thead>
                 <tr className="border-b border-[#EEEFF1] bg-(--ds-gray-5)">
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyle}>
-                    이수명
+                    {t("graduation.table.courseName")}
                   </th>
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleNarrow}>
-                    배당
+                    {t("graduation.table.allocation")}
                   </th>
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleAcquire}>
-                    취득(잔여)
+                    {t("graduation.table.acquired")}
                   </th>
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleComplete}>
-                    이수
+                    {t("graduation.table.completion")}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {majorType === MAJOR_TYPE.MICRO &&
-                  renderRow("재학(졸업직전) 및 수업연한 충족", "enrollment", getAllocation(majorType, "enrollment"))}
-                {renderRow("졸업학점", "graduation", getAllocation(majorType, "graduation"))}
-                {renderRow("전공학점", "major", getAllocation(majorType, "major"))}
-                {renderRow("전공핵심", "coreMajor", getAllocation(majorType, "coreMajor"))}
-                {renderRow("전공심화", "advancedMajor", getAllocation(majorType, "advancedMajor"))}
-                {renderRow("산학협력영역", "industryCooperation", getAllocation(majorType, "industryCooperation"))}
-                {renderRow("교양선택", "generalElective", getAllocation(majorType, "generalElective"))}
+                  renderRow(rowLabel("enrollment"), "enrollment", getAllocation(majorType, "enrollment"))}
+                {renderRow(rowLabel("graduation"), "graduation", getAllocation(majorType, "graduation"))}
+                {renderRow(rowLabel("major"), "major", getAllocation(majorType, "major"))}
+                {renderRow(rowLabel("coreMajor"), "coreMajor", getAllocation(majorType, "coreMajor"))}
+                {renderRow(rowLabel("advancedMajor"), "advancedMajor", getAllocation(majorType, "advancedMajor"))}
+                {renderRow(rowLabel("industryCooperation"), "industryCooperation", getAllocation(majorType, "industryCooperation"))}
+                {renderRow(rowLabel("generalElective"), "generalElective", getAllocation(majorType, "generalElective"))}
                 {majorType === MAJOR_TYPE.MICRO &&
-                  renderRow("마이크로전공 이수여부", "microMajor", getAllocation(majorType, "microMajor"))}
+                  renderRow(rowLabel("microMajor"), "microMajor", getAllocation(majorType, "microMajor"))}
               </tbody>
             </table>
           </div>
@@ -185,31 +188,31 @@ export default function GraduationResultPage() {
         {majorType === MAJOR_TYPE.DOUBLE && (
           <div className="mt-6 shrink-0">
             <h2 className="mb-3 break-keep text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-              제2전공 현황
+              {t("graduation.result.major2Title")}
             </h2>
             <div className="overflow-x-auto rounded-lg border border-[#EEEFF1] bg-white">
               <table className="w-full border-collapse border-spacing-0" style={{ borderSpacing: 0 }}>
                 <thead>
                   <tr className="border-b border-[#EEEFF1] bg-(--ds-gray-5)">
                     <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyle}>
-                      이수명
+                      {t("graduation.table.courseName")}
                     </th>
                     <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleNarrow}>
-                      배당
+                      {t("graduation.table.allocation")}
                     </th>
                     <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleAcquire}>
-                      취득(잔여)
+                      {t("graduation.table.acquired")}
                     </th>
                     <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleComplete}>
-                      이수
+                      {t("graduation.table.completion")}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {renderRow("전공학점", "secondMajor", getAllocation(majorType, "secondMajor"))}
-                  {renderRow("전공핵심", "secondCoreMajor", getAllocation(majorType, "secondCoreMajor"))}
-                  {renderRow("선수강이수여부", "secondPrerequisite", getAllocation(majorType, "secondPrerequisite"))}
-                  {renderRow("미필과목이수여부", "secondUncompleted", getAllocation(majorType, "secondUncompleted"))}
+                  {renderRow(rowLabel("secondMajor"), "secondMajor", getAllocation(majorType, "secondMajor"))}
+                  {renderRow(rowLabel("secondCoreMajor"), "secondCoreMajor", getAllocation(majorType, "secondCoreMajor"))}
+                  {renderRow(rowLabel("secondPrerequisite"), "secondPrerequisite", getAllocation(majorType, "secondPrerequisite"))}
+                  {renderRow(rowLabel("secondUncompleted"), "secondUncompleted", getAllocation(majorType, "secondUncompleted"))}
                 </tbody>
               </table>
             </div>
@@ -219,35 +222,35 @@ export default function GraduationResultPage() {
         {/* 필수 요건 */}
         <div className="mt-6 shrink-0">
           <h2 className="mb-3 break-keep text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-            필수 요건
+            {t("graduation.result.requiredTitle")}
           </h2>
           <div className="overflow-x-auto rounded-lg border border-[#EEEFF1] bg-white">
             <table className="w-full border-collapse border-spacing-0" style={{ borderSpacing: 0 }}>
               <thead>
                 <tr className="border-b border-[#EEEFF1] bg-(--ds-gray-5)">
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyle}>
-                    이수명
+                    {t("graduation.table.courseName")}
                   </th>
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleNarrow}>
-                    배당
+                    {t("graduation.table.allocation")}
                   </th>
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleAcquire}>
-                    취득(잔여)
+                    {t("graduation.table.acquired")}
                   </th>
                   <th className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={thStyleComplete}>
-                    이수
+                    {t("graduation.table.completion")}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {renderRow("선수강이수여부", "prerequisite", getAllocation(majorType, "prerequisite"))}
-                {renderRow("미필과목이수여부", "uncompleted", getAllocation(majorType, "uncompleted"))}
-                {renderRow("졸업논문/시험/작품", "thesis", getAllocation(majorType, "thesis"))}
-                {renderRow("영어전용강좌수", "englishOnly", getAllocation(majorType, "englishOnly"))}
-                {renderRow("졸업평점", "graduationGpa", getAllocation(majorType, "graduationGpa"))}
-                {renderRow("사회봉사", "socialService", getAllocation(majorType, "socialService"))}
-                {renderRow("PBL강좌수", "pbl", getAllocation(majorType, "pbl"))}
-                {renderRow("전공IC-PBL강좌수", "majorIcPbl", getAllocation(majorType, "majorIcPbl"))}
+                {renderRow(rowLabel("prerequisite"), "prerequisite", getAllocation(majorType, "prerequisite"))}
+                {renderRow(rowLabel("uncompleted"), "uncompleted", getAllocation(majorType, "uncompleted"))}
+                {renderRow(rowLabel("thesis"), "thesis", getAllocation(majorType, "thesis"))}
+                {renderRow(rowLabel("englishOnly"), "englishOnly", getAllocation(majorType, "englishOnly"))}
+                {renderRow(rowLabel("graduationGpa"), "graduationGpa", getAllocation(majorType, "graduationGpa"))}
+                {renderRow(rowLabel("socialService"), "socialService", getAllocation(majorType, "socialService"))}
+                {renderRow(rowLabel("pbl"), "pbl", getAllocation(majorType, "pbl"))}
+                {renderRow(rowLabel("majorIcPbl"), "majorIcPbl", getAllocation(majorType, "majorIcPbl"))}
               </tbody>
             </table>
           </div>

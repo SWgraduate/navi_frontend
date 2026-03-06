@@ -8,25 +8,26 @@ import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
 import { personalStudentIdSchema } from "@/lib/schemas/personal-info";
+import { useTranslation } from "react-i18next";
 
 /** 마이페이지 - 학번 수정 (이름 수정 페이지와 동일 패턴) */
 export default function MyPersonalStudentIdPage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
   const [studentId, setStudentId] = useState<string>(MOCK_PERSONAL_INFO.studentId);
   const [touched, setTouched] = useState(false);
+  const validationResult = useMemo(() => personalStudentIdSchema.safeParse(studentId), [studentId]);
 
-  const hasError = useMemo(
-    () => touched && !personalStudentIdSchema.safeParse(studentId).success,
-    [studentId, touched]
-  );
-  const canSubmit = useMemo(
-    () => personalStudentIdSchema.safeParse(studentId).success,
-    [studentId]
-  );
+  const hasError = touched && !validationResult.success;
+  const canSubmit = validationResult.success;
+  const errorMessage =
+    hasError && !validationResult.success
+      ? t(validationResult.error.issues[0]?.message ?? "my.personal.studentIdPage.error")
+      : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +52,7 @@ export default function MyPersonalStudentIdPage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          학번을 10자리 숫자로 입력해주세요
+          {t("my.personal.studentIdPage.title")}
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
@@ -59,7 +60,7 @@ export default function MyPersonalStudentIdPage() {
             htmlFor="personal-student-id"
             className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
           >
-            학번
+            {t("my.personal.studentIdPage.label")}
           </label>
           <div className="flex items-center rounded-md border border-border bg-(--ds-gray-5)">
             <input
@@ -71,12 +72,12 @@ export default function MyPersonalStudentIdPage() {
               onChange={(e) => setStudentId(e.target.value)}
               onBlur={() => setTouched(true)}
               className="min-w-0 flex-1 bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
-              placeholder="학번을 입력해주세요"
+              placeholder={t("my.personal.studentIdPage.placeholder")}
             />
           </div>
-          {hasError && (
+          {errorMessage && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              학번을 10자리 숫자로 입력해주세요
+              {errorMessage}
             </p>
           )}
         </div>
@@ -105,11 +106,10 @@ export default function MyPersonalStudentIdPage() {
               : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
           }
           disabled={!canSubmit}
-        >
-          수정
+          >
+          {t("my.personal.studentIdPage.submit")}
         </Button>
       </div>
     </div>
   );
 }
-

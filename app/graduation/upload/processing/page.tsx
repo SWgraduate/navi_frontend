@@ -13,6 +13,7 @@ import {
   type MajorType,
 } from "@/lib/mock-accounts";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
 
 /** Figma 1212-11608: 졸업사정조회 이미지 인식 중 페이지 */
 /** Figma 1229-15538: 졸업사정조회 결과 확인 페이지 */
@@ -21,6 +22,7 @@ import { withViewTransition } from "@/lib/view-transition";
 function GraduationProcessingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const imageUrl = searchParams.get("image");
   
   // 전공 타입 파싱 및 검증
@@ -60,6 +62,8 @@ function GraduationProcessingContent() {
   
   // 입력 검증 에러 메시지
   const [validationError, setValidationError] = useState<string | null>(null);
+  const fieldLabel = (key: keyof typeof credits) => t(`graduation.fields.${key}`);
+  const rowLabel = (key: keyof typeof credits) => t(`graduation.resultRows.${key}`);
 
   // 취득(잔여) 값에서 숫자 추출 함수
   const extractNumber = (value: string): number | null => {
@@ -205,26 +209,26 @@ function GraduationProcessingContent() {
 
   // 필드명과 한글 이름 매핑
   const fieldNameMap: Record<keyof typeof credits, string> = {
-    enrollment: "재학(졸업직전) 및 수업연한 충족",
-    graduation: "졸업학점",
-    major: "전공학점",
-    coreMajor: "전공핵심",
-    advancedMajor: "전공심화",
-    industryCooperation: "산학협력영역",
-    generalElective: "교양선택",
-    secondMajor: "제2전공 전공학점",
-    secondCoreMajor: "제2전공 전공핵심",
-    secondPrerequisite: "제2전공 선수강이수여부",
-    secondUncompleted: "제2전공 미필과목이수여부",
-    prerequisite: "선수강이수여부",
-    uncompleted: "미필과목이수여부",
-    thesis: "졸업논문/시험/작품",
-    englishOnly: "영어전용강좌수",
-    graduationGpa: "졸업평점",
-    socialService: "사회봉사",
-    pbl: "PBL강좌수",
-    majorIcPbl: "전공IC-PBL강좌수",
-    microMajor: "마이크로전공 이수여부",
+    enrollment: fieldLabel("enrollment"),
+    graduation: fieldLabel("graduation"),
+    major: fieldLabel("major"),
+    coreMajor: fieldLabel("coreMajor"),
+    advancedMajor: fieldLabel("advancedMajor"),
+    industryCooperation: fieldLabel("industryCooperation"),
+    generalElective: fieldLabel("generalElective"),
+    secondMajor: fieldLabel("secondMajor"),
+    secondCoreMajor: fieldLabel("secondCoreMajor"),
+    secondPrerequisite: fieldLabel("secondPrerequisite"),
+    secondUncompleted: fieldLabel("secondUncompleted"),
+    prerequisite: fieldLabel("prerequisite"),
+    uncompleted: fieldLabel("uncompleted"),
+    thesis: fieldLabel("thesis"),
+    englishOnly: fieldLabel("englishOnly"),
+    graduationGpa: fieldLabel("graduationGpa"),
+    socialService: fieldLabel("socialService"),
+    pbl: fieldLabel("pbl"),
+    majorIcPbl: fieldLabel("majorIcPbl"),
+    microMajor: fieldLabel("microMajor"),
   };
 
   // 입력 검증 함수
@@ -264,7 +268,7 @@ function GraduationProcessingContent() {
     });
 
     if (emptyFields.length > 0) {
-      setValidationError(`${emptyFields.join(", ")}을(를) 입력해주세요.`);
+      setValidationError(t("graduation.processing.validationError", { fields: emptyFields.join(", ") }));
       return false;
     }
     
@@ -312,7 +316,7 @@ function GraduationProcessingContent() {
                   <div className="relative w-full max-w-sm">
                     <Image
                       src={imageUrl}
-                      alt="졸업사정조회 스크린샷"
+                      alt={t("graduation.processing.altScreenshot")}
                       width={800}
                       height={1200}
                       className="w-full h-auto max-h-[1200px] object-contain"
@@ -322,7 +326,7 @@ function GraduationProcessingContent() {
               </div>
               <div className="flex min-h-0 flex-1 flex-col px-4 pt-6 pb-4">
                 <p className="text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
-                  인식한 내용이 일치하는지 확인해주세요
+                  {t("graduation.processing.confirmMessage")}
                 </p>
               </div>
             </>
@@ -333,7 +337,7 @@ function GraduationProcessingContent() {
           {/* 주전공(제1전공) 학점 현황 */}
           <div className="shrink-0">
             <h2 className="mb-3 break-keep text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-              주전공(제1전공) 학점 현황
+              {t("graduation.processing.major1Title")}
             </h2>
             <div className="overflow-x-auto rounded-lg border border-[#EEEFF1] bg-white">
               <div>
@@ -341,16 +345,16 @@ function GraduationProcessingContent() {
                   <thead>
                     <tr className="border-b border-[#EEEFF1] bg-(--ds-gray-5)">
                       <th className="text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px", width: "40%" }}>
-                        이수명
+                        {t("graduation.table.courseName")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "16%" }}>
-                        배당
+                        {t("graduation.table.allocation")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "96px", minWidth: "96px" }}>
-                        취득(잔여)
+                        {t("graduation.table.acquired")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "14%" }}>
-                        이수
+                        {t("graduation.table.completion")}
                       </th>
                     </tr>
                   </thead>
@@ -360,7 +364,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("enrollment");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>재학(졸업직전) 및 수업연한 충족</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("enrollment")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -382,7 +386,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("graduation");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>졸업학점</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("graduation")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -404,7 +408,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("major");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>전공학점</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("major")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -426,7 +430,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("coreMajor");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>전공핵심</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("coreMajor")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -448,7 +452,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("advancedMajor");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>전공심화</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("advancedMajor")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation || ""}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -470,7 +474,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("industryCooperation");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>산학협력영역</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("industryCooperation")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -492,7 +496,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("generalElective");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>교양선택</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("generalElective")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -515,7 +519,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("microMajor");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>마이크로전공 이수여부</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("microMajor")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -543,7 +547,7 @@ function GraduationProcessingContent() {
           {effectiveMajorType === MAJOR_TYPE.DOUBLE && (
           <div className="mt-6 shrink-0">
             <h2 className="mb-3 break-keep text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-              제2전공 현황
+              {t("graduation.processing.major2Title")}
             </h2>
             <div className="overflow-x-auto rounded-lg border border-[#EEEFF1] bg-white">
               <div>
@@ -551,22 +555,22 @@ function GraduationProcessingContent() {
                   <thead>
                     <tr className="border-b border-[#EEEFF1] bg-(--ds-gray-5)">
                       <th className="text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px", width: "40%" }}>
-                        이수명
+                        {t("graduation.table.courseName")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "16%" }}>
-                        배당
+                        {t("graduation.table.allocation")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "96px", minWidth: "96px" }}>
-                        취득(잔여)
+                        {t("graduation.table.acquired")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "14%" }}>
-                        이수
+                        {t("graduation.table.completion")}
                       </th>
                     </tr>
                   </thead>
                   <tbody className="text-ds-body-16-r leading-ds-body-16-r text-ds-secondary">
                     <tr className="border-b border-[#EEEFF1]">
-                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>전공학점</td>
+                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("secondMajor")}</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>36</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                         <input
@@ -583,7 +587,7 @@ function GraduationProcessingContent() {
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{calculateCompletion(credits.secondMajor, "36")}</td>
                     </tr>
                     <tr className="border-b border-[#EEEFF1]">
-                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>전공핵심</td>
+                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("secondCoreMajor")}</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>18</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                         <input
@@ -600,7 +604,7 @@ function GraduationProcessingContent() {
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{calculateCompletion(credits.secondCoreMajor, "18")}</td>
                     </tr>
                     <tr className="border-b border-[#EEEFF1]">
-                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>선수강이수여부</td>
+                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("secondPrerequisite")}</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>Y</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                         <input
@@ -617,7 +621,7 @@ function GraduationProcessingContent() {
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{calculateCompletion(credits.secondPrerequisite, "Y")}</td>
                     </tr>
                     <tr className="border-b border-[#EEEFF1]">
-                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>미필과목이수여부</td>
+                      <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("secondUncompleted")}</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>Y</td>
                       <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                         <input
@@ -643,7 +647,7 @@ function GraduationProcessingContent() {
           {/* 필수 요건 */}
           <div className="mt-6 shrink-0">
             <h2 className="mb-3 break-keep text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-              필수 요건
+              {t("graduation.processing.requiredTitle")}
             </h2>
             <div className="overflow-x-auto rounded-lg border border-[#EEEFF1] bg-white">
               <div>
@@ -651,16 +655,16 @@ function GraduationProcessingContent() {
                   <thead>
                     <tr className="border-b border-[#EEEFF1] bg-(--ds-gray-5)">
                       <th className="text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px", width: "40%" }}>
-                        이수명
+                        {t("graduation.table.courseName")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "16%" }}>
-                        배당
+                        {t("graduation.table.allocation")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "96px", minWidth: "96px" }}>
-                        취득(잔여)
+                        {t("graduation.table.acquired")}
                       </th>
                       <th className="py-1 text-center text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary" style={{ paddingLeft: "2px", paddingRight: "2px", width: "14%" }}>
-                        이수
+                        {t("graduation.table.completion")}
                       </th>
                     </tr>
                   </thead>
@@ -669,7 +673,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("prerequisite");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>선수강이수여부</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("prerequisite")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -691,7 +695,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("uncompleted");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>미필과목이수여부</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("uncompleted")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -713,7 +717,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("thesis");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>졸업논문/시험/작품</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("thesis")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -735,7 +739,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("englishOnly");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>영어전용강좌수</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("englishOnly")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -757,7 +761,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("graduationGpa");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>졸업평점</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("graduationGpa")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -779,7 +783,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("socialService");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>사회봉사</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("socialService")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -801,7 +805,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("pbl");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>PBL강좌수</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("pbl")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -823,7 +827,7 @@ function GraduationProcessingContent() {
                       const allocation = getAllocation("majorIcPbl");
                       return (
                         <tr className="border-b border-[#EEEFF1]">
-                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>전공IC-PBL강좌수</td>
+                          <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{rowLabel("majorIcPbl")}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>{allocation}</td>
                           <td className="text-center" style={{ paddingLeft: "2px", paddingRight: "2px", paddingTop: "8px", paddingBottom: "8px" }}>
                             <input
@@ -870,7 +874,7 @@ function GraduationProcessingContent() {
                 }
               }}
             >
-              일치 확인
+              {t("graduation.processing.confirmCta")}
             </Button>
           </div>
         )}
@@ -888,7 +892,7 @@ function GraduationProcessingContent() {
           <div className="relative w-full max-w-sm">
             <Image
               src={imageUrl as string}
-              alt="졸업사정조회 스크린샷"
+              alt={t("graduation.processing.altScreenshot")}
               width={800}
               height={1200}
               className="w-full h-auto max-h-[1200px] object-contain"
@@ -920,7 +924,7 @@ function GraduationProcessingContent() {
             {progress}%
           </span>
           <span className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
-            이미지 인식중...
+            {t("graduation.processing.scanning")}
           </span>
         </div>
       </div>
@@ -930,10 +934,12 @@ function GraduationProcessingContent() {
 
 export default function GraduationProcessingPage() {
   useHeaderBackground("white");
+  const { t } = useTranslation();
+
   return (
     <Suspense fallback={
       <div className="flex h-full min-h-0 flex-col items-center justify-center bg-white">
-        <div className="text-ds-body-16-r text-ds-tertiary">로딩 중...</div>
+        <div className="text-ds-body-16-r text-ds-tertiary">{t("common.loading")}</div>
       </div>
     }>
       <GraduationProcessingContent />

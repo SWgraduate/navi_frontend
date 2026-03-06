@@ -1,0 +1,470 @@
+{
+  "header": {
+    "home": "NAVI",
+    "speak": "Speak",
+    "login": "Login",
+    "signup": "Sign Up",
+    "graduation": "Graduation",
+    "graduationUpload": "Graduation Scan",
+    "graduationResult": "Graduation Result",
+    "my": "My",
+    "myTerms": "Terms & Privacy",
+    "myLanguage": "Language",
+    "myPersonal": "Personal Info",
+    "myPersonalName": "Name",
+    "myPersonalStudentId": "Student ID",
+    "myPersonalMajor": "Major",
+    "myPersonalSecondMajor": "Second Major",
+    "myPersonalAcademicStatus": "Academic Status",
+    "myPersonalYearSemester": "Year / Semester",
+    "history": "History",
+    "termsService": "Terms of Service",
+    "termsPrivacyPolicy": "NAVI Privacy Policy",
+    "termsPrivacy": "Privacy Collection & Use",
+    "termsAi": "AI Service Disclaimer",
+    "termsMarketing": "Marketing Consent",
+    "termsAgree": "Terms Agreement",
+    "edit": "Edit"
+  },
+  "bottomBar": {
+    "graduation": "Graduation",
+    "home": "NAVI",
+    "my": "My"
+  },
+  "chatInput": {
+    "placeholder": "Ask me anything."
+  },
+  "scan": {
+    "graduation": "Graduation Scan",
+    "schedule": "Recent Schedule Scan"
+  },
+  "languages": {
+    "koNative": "한국어",
+    "enNative": "English",
+    "zhNative": "中文"
+  },
+  "majors": {
+    "ictConvergence": "School of ICT Convergence",
+    "ictDesignTech": "ICT Convergence Design Technology",
+    "ictMediaTech": "ICT Convergence Media Technology",
+    "ictCultureTech": "ICT Convergence Culture Technology",
+    "computerScience": "School of Computer Science",
+    "artificialIntelligence": "School of Artificial Intelligence",
+    "mathDataScience": "Department of Mathematical Data Science",
+    "business": "Department of Business Administration"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "next": "Next",
+    "complete": "Done",
+    "edit": "Edit",
+    "agree": "Agree",
+    "revoke": "Revoke",
+    "logout": "Logout",
+    "withdraw": "Withdraw",
+    "start": "Get Started",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
+    "attach": "Attach",
+    "close": "Close",
+    "noResults": "No results found",
+    "remove": "Remove",
+    "loading": "Loading...",
+    "back": "Back",
+    "history": "History",
+    "add": "Add",
+    "up": "Up",
+    "none": "None",
+    "file": "File",
+    "secondMajorTypes": {
+      "multiple": "Multi Major",
+      "convergence": "Convergence Major",
+      "minor": "Minor",
+      "double": "Double Major",
+      "linked": "Linked Major",
+      "micro": "Micro Major"
+    }
+  },
+  "chat": {
+    "loading": "Generating reply"
+  },
+  "splash": {
+    "loading": "Loading Navi"
+  },
+  "home": {
+    "welcomeName": "Hello, {{name}}! ",
+    "hanyangUniv": "Hanyang",
+    "welcomeSuffix": " life made easier"
+  },
+  "login": {
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "findId": "Find ID",
+    "findPassword": "Find Password",
+    "signupLink": "Sign Up",
+    "submit": "Login",
+    "emailError": "Email is incorrect",
+    "passwordError": "Password is incorrect"
+  },
+  "signup": {
+    "terms": {
+      "title1": "Welcome to Navi",
+      "title2": "Please agree to the terms",
+      "allRequired": "Agree to all required terms",
+      "requiredBadge": "[Required]",
+      "optionalBadge": "[Optional]",
+      "service": "Terms of Service",
+      "privacy": "Privacy Collection & Use",
+      "ai": "AI Service Disclaimer",
+      "marketing": "Marketing Consent",
+      "submit": "Agree"
+    },
+    "email": {
+      "title1": "First, verify your",
+      "title2": "student email",
+      "subtitle": "This email will be used for login",
+      "label": "Email",
+      "placeholder": "Enter your email",
+      "submit": "Get Verification Code"
+    },
+    "verify": {
+      "title1": "Enter the 6-digit",
+      "title2": "code sent to your email",
+      "locked": "Please try again after 24 hours.",
+      "codeGroup": "6-digit verification code",
+      "digitLabel": "Digit {{index}}",
+      "resend": "Resend Code",
+      "hint1": "If the timer expires, please request a new code.",
+      "hint2": "You can receive up to 5 new codes per day.",
+      "hint3": "After 5 consecutive failures, please try again after 24 hours.",
+      "submit": "Confirm"
+    },
+    "name": {
+      "title": "What is your name?",
+      "label": "Name",
+      "placeholder": "Enter your name",
+      "submit": "Next"
+    },
+    "password": {
+      "title1Name": "Nice to meet you, {{name}}!",
+      "title2": "Set your password",
+      "label": "Password",
+      "placeholder": "Enter your password.",
+      "confirmLabel": "Confirm Password",
+      "confirmPlaceholder": "Re-enter your password.",
+      "submit": "Next",
+      "defaultName": "Member"
+    },
+    "complete": {
+      "title": "How close are you to graduation?",
+      "subtitle": "Please provide your academic info for graduation check",
+      "studentIdLabel": "Student ID",
+      "studentIdPlaceholder": "Enter student ID (e.g. 2026000000)",
+      "majorLabel": "Major",
+      "majorPlaceholder": "Select your major",
+      "secondMajorTypeLabel": "Second Major Type",
+      "secondMajorTypePlaceholder": "Select second major type",
+      "secondMajorTypePickerTitle": "Select second major type",
+      "secondMajorLabel": "Second Major",
+      "secondMajorPlaceholder": "Select your major",
+      "secondMajorPickerTitle": "Select second major",
+      "academicStatusLabel": "Academic Status",
+      "enrolled": "Enrolled",
+      "leave": "On Leave",
+      "yearSemesterLabel": "Current Year / Semester",
+      "yearSemesterPlaceholder": "Select year / semester",
+      "yearSemesterPickerTitle": "Select Year / Semester",
+      "searchNoResults": "No results found",
+      "year": "Year {{n}}",
+      "semester": "Sem {{n}}",
+      "yearSemesterDisplay": "Year {{y}} Sem {{s}}",
+      "submit": "Done"
+    },
+    "welcome": {
+      "title": "Welcome!",
+      "subtitle": "Start managing your studies with Navi.",
+      "submit": "Start Navi"
+    },
+    "termsDetail": {
+      "service": "Terms of Service",
+      "privacy": "Privacy Collection & Use",
+      "privacyPolicy": "NAVI Privacy Policy",
+      "ai": "AI Service Disclaimer",
+      "marketing": "Marketing Consent",
+      "unknown": "Terms",
+      "agree": "Agree",
+      "revokeButton": "Revoke Consent",
+      "revokeModalTitle": "Revoke marketing consent?",
+      "revokeConfirm": "Revoke",
+      "cancel": "Cancel",
+      "defaultContent": "{{title}} content will be shown here.",
+      "notFound": "Terms not found."
+    }
+  },
+  "graduation": {
+    "loading": "Loading",
+    "title": "Start graduation management smartly",
+    "subtitle1": "Screenshot your graduation check from Hanyang Portal",
+    "subtitle2": "and view your remaining requirements at a glance.",
+    "start": "Get Started",
+    "upload": {
+      "title1": "Your photo should",
+      "title2": "contain the following items.",
+      "caption1": "From graduation credits to general electives,",
+      "caption2": "capture the full screen for accurate analysis.",
+      "caption3": "Double major students must include second major info.",
+      "altExample": "Graduation check table example",
+      "altUploaded": "Uploaded graduation check screenshot",
+      "altReselect": "Re-select image",
+      "camera": "Take Photo",
+      "next": "Next",
+      "selectPhoto": "Select Photo"
+    },
+    "processing": {
+      "confirmMessage": "Please verify the recognized content is correct",
+      "altScreenshot": "Graduation check screenshot",
+      "validationError": "Please enter {{fields}}.",
+      "submit": "Confirm",
+      "confirmCta": "Confirm Match",
+      "scanning": "Recognizing image...",
+      "major1Title": "Major (1st) Credits",
+      "major2Title": "Second Major Status",
+      "requiredTitle": "Required Conditions"
+    },
+    "result": {
+      "noResult": "No saved graduation check results.",
+      "major1Title": "Major (1st) Credits",
+      "major2Title": "Second Major Status",
+      "requiredTitle": "Required Conditions"
+    },
+    "table": {
+      "courseName": "Course",
+      "allocation": "Required",
+      "acquired": "Acquired",
+      "completion": "Done"
+    },
+    "fields": {
+      "enrollment": "Enrollment & Study Period",
+      "graduation": "Graduation Credits",
+      "major": "Major Credits",
+      "coreMajor": "Core Major",
+      "advancedMajor": "Advanced Major",
+      "industryCooperation": "Industry Cooperation",
+      "generalElective": "General Elective",
+      "secondMajor": "2nd Major Credits",
+      "secondCoreMajor": "2nd Core Major",
+      "secondPrerequisite": "2nd Prerequisite",
+      "secondUncompleted": "2nd Incomplete Courses",
+      "prerequisite": "Prerequisites",
+      "uncompleted": "Incomplete Courses",
+      "thesis": "Thesis/Exam/Work",
+      "englishOnly": "English-Only Courses",
+      "graduationGpa": "Graduation GPA",
+      "socialService": "Social Service",
+      "pbl": "PBL Courses",
+      "majorIcPbl": "Major IC-PBL",
+      "microMajor": "Micro Major Completion"
+    },
+    "resultRows": {
+      "enrollment": "Enrollment & Study Period",
+      "graduation": "Graduation Credits",
+      "major": "Major Credits",
+      "coreMajor": "Core Major",
+      "advancedMajor": "Advanced Major",
+      "industryCooperation": "Industry Cooperation",
+      "generalElective": "General Elective",
+      "microMajor": "Micro Major Completion",
+      "prerequisite": "Prerequisites",
+      "uncompleted": "Incomplete Courses",
+      "thesis": "Thesis/Exam/Work",
+      "englishOnly": "English-Only Courses",
+      "graduationGpa": "Graduation GPA",
+      "socialService": "Social Service",
+      "pbl": "PBL Courses",
+      "majorIcPbl": "Major IC-PBL",
+      "secondMajor": "Major Credits",
+      "secondCoreMajor": "Core Major",
+      "secondPrerequisite": "Prerequisites",
+      "secondUncompleted": "Incomplete Courses"
+    }
+  },
+  "history": {
+    "searchPlaceholder": "Search history...",
+    "noResults": "No results found."
+  },
+  "historyMenu": {
+    "pin": "Pin",
+    "rename": "Rename",
+    "delete": "Delete"
+  },
+  "attachmentMenu": {
+    "label": "Attachment options",
+    "file": "File",
+    "photo": "Photo",
+    "camera": "Camera"
+  },
+  "speak": {
+    "micOn": "Turn off mic",
+    "micOff": "Turn on mic",
+    "close": "Close",
+    "attach": "Attach",
+    "permissionDenied": "Microphone access required. Please allow it in browser settings.",
+    "dummyLine1": "Spoken text appears here",
+    "dummyLine2": "Spoken text appears here",
+    "dummyLine3": "Newest input appears darker"
+  },
+  "my": {
+    "greetingName": "{{name}}",
+    "greetingText": "Hello!",
+    "personalInfo": "Personal Info",
+    "language": "Language",
+    "languageValue": "English (EN)",
+    "terms": "Terms & Privacy",
+    "versionLabel": "Version",
+    "currentVersion": "v{{version}}",
+    "logout": "Logout",
+    "withdraw": "Withdraw",
+    "logoutModalTitle": "Log out?",
+    "logoutModalCaption": "You can log back in anytime",
+    "logoutConfirm": "Logout",
+    "withdrawModalTitle": "Leave NAVI?",
+    "withdrawModalCaption": "Deleted data cannot be recovered.\nPlease decide carefully.",
+    "withdrawConfirm": "Withdraw",
+    "cancel": "Cancel",
+    "languagePage": {
+      "title": "Select language",
+      "label": "Language",
+      "submit": "Save"
+    },
+    "termsPage": {
+      "required": "Required",
+      "optional": "Optional",
+      "privacy": "Privacy Collection & Use",
+      "privacyPolicy": "NAVI Privacy Policy",
+      "service": "Terms of Service",
+      "ai": "AI Service Disclaimer",
+      "marketing": "Marketing Consent"
+    },
+    "personal": {
+      "name": "Name",
+      "studentId": "Student ID",
+      "major": "Major",
+      "secondMajor": "Second Major",
+      "academicStatus": "Academic Status",
+      "yearSemester": "Current Year / Semester",
+      "namePage": {
+        "title": "Enter your name",
+        "label": "Name",
+        "placeholder": "Enter your name",
+        "error": "Please enter your name.",
+        "submit": "Save"
+      },
+      "studentIdPage": {
+        "title": "Enter your 10-digit student ID",
+        "label": "Student ID",
+        "placeholder": "Enter student ID",
+        "error": "Please enter a 10-digit student ID",
+        "submit": "Save"
+      },
+      "majorPage": {
+        "title": "Select your major",
+        "label": "Major",
+        "placeholder": "Select your major",
+        "error": "Please select your major.",
+        "submit": "Save"
+      },
+      "secondMajorPage": {
+        "title": "Select your second major",
+        "typeLabel": "Second Major Type",
+        "typePlaceholder": "Select second major type",
+        "typeError": "Please select second major type.",
+        "majorLabel": "Second Major",
+        "majorPlaceholder": "Select your major",
+        "majorError": "Please select your second major.",
+        "submit": "Save"
+      },
+      "academicStatusPage": {
+        "title": "Select your academic status",
+        "label": "Academic Status",
+        "enrolled": "Enrolled",
+        "leave": "On Leave",
+        "error": "Please select your academic status.",
+        "submit": "Save"
+      },
+      "yearSemesterPage": {
+        "title": "Select year / semester",
+        "label": "Current Year / Semester",
+        "placeholder": "Select year / semester",
+        "error": "Please select year / semester.",
+        "display": "Year {{y}} Sem {{s}}",
+        "submit": "Save"
+      }
+    }
+  },
+  "sheets": {
+    "majorSelect": {
+      "defaultTitle": "Select your major",
+      "searchPlaceholder": "Search major",
+      "noResults": "No results found"
+    },
+    "yearSemester": {
+      "title": "Select Year / Semester",
+      "year": "Year {{n}}",
+      "semester": "Sem {{n}}",
+      "confirm": "Done"
+    }
+  },
+  "errors": {
+    "email": {
+      "empty": "Please enter your email",
+      "korean": "Email cannot contain Korean characters",
+      "uppercase": "Email cannot contain uppercase letters",
+      "koreanSignup": "Email cannot contain Korean characters.",
+      "uppercaseSignup": "Email cannot contain uppercase letters."
+    },
+    "password": {
+      "minLength": "Password must be at least 8 characters",
+      "korean": "Password cannot contain Korean characters",
+      "rule": "8-16 characters / uppercase, lowercase, numbers, and special characters"
+    },
+    "passwordConfirm": {
+      "empty": "Please re-enter your password",
+      "mismatch": "Passwords do not match"
+    },
+    "name": {
+      "empty": "Please enter your name"
+    },
+    "verifyCode": {
+      "length": "Please enter a 6-digit verification code",
+      "numeric": "Please enter 6 digits",
+      "incorrect": "Incorrect code. Please check again.",
+      "expired": "Code has expired. Please request a new one.",
+      "resendLimit": "You can request a new code up to 5 times per day. Try again tomorrow."
+    },
+    "studentId": {
+      "length": "Please enter a 10-digit student ID",
+      "numeric": "Numbers only",
+      "format": "Please enter a valid student ID"
+    },
+    "yearSemester": {
+      "empty": "Please select year / semester",
+      "format": "Please select year / semester"
+    },
+    "major": {
+      "empty": "Please select your major"
+    },
+    "academicStatus": {
+      "required": "Please select your academic status"
+    },
+    "secondMajor": {
+      "duplicate": "Already selected as your major"
+    },
+    "personalName": {
+      "empty": "Please enter your name",
+      "special": "Name cannot contain special characters"
+    }
+  }
+}

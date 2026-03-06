@@ -10,11 +10,14 @@ import { matchMockAccount } from "@/lib/mock-accounts";
 import { loginFormSchema } from "@/lib/schemas/login";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 const EMAIL_SUFFIX = "@hanyang.ac.kr";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   useHeaderBackground("white");
 
   const [emailPart, setEmailPart] = useState("");
@@ -51,8 +54,8 @@ export default function LoginPage() {
       withViewTransition(() => router.replace("/home"));
     } else {
       setCredentialsErrors({
-        email: "이메일이 올바르지 않습니다",
-        password: "비밀번호가 올바르지 않습니다",
+        email: t("login.emailError"),
+        password: t("login.passwordError"),
       });
     }
   };
@@ -63,7 +66,7 @@ export default function LoginPage() {
         {/* 이메일 */}
         <div className="flex flex-col gap-2">
           <label htmlFor="login-email" className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
-            이메일
+            {t("login.emailLabel")}
           </label>
           <div
             className={`flex items-center rounded-lg border-2 bg-secondary ${(touched.emailPart && fieldErrors.emailPart) || credentialsErrors?.email ? "border-destructive" : "border-transparent focus-within:border-primary"}`}
@@ -73,7 +76,7 @@ export default function LoginPage() {
               type="text"
               inputMode="email"
               autoComplete="username"
-              placeholder="이메일을 입력해주세요"
+              placeholder={t("login.emailPlaceholder")}
               value={emailPart}
               onChange={(e) => {
               setEmailPart(e.target.value);
@@ -88,7 +91,7 @@ export default function LoginPage() {
           </div>
           {((touched.emailPart && fieldErrors.emailPart) || credentialsErrors?.email) && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              {credentialsErrors?.email ?? fieldErrors.emailPart}
+              {credentialsErrors?.email ?? t(fieldErrors.emailPart ?? "")}
             </p>
           )}
         </div>
@@ -96,7 +99,7 @@ export default function LoginPage() {
         {/* 비밀번호 */}
         <div className="flex flex-col gap-2">
           <label htmlFor="login-password" className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
-            비밀번호
+            {t("login.passwordLabel")}
           </label>
           <div
             className={`relative flex items-center rounded-lg border-2 bg-secondary ${(touched.password && fieldErrors.password) || credentialsErrors?.password ? "border-destructive" : "border-transparent focus-within:border-primary"}`}
@@ -105,7 +108,7 @@ export default function LoginPage() {
               id="login-password"
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
-              placeholder="비밀번호를 입력해주세요"
+              placeholder={t("login.passwordPlaceholder")}
               value={password}
               onChange={(e) => {
               setPassword(e.target.value);
@@ -118,14 +121,14 @@ export default function LoginPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-md text-ds-tertiary active:bg-ds-gray-10"
-              aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+              aria-label={showPassword ? t("common.hidePassword") : t("common.showPassword")}
             >
               {showPassword ? <EyeOff style={{ width: 24, height: 24 }} /> : <Eye style={{ width: 24, height: 24 }} />}
             </button>
           </div>
           {((touched.password && fieldErrors.password) || credentialsErrors?.password) && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              {credentialsErrors?.password ?? fieldErrors.password}
+              {credentialsErrors?.password ?? t(fieldErrors.password ?? "")}
             </p>
           )}
         </div>
@@ -133,17 +136,17 @@ export default function LoginPage() {
         {/* 링크: 아이디 찾기 | 비밀번호 찾기 | 회원가입 */}
         <div className="flex items-center justify-center gap-8 text-ds-caption-14-m leading-ds-caption-14-m text-medium text-ds-Secondary mt-2">
           <button type="button" className="active:opacity-70">
-            아이디 찾기
+            {t("login.findId")}
           </button>
           <span aria-hidden
           className="text-[#EEEFF1]">|</span>
           <button type="button" className="active:opacity-70">
-            비밀번호 찾기
+            {t("login.findPassword")}
           </button>
           <span aria-hidden
           className="text-[#EEEFF1]">|</span>
           <TransitionLink href="/signup" className="active:opacity-70">
-            회원가입
+            {t("login.signupLink")}
           </TransitionLink>
         </div>
 
@@ -153,7 +156,7 @@ export default function LoginPage() {
           size="lg"
           className="h-auto w-full py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white mt-4"
         >
-          로그인
+          {t("login.submit")}
         </Button>
       </form>
     </div>

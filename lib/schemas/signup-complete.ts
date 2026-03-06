@@ -4,35 +4,35 @@ import { z } from "zod";
 export const signupCompleteStudentIdSchema = z
   .string()
   .trim()
-  .length(10, "학번 10자리를 입력해주세요")
-  .regex(/^\d{10}$/, "숫자만 입력해주세요")
-  .refine((v) => /^20[123]/.test(v), "학번을 올바르게 입력해주세요");
+  .length(10, "errors.studentId.length")
+  .regex(/^\d{10}$/, "errors.studentId.numeric")
+  .refine((v) => /^20[123]/.test(v), "errors.studentId.format");
 
 /** 학년·학기: "N-N" 형식 (예: 1-1, 2-2) */
 const yearSemesterSchema = z
   .string()
   .trim()
-  .min(1, "이수 학년/학기를 선택해주세요")
-  .regex(/^[1-4]-[12]$/, "학년/학기를 선택해주세요");
+  .min(1, "errors.yearSemester.empty")
+  .regex(/^[1-4]-[12]$/, "errors.yearSemester.format");
 
 /** 6단계 학적 정보 폼 (주전공·제2전공 중복 불가) */
 export const signupCompleteFormSchema = z
   .object({
     studentId: signupCompleteStudentIdSchema,
-    major: z.string().trim().min(1, "주전공을 선택해주세요"),
+    major: z.string().trim().min(1, "errors.major.empty"),
     secondMajorType: z.string(),
     secondMajor: z.string(),
     academicStatus: z
-      .enum(["enrolled", "leave"], { required_error: "학적상태를 선택해주세요" })
+      .enum(["enrolled", "leave"], { required_error: "errors.academicStatus.required" })
       .or(z.literal("")),
     yearSemester: yearSemesterSchema.or(z.literal("")),
   })
   .refine((data) => data.academicStatus !== "", {
-    message: "학적상태를 선택해주세요",
+    message: "errors.academicStatus.required",
     path: ["academicStatus"],
   })
   .refine((data) => data.yearSemester.trim() !== "" && /^[1-4]-[12]$/.test(data.yearSemester), {
-    message: "이수 학년/학기를 선택해주세요",
+    message: "errors.yearSemester.empty",
     path: ["yearSemester"],
   })
   .refine(
@@ -40,7 +40,7 @@ export const signupCompleteFormSchema = z
       if (!data.secondMajorType || !data.secondMajor.trim()) return true;
       return data.major.trim() !== data.secondMajor.trim();
     },
-    { message: "이미 주전공으로 선택했어요", path: ["secondMajor"] }
+    { message: "errors.secondMajor.duplicate", path: ["secondMajor"] }
   );
 
 export type SignupCompleteFormValues = z.infer<typeof signupCompleteFormSchema>;

@@ -5,20 +5,29 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import { type Language } from "@/lib/i18n-storage";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 import { AI_TERMS } from "../content/ai";
 import { MARKETING_TERMS } from "../content/marketing";
 import { PRIVACY_POLICY_INTRO, PRIVACY_POLICY_SECTIONS } from "../content/privacy-policy";
 import { PRIVACY_TERMS } from "../content/privacy";
 import { SERVICE_TERMS_SECTIONS } from "../content/service";
 
-const TERMS_META: Record<string, { title: string }> = {
-  service: { title: "서비스 이용약관" },
-  privacy: { title: "개인정보 수집 및 이용 동의" },
-  "privacy-policy": { title: "NAVI 개인정보 처리방침" },
-  ai: { title: "AI 서비스 결과 면책 동의" },
-  marketing: { title: "마케팅 정보 수신 동의" },
+const TERMS_META: Record<string, { titleKey: string }> = {
+  service: { titleKey: "signup.termsDetail.service" },
+  privacy: { titleKey: "signup.termsDetail.privacy" },
+  "privacy-policy": { titleKey: "signup.termsDetail.privacyPolicy" },
+  ai: { titleKey: "signup.termsDetail.ai" },
+  marketing: { titleKey: "signup.termsDetail.marketing" },
 };
+
+function resolveTermsLanguage(language?: string): Language {
+  if (language?.startsWith("en")) return "en";
+  if (language?.startsWith("zh")) return "zh";
+  return "ko";
+}
 
 /** 회원가입 - 약관 동의 상세 페이지 (Figma 1292-9411: 서비스 이용약관) */
 export default function SignupTermsPage() {
@@ -26,12 +35,20 @@ export default function SignupTermsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = typeof params.id === "string" ? params.id : "";
+  const { t, i18n } = useTranslation();
   useHeaderBackground("white");
 
   const fromMy = searchParams.get("from") === "my";
+  const language = resolveTermsLanguage(i18n.resolvedLanguage ?? i18n.language);
+  const serviceTermsSections = SERVICE_TERMS_SECTIONS[language];
+  const privacyPolicyIntro = PRIVACY_POLICY_INTRO[language];
+  const privacyPolicySections = PRIVACY_POLICY_SECTIONS[language];
+  const privacyTerms = PRIVACY_TERMS[language];
+  const aiTerms = AI_TERMS[language];
+  const marketingTerms = MARKETING_TERMS[language];
 
   const meta = id && TERMS_META[id];
-  const title = (meta && "title" in meta ? meta.title : undefined) ?? "약관";
+  const title = (meta && "titleKey" in meta ? t(meta.titleKey) : undefined) ?? t("signup.termsDetail.unknown");
 
   const handleBack = () => {
     if (showAgreeButton && id && typeof window !== "undefined") {
@@ -76,7 +93,7 @@ export default function SignupTermsPage() {
       >
         {isService ? (
           <div className="flex flex-col gap-4 pb-15 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
-            {SERVICE_TERMS_SECTIONS.map((section) => (
+            {serviceTermsSections.map((section) => (
               <section key={section.title} className="flex flex-col gap-1">
                 <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
                   {section.title}
@@ -89,8 +106,8 @@ export default function SignupTermsPage() {
           </div>
         ) : isPrivacyPolicy ? (
           <div className="flex flex-col gap-4 pb-6 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
-            <p>{PRIVACY_POLICY_INTRO}</p>
-            {PRIVACY_POLICY_SECTIONS.map((section) => (
+            <p>{privacyPolicyIntro}</p>
+            {privacyPolicySections.map((section) => (
               <section key={section.title} className="flex flex-col gap-1">
                 <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
                   {section.title}
@@ -121,7 +138,7 @@ export default function SignupTermsPage() {
           </div>
         ) : isPrivacy ? (
           <div className="flex flex-col gap-4 pb-6 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
-            <p>{PRIVACY_TERMS.intro}</p>
+            <p>{privacyTerms.intro}</p>
             <div
               className="grid w-full overflow-hidden rounded-md border border-border"
               style={{
@@ -131,29 +148,29 @@ export default function SignupTermsPage() {
               {/* 헤더 행 */}
               <div className="flex items-center border-b border-r border-border bg-muted px-2 py-2">
                 <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
-                  {PRIVACY_TERMS.table.headers[0]}
+                  {privacyTerms.table.headers[0]}
                 </p>
               </div>
               <div className="flex items-center border-b border-r border-border bg-muted px-2 py-2">
                 <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
-                  {PRIVACY_TERMS.table.headers[1]}
+                  {privacyTerms.table.headers[1]}
                 </p>
               </div>
               <div className="flex items-center border-b border-border bg-muted px-2 py-2">
                 <p className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-secondary">
-                  {PRIVACY_TERMS.table.headers[2]}
+                  {privacyTerms.table.headers[2]}
                 </p>
               </div>
               {/* 데이터 행 - 가로 라인 맞춤, 보유기간 하나로 통일 */}
-              {PRIVACY_TERMS.table.rows.map((row, i) => (
+              {privacyTerms.table.rows.map((row, i) => (
                 <Fragment key={i}>
                   <div
-                    className={`flex min-h-10 items-center border-r border-border px-2 py-2 ${i < PRIVACY_TERMS.table.rows.length - 1 ? "border-b" : ""}`}
+                    className={`flex min-h-10 items-center border-r border-border px-2 py-2 ${i < privacyTerms.table.rows.length - 1 ? "border-b" : ""}`}
                   >
                     <p className="whitespace-pre-wrap">{row.purpose}</p>
                   </div>
                   <div
-                    className={`flex min-h-10 items-center border-r border-border px-2 py-2 ${i < PRIVACY_TERMS.table.rows.length - 1 ? "border-b" : ""}`}
+                    className={`flex min-h-10 items-center border-r border-border px-2 py-2 ${i < privacyTerms.table.rows.length - 1 ? "border-b" : ""}`}
                   >
                     <p>{row.items}</p>
                   </div>
@@ -162,22 +179,22 @@ export default function SignupTermsPage() {
                       className="flex min-h-0 items-center justify-center border-b border-border px-2 py-2"
                       style={{ gridRow: "span 3" }}
                     >
-                      <p>{PRIVACY_TERMS.table.retention}</p>
+                      <p>{privacyTerms.table.retention}</p>
                     </div>
                   )}
                 </Fragment>
               ))}
             </div>
-            <p>{PRIVACY_TERMS.disclaimer}</p>
+            <p>{privacyTerms.disclaimer}</p>
           </div>
         ) : isAi ? (
           <div className="flex flex-col gap-4 pb-6 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
             <div className="rounded-lg bg-destructive/10 px-4 py-2">
               <p className="text-ds-caption-14-m font-medium text-destructive">
-                {AI_TERMS.notice}
+                {aiTerms.notice}
               </p>
             </div>
-            {AI_TERMS.sections.map((section) => (
+            {aiTerms.sections.map((section) => (
               <section key={section.title} className="flex flex-col gap-1">
                 <p className="text-ds-caption-14-m font-medium text-ds-secondary">
                   {section.title}
@@ -189,9 +206,9 @@ export default function SignupTermsPage() {
         ) : isMarketing ? (
           <div className="flex flex-col gap-4 pb-6 text-ds-caption-14-r leading-ds-caption-14-r text-ds-secondary tracking-[-0.35px]">
             <p className="text-ds-caption-14-m font-medium text-ds-secondary">
-              {MARKETING_TERMS.intro}
+              {marketingTerms.intro}
             </p>
-            {MARKETING_TERMS.sections.map((section) => (
+            {marketingTerms.sections.map((section) => (
               <section key={section.title} className="flex flex-col gap-1">
                 <p className="text-ds-caption-14-m font-medium text-ds-secondary">
                   {section.title}
@@ -209,7 +226,7 @@ export default function SignupTermsPage() {
                 )}
               </section>
             ))}
-            <p>{MARKETING_TERMS.disclaimer}</p>
+            <p>{marketingTerms.disclaimer}</p>
           </div>
         ) : (
           <div className="pb-6">
@@ -219,8 +236,8 @@ export default function SignupTermsPage() {
             <div className="mt-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
               <p className="whitespace-pre-wrap">
                 {id && meta
-                  ? `${title} 약관 내용이 여기에 표시됩니다.`
-                  : "약관을 찾을 수 없습니다."}
+                  ? t("signup.termsDetail.defaultContent", { title })
+                  : t("signup.termsDetail.notFound")}
               </p>
             </div>
           </div>
@@ -254,7 +271,7 @@ export default function SignupTermsPage() {
                 className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb bg-(--ds-bg-disabled) text-ds-disabled cursor-pointer hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)"
                 onClick={() => setRevokeModalOpen(true)}
               >
-                동의 철회하기
+                {t("signup.termsDetail.revokeButton")}
               </Button>
             ) : (
               <Button
@@ -264,7 +281,7 @@ export default function SignupTermsPage() {
                 className="h-auto w-full rounded-lg py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white"
                 onClick={handleBack}
               >
-                동의하기
+                {t("signup.termsDetail.agree")}
               </Button>
             )}
           </div>
@@ -274,9 +291,9 @@ export default function SignupTermsPage() {
       <Modal
         open={revokeModalOpen}
         onOpenChange={setRevokeModalOpen}
-        title="마케팅 정보 수신을 철회할까요?"
-        cancelLabel="취소"
-        confirmLabel="철회"
+        title={t("signup.termsDetail.revokeModalTitle")}
+        cancelLabel={t("signup.termsDetail.cancel")}
+        confirmLabel={t("signup.termsDetail.revokeConfirm")}
         onConfirm={handleRevokeConfirm}
         confirmVariant="primary"
       />

@@ -6,11 +6,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 /** Figma 1212-11510: 졸업사정조회 스캔 페이지 */
 export default function GraduationUploadPage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -48,19 +51,19 @@ export default function GraduationUploadPage() {
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-4 pb-4">
         <div className="mb-6">
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            사진에 아래와 같은
+            {t("graduation.upload.title1")}
           </h1>
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            항목들이 보여야해요.
+            {t("graduation.upload.title2")}
           </h1>
           <p className="mt-2 text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
-            정확한 분석을 위해 졸업학점부터 교양선택까지
+            {t("graduation.upload.caption1")}
           </p>
           <p className="mt-1 text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
-            전체 화면이 보이도록 캡처해주세요.
+            {t("graduation.upload.caption2")}
           </p>
           <p className="mt-1 text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
-            다중전공자라면 제2전공까지 포함되어야합니다.
+            {t("graduation.upload.caption3")}
           </p>
         </div>
 
@@ -72,11 +75,11 @@ export default function GraduationUploadPage() {
                 type="button"
                 onClick={handleFileSelectClick}
                 className="w-full cursor-pointer"
-                aria-label="이미지 다시 선택하기"
+                aria-label={t("graduation.upload.altReselect")}
               >
                 <Image
                   src={previewUrl}
-                  alt="업로드된 졸업사정조회 스크린샷"
+                  alt={t("graduation.upload.altUploaded")}
                   width={800}
                   height={1200}
                   className="w-full h-auto max-h-[1200px]"
@@ -85,7 +88,7 @@ export default function GraduationUploadPage() {
             ) : (
               <Image
                 src="/example/example.png"
-                alt="졸업사정조회 표 예시"
+                alt={t("graduation.upload.altExample")}
                 width={800}
                 height={1200}
                 className="w-full h-auto max-h-[1200px]"
@@ -121,7 +124,7 @@ export default function GraduationUploadPage() {
           size="icon-lg"
           className="shrink-0 h-12 w-12 p-0 text-ds-brand [&_svg]:size-6!"
           onClick={handleCameraClick}
-          aria-label="촬영하기"
+          aria-label={t("graduation.upload.camera")}
         >
           <svg
             width="24"
@@ -155,7 +158,7 @@ export default function GraduationUploadPage() {
           className="flex-1 text-white"
           onClick={selectedFile ? handleUpload : handleFileSelectClick}
         >
-          {selectedFile ? "다음" : "사진 선택"}
+          {selectedFile ? t("graduation.upload.next") : t("graduation.upload.selectPhoto")}
         </Button>
       </div>
     </div>

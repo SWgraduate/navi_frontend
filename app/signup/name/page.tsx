@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { signupNameFormSchema } from "@/lib/schemas/signup-name";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 const BUTTON_AREA_HEIGHT = 80;
 
 /** Figma 4/6: 회원가입 - 이름 입력 */
 export default function SignupNamePage() {
   const router = useRouter();
+  const { t } = useTranslation();
   useHeaderBackground("white");
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
@@ -55,7 +58,7 @@ export default function SignupNamePage() {
         </p>
         <div className="flex flex-col gap-2">
           <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-            이제 이름을 알려주세요
+            {t("signup.name.title")}
           </h1>
         </div>
 
@@ -64,14 +67,14 @@ export default function SignupNamePage() {
             htmlFor="signup-name"
             className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
           >
-            이름
+            {t("signup.name.label")}
           </label>
           <div className="flex items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
             <input
               id="signup-name"
               type="text"
               autoComplete="name"
-              placeholder="이름을 입력해주세요"
+              placeholder={t("signup.name.placeholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               onBlur={() => setTouched(true)}
@@ -80,7 +83,7 @@ export default function SignupNamePage() {
           </div>
           {touched && fieldErrors.name && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              {fieldErrors.name}
+              {t(fieldErrors.name)}
             </p>
           )}
         </form>
@@ -110,7 +113,7 @@ export default function SignupNamePage() {
           )}
           disabled={!canSubmit}
         >
-          다음
+          {t("signup.name.submit")}
         </Button>
       </div>
     </div>

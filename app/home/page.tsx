@@ -6,12 +6,15 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatLoading } from "@/components/chat/chat-loading";
 import { useChat } from "@/contexts/chat-context";
 import { isLoggedIn } from "@/lib/auth-storage";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
 const MOCK_MAIN_USER = { name: "Navi" } as const;
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { messages, isLoading } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -44,8 +47,8 @@ export default function Home() {
       {messages.length === 0 ? (
         // 초기 상태: 환영 문구
         <p className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          {MOCK_MAIN_USER.name}님의 <br />
-          <span className="text-ds-brand">한양대</span> 생활을 더 편하게
+          {t("home.welcomeName", { name: MOCK_MAIN_USER.name })}<br />
+          <span className="text-ds-brand">{t("home.hanyangUniv")}</span>{t("home.welcomeSuffix")}
         </p>
       ) : (
         // 채팅 메시지 목록

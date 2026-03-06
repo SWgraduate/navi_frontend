@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -11,6 +11,8 @@ import { ScrollFade } from "@/components/ui/scroll-fade";
 import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
 /** mic-on.svg 기반 - currentColor로 brand 색상 적용 가능 */
 function MicOnIcon({ className }: { className?: string }) {
@@ -90,16 +92,10 @@ function MicOffIcon({ className }: { className?: string }) {
 const btnBase =
   "flex size-14 shrink-0 items-center justify-center rounded-[28px] bg-(--ds-gray-5) hover:bg-(--ds-gray-10) active:opacity-80";
 
-/** Figma 1460-5250: 음성 인식 텍스트 더미 (STT 연동 전), 3줄만 노출·이상은 하단 페이드 */
-const DUMMY_SPEECH_LINES = [
-  { text: "입력한 값이 보이는 곳", color: "text-ds-tertiary" },
-  { text: "입력한 값이 보이는 곳", color: "text-ds-secondary" },
-  { text: "새로 입력 될 수록 진함", color: "text-ds-primary" },
-] as const;
-
 /** Figma 1433-13978: 졸업 캡스톤 - 음성 말하기 화면 */
 export default function SpeakPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [micOn, setMicOn] = useState(true);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [attachments, setAttachments] = useState<
@@ -109,6 +105,14 @@ export default function SpeakPage() {
 
   const { wavePulse, waveHeights, permissionState, errorMessage } =
     useVoiceAnalyser(micOn);
+  const dummySpeechLines = useMemo(
+    () => [
+      { text: t("speak.dummyLine1"), color: "text-ds-tertiary" },
+      { text: t("speak.dummyLine2"), color: "text-ds-secondary" },
+      { text: t("speak.dummyLine3"), color: "text-ds-primary" },
+    ],
+    [t]
+  );
 
   const handleFileSelect = (files: File[]) => {
     setAttachments((prev) => [
@@ -194,7 +198,7 @@ export default function SpeakPage() {
           className="relative flex max-h-18 w-full max-w-(--app-max-width) flex-col items-center justify-center overflow-hidden"
         >
           <div className="flex flex-col items-center justify-center gap-0">
-            {DUMMY_SPEECH_LINES.map((line, i) => (
+            {dummySpeechLines.map((line, i) => (
               <p
                 key={i}
                 className={cn(
@@ -233,7 +237,7 @@ export default function SpeakPage() {
       {/* 마이크 권한 에러/거부 시 안내 (필요 시 노출) */}
       {permissionState === "denied" && (
         <p className="absolute left-4 right-4 top-1/2 z-10 -translate-y-1/2 text-center text-sm text-ds-tertiary">
-          마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.
+          {t("speak.permissionDenied")}
         </p>
       )}
       {permissionState === "error" && errorMessage && (
@@ -284,7 +288,7 @@ export default function SpeakPage() {
           type="button"
           onClick={() => setAttachMenuOpen((o) => !o)}
           className={cn(btnBase, "text-ds-tertiary")}
-          aria-label="첨부"
+          aria-label={t("speak.attach")}
           aria-expanded={attachMenuOpen}
           aria-haspopup="menu"
         >
@@ -307,7 +311,7 @@ export default function SpeakPage() {
             btnBase,
             micOn ? "text-ds-brand" : "text-ds-tertiary"
           )}
-          aria-label={micOn ? "마이크 끄기" : "마이크 켜기"}
+          aria-label={micOn ? t("speak.micOn") : t("speak.micOff")}
         >
           {micOn ? (
             <MicOnIcon className="size-6 shrink-0" />
@@ -321,7 +325,7 @@ export default function SpeakPage() {
           type="button"
           onClick={handleClose}
           className={cn(btnBase, "text-ds-tertiary")}
-          aria-label="닫기"
+          aria-label={t("speak.close")}
         >
           <X className="size-6" strokeWidth={1.5} />
         </button>

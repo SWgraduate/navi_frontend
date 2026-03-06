@@ -4,6 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { LeftIcon, HistoryIcon, NewChatIcon } from "@/components/icons/header-icons";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface HeaderProps {
   /** [좌] 뒤로가기 버튼 노출 */
@@ -52,6 +53,7 @@ function Header({
   scrolled = false,
   className,
 }: HeaderProps) {
+  const { t } = useTranslation();
   const showLeft = showBack && onBack != null;
   const showCenter = showTitle && title !== "";
   const hasRightSlot = rightSlot != null;
@@ -80,7 +82,7 @@ function Header({
             variant="ghost"
             size="icon"
             onClick={onBack}
-            aria-label="뒤로"
+            aria-label={t("common.back")}
             className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
           >
             <span className="text-ds-secondary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
@@ -114,7 +116,7 @@ function Header({
                 variant="ghost"
                 size="icon"
                 onClick={onHistory}
-                aria-label="히스토리"
+                aria-label={t("common.history")}
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
                 <span className="text-ds-secondary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">
@@ -127,7 +129,7 @@ function Header({
                 variant="ghost"
                 size="icon"
                 onClick={onAdd}
-                aria-label="추가"
+                aria-label={t("common.add")}
                 className="shrink-0 bg-transparent hover:bg-transparent active:opacity-70"
               >
                 <span className="text-ds-secondary [&_svg]:size-6! [&_svg]:h-6! [&_svg]:w-6!">

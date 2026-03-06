@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
-import { MAJOR_OPTIONS, SECOND_MAJOR_OPTIONS } from "@/app/signup/complete/page";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
+import { useTranslation } from "react-i18next";
+import {
+  getMajorLabel,
+  getMajorOptions,
+  getSecondMajorTypeLabel,
+  getSecondMajorTypeOptions,
+  type MajorCode,
+  type SecondMajorTypeCode,
+} from "@/lib/academic-options";
 
 function DownIcon({ className }: { className?: string }) {
   return (
@@ -65,11 +73,16 @@ function UpDownIcon({ className }: { className?: string }) {
 export default function MyPersonalSecondMajorPage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const majorOptions = useMemo(() => getMajorOptions(t), [t]);
+  const secondMajorTypeOptions = useMemo(() => getSecondMajorTypeOptions(t), [t]);
 
-  const [secondMajorType, setSecondMajorType] = useState<string>("");
-  const [secondMajor, setSecondMajor] = useState<string>(MOCK_PERSONAL_INFO.secondMajor === "없음" ? "" : MOCK_PERSONAL_INFO.secondMajor);
+  const [secondMajorType, setSecondMajorType] = useState<SecondMajorTypeCode | "">(
+    MOCK_PERSONAL_INFO.secondMajorType
+  );
+  const [secondMajor, setSecondMajor] = useState<MajorCode | "">(MOCK_PERSONAL_INFO.secondMajor);
   const [secondMajorSheetOpen, setSecondMajorSheetOpen] = useState(false);
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -101,7 +114,7 @@ export default function MyPersonalSecondMajorPage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          제2전공을 선택해주세요
+          {t("my.personal.secondMajorPage.title")}
         </h1>
 
         {/* 제2전공 유형 */}
@@ -110,7 +123,7 @@ export default function MyPersonalSecondMajorPage() {
             htmlFor="personal-second-major-type-trigger"
             className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
           >
-            제2전공 유형
+            {t("my.personal.secondMajorPage.typeLabel")}
           </label>
           <button
             id="personal-second-major-type-trigger"
@@ -119,7 +132,7 @@ export default function MyPersonalSecondMajorPage() {
             className="relative flex w-full items-center justify-between rounded-md border border-border bg-(--ds-gray-5) p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0"
           >
             <span className={secondMajorType ? "text-ds-primary" : "text-ds-tertiary"}>
-              {secondMajorType || "제2전공 유형을 선택해주세요"}
+              {getSecondMajorTypeLabel(t, secondMajorType) || t("my.personal.secondMajorPage.typePlaceholder")}
             </span>
             <span className="absolute right-3 flex h-6 w-6 items-center justify-center">
               <DownIcon className="h-6 w-6 text-ds-tertiary" />
@@ -127,7 +140,7 @@ export default function MyPersonalSecondMajorPage() {
           </button>
           {hasTypeError && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              제2전공 유형을 선택해주세요.
+              {t("my.personal.secondMajorPage.typeError")}
             </p>
           )}
         </div>
@@ -138,7 +151,7 @@ export default function MyPersonalSecondMajorPage() {
             htmlFor="personal-second-major-picker-trigger"
             className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
           >
-            제2전공
+            {t("my.personal.secondMajorPage.majorLabel")}
           </label>
           <button
             id="personal-second-major-picker-trigger"
@@ -147,7 +160,7 @@ export default function MyPersonalSecondMajorPage() {
             className="relative flex w-full items-center justify-between rounded-md border border-border bg-(--ds-gray-5) p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0"
           >
             <span className={secondMajor ? "text-ds-primary" : "text-ds-tertiary"}>
-              {secondMajor || "전공을 선택해주세요"}
+              {getMajorLabel(t, secondMajor) || t("my.personal.secondMajorPage.majorPlaceholder")}
             </span>
             <span className="absolute right-3 flex h-6 w-6 items-center justify-center">
               <UpDownIcon className="h-6 w-6 text-ds-tertiary" />
@@ -155,7 +168,7 @@ export default function MyPersonalSecondMajorPage() {
           </button>
           {hasMajorError && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              제2전공을 선택해주세요.
+              {t("my.personal.secondMajorPage.majorError")}
             </p>
           )}
         </div>
@@ -165,27 +178,27 @@ export default function MyPersonalSecondMajorPage() {
       <MajorSelectSheet
         open={secondMajorPickerOpen}
         selected={secondMajorType}
-        options={SECOND_MAJOR_OPTIONS}
+        options={secondMajorTypeOptions}
         onOpenChange={setSecondMajorPickerOpen}
         onSelect={(next) => {
-          setSecondMajorType(next);
+          setSecondMajorType(next as SecondMajorTypeCode | "");
           if (!next) setSecondMajor("");
           setTouched(true);
         }}
-        title="제2전공 유형을 선택해주세요"
+        title={t("my.personal.secondMajorPage.typePlaceholder")}
       />
 
       {/* 제2전공 선택 바텀시트 – 전공 목록은 주전공과 동일 옵션 사용 (MAJOR_OPTIONS) */}
       <MajorSelectSheet
         open={secondMajorSheetOpen}
         selected={secondMajor}
-        options={MAJOR_OPTIONS}
+        options={majorOptions}
         onOpenChange={setSecondMajorSheetOpen}
         onSelect={(next) => {
-          setSecondMajor(next);
+          setSecondMajor(next as MajorCode | "");
           setTouched(true);
         }}
-        title="제2전공을 선택해주세요"
+        title={t("my.personal.secondMajorPage.title")}
       />
 
       <div
@@ -213,11 +226,10 @@ export default function MyPersonalSecondMajorPage() {
             }
             disabled={!canSubmit}
           >
-            수정
+            {t("my.personal.secondMajorPage.submit")}
           </Button>
         </div>
       </div>
     </div>
   );
 }
-

@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface AttachmentMenuProps {
   /** 트리거 버튼의 ref (메뉴 위치 계산용) */
@@ -37,6 +38,7 @@ export function AttachmentMenu({
   onCameraCapture,
   className,
 }: AttachmentMenuProps) {
+  const { t } = useTranslation();
   const [position, setPosition] = React.useState({ top: 0, left: 0 });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const photoInputRef = React.useRef<HTMLInputElement>(null);
@@ -131,7 +133,7 @@ export function AttachmentMenu({
       />
       <div
         role="menu"
-        aria-label="첨부 옵션"
+        aria-label={t("attachmentMenu.label")}
         className={cn(
           "fixed z-50 flex flex-col rounded-lg border border-(--ds-gray-10) bg-white py-1 shadow-ds-soft",
           className
@@ -155,7 +157,7 @@ export function AttachmentMenu({
             height={24}
             className="shrink-0 opacity-70"
           />
-          파일
+          {t("attachmentMenu.file")}
         </button>
         <button
           type="button"
@@ -170,7 +172,7 @@ export function AttachmentMenu({
             height={24}
             className="shrink-0 opacity-70"
           />
-          사진
+          {t("attachmentMenu.photo")}
         </button>
         <button
           type="button"
@@ -185,7 +187,7 @@ export function AttachmentMenu({
             height={24}
             className="shrink-0 opacity-70"
           />
-          카메라
+          {t("attachmentMenu.camera")}
         </button>
       </div>
     </>

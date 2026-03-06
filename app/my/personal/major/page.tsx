@@ -7,8 +7,9 @@ import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
-import { MAJOR_OPTIONS } from "@/app/signup/complete/page";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
+import { useTranslation } from "react-i18next";
+import { getMajorLabel, getMajorOptions, type MajorCode } from "@/lib/academic-options";
 
 function UpDownIcon({ className }: { className?: string }) {
   return (
@@ -43,10 +44,12 @@ function UpDownIcon({ className }: { className?: string }) {
 export default function MyPersonalMajorPage() {
   useHeaderBackground("white");
   const router = useRouter();
+  const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const majorOptions = getMajorOptions(t);
 
-  const [major, setMajor] = useState<string>(MOCK_PERSONAL_INFO.major);
+  const [major, setMajor] = useState<MajorCode | "">(MOCK_PERSONAL_INFO.major);
   const [majorSheetOpen, setMajorSheetOpen] = useState(false);
   const [touched, setTouched] = useState(false);
 
@@ -76,7 +79,7 @@ export default function MyPersonalMajorPage() {
         }}
       >
         <h1 className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          주전공을 선택해주세요
+          {t("my.personal.majorPage.title")}
         </h1>
 
         <div className="mt-2 flex flex-col gap-2">
@@ -84,7 +87,7 @@ export default function MyPersonalMajorPage() {
             htmlFor="personal-major-trigger"
             className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary"
           >
-            주전공
+            {t("my.personal.majorPage.label")}
           </label>
           <button
             id="personal-major-trigger"
@@ -93,7 +96,7 @@ export default function MyPersonalMajorPage() {
             className="relative flex w-full items-center justify-between rounded-md border border-border bg-(--ds-gray-5) p-4 pr-10 text-left text-ds-body-16-r leading-ds-body-16-r focus:outline-none focus:ring-0"
           >
             <span className={major ? "text-ds-primary" : "text-ds-tertiary"}>
-              {major || "전공을 선택해주세요"}
+              {getMajorLabel(t, major) || t("my.personal.majorPage.placeholder")}
             </span>
             <span className="absolute right-3 flex h-6 w-6 items-center justify-center">
               <UpDownIcon className="h-6 w-6 text-ds-tertiary" />
@@ -101,7 +104,7 @@ export default function MyPersonalMajorPage() {
           </button>
           {hasError && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
-              주전공을 선택해주세요.
+              {t("my.personal.majorPage.error")}
             </p>
           )}
         </div>
@@ -111,10 +114,10 @@ export default function MyPersonalMajorPage() {
       <MajorSelectSheet
         open={majorSheetOpen}
         selected={major}
-        options={MAJOR_OPTIONS}
+        options={majorOptions}
         onOpenChange={setMajorSheetOpen}
         onSelect={(next) => {
-          setMajor(next);
+          setMajor(next as MajorCode | "");
           setTouched(true);
         }}
       />
@@ -144,11 +147,10 @@ export default function MyPersonalMajorPage() {
             }
             disabled={!canSubmit}
           >
-            수정
+            {t("my.personal.majorPage.submit")}
           </Button>
         </div>
       </div>
     </div>
   );
 }
-

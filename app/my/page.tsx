@@ -10,6 +10,7 @@ import { setLoggedIn } from "@/lib/auth-storage";
 import { clearGraduationResult } from "@/lib/mock-accounts";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
+import { useTranslation } from "react-i18next";
 
 /* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
 const MOCK_USER = {
@@ -17,23 +18,23 @@ const MOCK_USER = {
   email: "aaaaaa@hanyang.ac.kr",
 } as const;
 
-const MOCK_SETTING_ITEMS: Array<{
-  label: string;
-  href: string;
-  rightLabel?: string;
-}> = [
-  { label: "개인정보 설정", href: "/my/personal" },
-  { label: "언어설정", href: "/my/language", rightLabel: "한국어(KR)" },
-];
-
 const MOCK_VERSION = "1.00";
 
 /** Figma 1086-8553 마이페이지. 로그아웃 확인: Figma 1128-8760 */
 export default function MyPage() {
   useHeaderBackground("white"); // 헤더·노치 영역 배경 흰색
   const router = useRouter();
+  const { t } = useTranslation();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+  const settingItems = [
+    { label: t("my.personalInfo"), href: "/my/personal" },
+    {
+      label: t("my.language"),
+      href: "/my/language",
+      rightLabel: t("my.languageValue"),
+    },
+  ];
 
   const handleLogoutConfirm = () => {
     setLogoutModalOpen(false);
@@ -55,9 +56,9 @@ export default function MyPage() {
       {/* 사용자 정보 - 메인과 동일한 높이에서 시작 (pt-4) */}
       <section className="px-4 pt-20 pb-16">
         <p className="font-semibold text-ds-title-24-sb leading-ds-title-24-sb text-ds-primary">
-          {MOCK_USER.name}님
+          {t("my.greetingName", { name: MOCK_USER.name })}
           <br />
-          안녕하세요!
+          {t("my.greetingText")}
         </p>
         <p className="mt-1 text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
           {MOCK_USER.email}
@@ -66,8 +67,8 @@ export default function MyPage() {
       <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
 
       {/* 설정 메뉴 */}
-      <nav className="px-4" aria-label="설정 메뉴">
-        {MOCK_SETTING_ITEMS.map((item) => (
+      <nav className="px-4" aria-label={t("my.personalInfo")}>
+        {settingItems.map((item) => (
           <TransitionLink
             key={item.href}
             href={item.href}
@@ -84,23 +85,23 @@ export default function MyPage() {
       <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
 
       {/* 약관 및 개인정보 처리 동의 */}
-      <nav className="px-4" aria-label="약관 및 개인정보">
+      <nav className="px-4" aria-label={t("my.terms")}>
         <TransitionLink
           href="/my/terms"
           className="flex items-center justify-between py-3 text-ds-body-16-r leading-ds-body-16-r text-ds-primary active:opacity-70"
         >
-          <span>약관 및 개인정보 처리 동의</span>
+          <span>{t("my.terms")}</span>
           <RightIcon className="text-ds-tertiary" />
         </TransitionLink>
       </nav>
       <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
 
       {/* 버전 정보 · 로그아웃 */}
-      <nav className="px-4" aria-label="버전 및 계정">
+      <nav className="px-4" aria-label={t("my.versionLabel")}>
         <div className="flex items-center justify-between py-3 text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
-          <span>버전 정보</span>
+          <span>{t("my.versionLabel")}</span>
           <span className="text-ds-tertiary">
-            현재 버전 {MOCK_VERSION}
+            {t("my.currentVersion", { version: MOCK_VERSION })}
           </span>
         </div>
         <button
@@ -110,7 +111,7 @@ export default function MyPage() {
           )}
           onClick={() => setLogoutModalOpen(true)}
         >
-          로그아웃
+          {t("my.logout")}
         </button>
         <button
           type="button"
@@ -119,27 +120,26 @@ export default function MyPage() {
           )}
           onClick={() => setWithdrawModalOpen(true)}
         >
-          탈퇴하기
+          {t("my.withdraw")}
         </button>
       </nav>
 
       <Modal
         open={logoutModalOpen}
         onOpenChange={setLogoutModalOpen}
-        title="로그아웃 하시겠어요?"
-        caption="언제든지 다시 로그인 할 수 있어요"
-        cancelLabel="취소"
-        confirmLabel="로그아웃"
+        title={t("my.logoutModalTitle")}
+        caption={t("my.logoutModalCaption")}
+        cancelLabel={t("my.cancel")}
+        confirmLabel={t("my.logoutConfirm")}
         onConfirm={handleLogoutConfirm}
       />
       <Modal
         open={withdrawModalOpen}
         onOpenChange={setWithdrawModalOpen}
-        title="정말 NAVI를 떠나시겠어요?"
-        caption={`삭제된 데이터는 다시 복구할 수 없으니
-신중하게 결정해 주세요`}
-        cancelLabel="취소"
-        confirmLabel="탈퇴"
+        title={t("my.withdrawModalTitle")}
+        caption={t("my.withdrawModalCaption")}
+        cancelLabel={t("my.cancel")}
+        confirmLabel={t("my.withdrawConfirm")}
         confirmVariant="destructive"
         onConfirm={handleWithdrawConfirm}
       />

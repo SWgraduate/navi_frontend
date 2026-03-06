@@ -4,24 +4,46 @@ import { RightIcon } from "@/components/icons/header-icons";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useTranslation } from "react-i18next";
+import { getMajorLabel } from "@/lib/academic-options";
 
 /** Figma 1091-6843: 마이페이지 - 개인정보 설정 */
-const PERSONAL_ITEMS: Array<{ label: string; value: string; href?: string }> = [
-  { label: "이름", value: MOCK_PERSONAL_INFO.name, href: "/my/personal/name" },
-  { label: "학번", value: MOCK_PERSONAL_INFO.studentId, href: "/my/personal/student-id" },
-  { label: "주전공", value: MOCK_PERSONAL_INFO.major, href: "/my/personal/major" },
-  { label: "제2전공", value: MOCK_PERSONAL_INFO.secondMajor, href: "/my/personal/second-major" },
-  { label: "학적상태", value: MOCK_PERSONAL_INFO.academicStatus, href: "/my/personal/academic-status" },
-  { label: "현재 이수한 학년/학기", value: MOCK_PERSONAL_INFO.yearSemester, href: "/my/personal/year-semester" },
-];
-
 export default function MyPersonalPage() {
   useHeaderBackground("white");
+  const { t } = useTranslation();
+  const [year, semester] = MOCK_PERSONAL_INFO.yearSemester.split("-").map(Number);
+  const yearSemesterValue =
+    Number.isFinite(year) && Number.isFinite(semester)
+      ? t("my.personal.yearSemesterPage.display", { y: year, s: semester })
+      : MOCK_PERSONAL_INFO.yearSemester;
+  const personalItems: Array<{ label: string; value: string; href?: string }> = [
+    { label: t("my.personal.name"), value: MOCK_PERSONAL_INFO.name, href: "/my/personal/name" },
+    { label: t("my.personal.studentId"), value: MOCK_PERSONAL_INFO.studentId, href: "/my/personal/student-id" },
+    { label: t("my.personal.major"), value: getMajorLabel(t, MOCK_PERSONAL_INFO.major), href: "/my/personal/major" },
+    {
+      label: t("my.personal.secondMajor"),
+      value: MOCK_PERSONAL_INFO.secondMajor ? getMajorLabel(t, MOCK_PERSONAL_INFO.secondMajor) : t("common.none"),
+      href: "/my/personal/second-major",
+    },
+    {
+      label: t("my.personal.academicStatus"),
+      value:
+        MOCK_PERSONAL_INFO.academicStatus === "leave"
+          ? t("my.personal.academicStatusPage.leave")
+          : t("my.personal.academicStatusPage.enrolled"),
+      href: "/my/personal/academic-status",
+    },
+    {
+      label: t("my.personal.yearSemester"),
+      value: yearSemesterValue,
+      href: "/my/personal/year-semester",
+    },
+  ];
 
   return (
     <div className="min-h-full bg-(--ds-gray-0)">
-      <nav className="px-4 pt-4" aria-label="개인정보 목록">
-        {PERSONAL_ITEMS.map((item) => {
+      <nav className="px-4 pt-4" aria-label={t("my.personalInfo")}>
+        {personalItems.map((item) => {
           const content = (
             <>
               <span className="text-ds-primary">{item.label}</span>
@@ -54,4 +76,3 @@ export default function MyPersonalPage() {
     </div>
   );
 }
-
