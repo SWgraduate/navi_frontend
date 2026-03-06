@@ -39,10 +39,7 @@ const HEADER_TITLE_KEYS: Record<string, string> = {
 const ROUTES_WITH_BOTTOM_BAR = ["/home", "/graduation", "/my"] as const;
 
 function pathHasBottomBar(pathname: string): boolean {
-  return ROUTES_WITH_BOTTOM_BAR.some((route) => {
-    if (route === "/home") return pathname === "/home";
-    return pathname === route || pathname.startsWith(route + "/");
-  });
+  return ROUTES_WITH_BOTTOM_BAR.some((route) => pathname === route);
 }
 
 function isFocusableInput(el: EventTarget | null): boolean {
@@ -78,7 +75,6 @@ function AppHeaderWithSearchParams({
   scrolled,
   router,
   startNewChat,
-  scanMenuOpen,
   setScanMenuOpen,
 }: {
   pathname: string;
@@ -92,7 +88,6 @@ function AppHeaderWithSearchParams({
   scrolled: boolean;
   router: ReturnType<typeof useRouter>;
   startNewChat: () => void;
-  scanMenuOpen: boolean;
   setScanMenuOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
 }) {
   const searchParams = useSearchParams();
@@ -501,7 +496,6 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
               scrolled={scrolled}
               router={router}
               startNewChat={startNewChat}
-              scanMenuOpen={scanMenuOpen}
               setScanMenuOpen={setScanMenuOpen}
             />
           </Suspense>

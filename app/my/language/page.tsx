@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/contexts/i18n-context";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
+import i18n from "@/lib/i18n";
+import { getStoredLanguage, setStoredLanguage, type Language } from "@/lib/i18n-storage";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
@@ -20,33 +21,28 @@ export default function MyLanguagePage() {
   useHeaderBackground("white");
   const router = useRouter();
   const { t } = useTranslation();
-  const { language, setLanguage } = useI18n();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
 
-  const initialCode = language;
-  const [languageCode, setLanguageCode] = useState<(typeof LANGUAGE_OPTIONS)[number]["code"]>(
-    initialCode
-  );
-  useEffect(() => {
-    setLanguageCode(language);
-  }, [language]);
+  const [initialCode, setInitialCode] = useState<Language>(() => getStoredLanguage());
+  const [languageCode, setLanguageCode] = useState<Language>(() => getStoredLanguage());
 
   const canSubmit = languageCode !== initialCode;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     if (!canSubmit) return;
 
-    setLanguage(languageCode);
-    withViewTransition(() => router.back());
+    setStoredLanguage(languageCode);
+    document.documentElement.lang = languageCode;
+    await i18n.changeLanguage(languageCode);
+    setInitialCode(languageCode);
+    withViewTransition(() => router.push("/my"));
   };
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <form
         id="language-form"
-        onSubmit={handleSubmit}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-4 pb-4 transition-[padding-bottom] duration-250 ease-out"
         style={{
           paddingBottom:
@@ -104,10 +100,10 @@ export default function MyLanguagePage() {
       >
         <div className="px-4">
           <Button
-            type="submit"
-            form="language-form"
+            type="button"
             variant="primary"
             size="lg"
+            onClick={handleSave}
             className={
               "h-auto w-full rounded-md py-3 text-ds-body-16-sb leading-ds-body-16-sb" +
               (canSubmit
