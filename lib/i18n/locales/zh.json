@@ -293,7 +293,7 @@
     }
   },
   "history": {
-    "searchPlaceholder": "搜索历史记录...",
+    "searchPlaceholder": "搜索",
     "noResults": "无搜索结果。"
   },
   "historyMenu": {

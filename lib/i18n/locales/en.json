@@ -293,7 +293,7 @@
     }
   },
   "history": {
-    "searchPlaceholder": "Search history...",
+    "searchPlaceholder": "Search",
     "noResults": "No results found."
   },
   "historyMenu": {

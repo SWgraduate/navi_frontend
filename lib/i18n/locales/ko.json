@@ -293,7 +293,7 @@
     }
   },
   "history": {
-    "searchPlaceholder": "전공을 검색하세요.",
+    "searchPlaceholder": "검색",
     "noResults": "검색 결과가 없습니다."
   },
   "historyMenu": {
