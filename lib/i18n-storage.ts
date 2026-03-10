@@ -2,6 +2,12 @@ const LANGUAGE_KEY = "navi_language";
 
 export type Language = "ko" | "en" | "zh";
 
+export function hasStoredLanguage(): boolean {
+  if (typeof window === "undefined") return true;
+  const stored = localStorage.getItem(LANGUAGE_KEY);
+  return stored === "ko" || stored === "en" || stored === "zh";
+}
+
 export function getStoredLanguage(): Language {
   if (typeof window === "undefined") return "ko";
   const stored = localStorage.getItem(LANGUAGE_KEY);

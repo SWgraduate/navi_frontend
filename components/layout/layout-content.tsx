@@ -202,11 +202,13 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isGraduationRootPage = pathname === "/graduation";
   const isSignupTermsPage = pathname.startsWith("/signup/terms");
   const isSignupTermsAgreePage = pathname === "/signup";
+  const isLanguageOnboardingPage = pathname === "/language-onboarding";
   const showHeader =
     !isSplash &&
     pathname !== "/my" &&
     pathname !== "/speak" &&
-    !isGraduationRootPage;
+    !isGraduationRootPage &&
+    !isLanguageOnboardingPage;
   const isWhiteBackgroundPage =
     isSplash ||
     isMyPage ||
@@ -216,7 +218,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     pathname === "/speak" ||
     isSignupTermsPage ||
     isSignupTermsAgreePage ||
-    isLoginPage;
+    isLoginPage ||
+    isLanguageOnboardingPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);

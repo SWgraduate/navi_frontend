@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
 import i18n from "@/lib/i18n";
 import { getStoredLanguage, setStoredLanguage, type Language } from "@/lib/i18n-storage";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { withViewTransition } from "@/lib/view-transition";
 
 const LANGUAGE_OPTIONS = [
   { code: "ko", labelKey: "languages.koNative" },
@@ -36,6 +36,7 @@ export default function MyLanguagePage() {
     document.documentElement.lang = languageCode;
     await i18n.changeLanguage(languageCode);
     setInitialCode(languageCode);
+
     withViewTransition(() => router.push("/my"));
   };
 
