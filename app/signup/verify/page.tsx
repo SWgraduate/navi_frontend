@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { signupVerifyResendSchema, signupVerifySubmitSchema } from "@/lib/schemas/signup-verify";
+import { sendAuthEmail, verifyAuthEmail } from "@/lib/api/auth";
 import { Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
@@ -20,6 +21,7 @@ const LOCK_HOURS = 24;
 
 const STORAGE_KEY_RESEND = "signup_verify_resend";
 const STORAGE_KEY_LOCKED_UNTIL = "signup_verify_locked_until";
+const SIGNUP_EMAIL_KEY = "signup_email";
 
 function getTodayKey() {
   return typeof window !== "undefined" ? new Date().toISOString().slice(0, 10) : "";
@@ -79,6 +81,7 @@ export default function SignupVerifyPage() {
   const [storageSynced, setStorageSynced] = useState({ isLocked: false, resendCount: 0 });
   const [consecutiveFail, setConsecutiveFail] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const isLocked = storageSynced.isLocked;
@@ -90,6 +93,15 @@ export default function SignupVerifyPage() {
     const id = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(id);
   }, []);
+
+  // 이메일 없이 직접 접근 시 이메일 페이지로 리다이렉트
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const email = sessionStorage.getItem(SIGNUP_EMAIL_KEY);
+    if (!email) {
+      router.replace("/signup/email");
+    }
+  }, [router]);
 
   const setResendCount = useCallback((n: number) => {
     setStorageSynced((prev) => ({ ...prev, resendCount: n }));
@@ -150,21 +162,35 @@ export default function SignupVerifyPage() {
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     const parsed = signupVerifyResendSchema.safeParse({ resendCount });
     if (!parsed.success) {
       setSubmitError(t(parsed.error.issues[0]?.message ?? parsed.error.message));
       return;
     }
+    const email =
+      typeof window !== "undefined" ? sessionStorage.getItem(SIGNUP_EMAIL_KEY) : null;
+    if (!email) {
+      setSubmitError("이메일 정보가 없습니다. 이메일 입력 단계로 돌아가 주세요.");
+      return;
+    }
     setSubmitError(null);
-    const next = incrementResendCount();
-    setResendCount(next);
-    setTimerSeconds(INITIAL_TIMER_SECONDS);
-    setDigits(Array(CODE_LENGTH).fill(""));
-    inputRefs.current[0]?.focus();
+    setIsResending(true);
+    try {
+      await sendAuthEmail({ email });
+      const next = incrementResendCount();
+      setResendCount(next);
+      setTimerSeconds(INITIAL_TIMER_SECONDS);
+      setDigits(Array(CODE_LENGTH).fill(""));
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "인증번호 재발송에 실패했습니다.");
+    } finally {
+      setIsResending(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
     if (!canSubmit) return;
@@ -183,8 +209,29 @@ export default function SignupVerifyPage() {
       }
       return;
     }
-    setConsecutiveFail(0);
-    withViewTransition(() => router.push("/signup/name"));
+
+    const email =
+      typeof window !== "undefined" ? sessionStorage.getItem(SIGNUP_EMAIL_KEY) : null;
+    if (!email) {
+      setSubmitError("이메일 정보가 없습니다. 이메일 입력 단계로 돌아가 주세요.");
+      return;
+    }
+
+    try {
+      await verifyAuthEmail({ email, code });
+      setConsecutiveFail(0);
+      withViewTransition(() => router.push("/signup/name"));
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : t("errors.verifyCode.incorrect");
+      setSubmitError(message);
+      const next = consecutiveFail + 1;
+      setConsecutiveFail(next);
+      if (next >= 5) {
+        setLockedUntil(Date.now() + LOCK_HOURS * 60 * 60 * 1000);
+        setIsLocked(true);
+      }
+    }
   };
 
   return (
@@ -257,7 +304,7 @@ export default function SignupVerifyPage() {
           <button
             type="button"
             onClick={handleResend}
-            disabled={isLocked}
+            disabled={isLocked || isResending}
             className={cn(
               "flex items-center justify-start gap-1.5 text-ds-body-16-r leading-ds-body-16-r active:opacity-70",
               canResend ? "text-ds-brand" : "cursor-not-allowed text-ds-tertiary"
@@ -267,7 +314,7 @@ export default function SignupVerifyPage() {
               <path d="M21 12C21 13.78 20.4722 15.5201 19.4832 17.0001C18.4943 18.4802 17.0887 19.6337 15.4442 20.3149C13.7996 20.9961 11.99 21.1743 10.2442 20.8271C8.49836 20.4798 6.89472 19.6226 5.63604 18.364C4.37737 17.1053 3.5202 15.5016 3.17294 13.7558C2.82567 12.01 3.0039 10.2004 3.68509 8.55585C4.36628 6.91131 5.51983 5.50571 6.99987 4.51677C8.47991 3.52784 10.22 3 12 3C14.52 3 16.93 4 18.74 5.74L21 8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M21 3V8H16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span>{t("signup.verify.resend")}</span>
+            <span>{isResending ? t("signup.verify.resending") : t("signup.verify.resend")}</span>
           </button>
 
           <div className="flex flex-col gap-1 text-ds-caption-14-r leading-ds-caption-14-r text-ds-tertiary">
