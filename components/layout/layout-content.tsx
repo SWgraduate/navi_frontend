@@ -215,7 +215,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     isGraduationResultPage ||
     pathname === "/speak" ||
     isSignupTermsPage ||
-    isSignupTermsAgreePage;
+    isSignupTermsAgreePage ||
+    isLoginPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
