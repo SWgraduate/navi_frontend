@@ -28,7 +28,7 @@ No test suite is configured.
 
 ```
 app/
-  layout.tsx          # Root layout: wraps everything in ChatProvider + LayoutContent
+  layout.tsx          # Root layout: wraps everything in I18nProvider + ChatProvider + LayoutContent
   splash/             # Splash screen (checks auth, redirects to /home or /login)
   login/
   signup/             # Multi-step: terms → email → verify → name → password → complete → welcome
@@ -52,7 +52,14 @@ The `LayoutContent` component is the shell for all pages. It handles:
 
 - **Chat state**: `contexts/chat-context.tsx` — `ChatProvider` wraps the app, exposes `messages`, `isLoading`, `sendMessage`, `startNewChat` via `useChat()` hook. Currently uses mock timeout; API integration is a TODO.
 - **Auth state**: `lib/auth-storage.ts` — localStorage key `navi_logged_in`. Mock credentials in `lib/mock-accounts.ts`.
+- **Language/i18n**: `contexts/i18n-context.tsx` + `lib/i18n-storage.ts` — localStorage key `navi_language`. Exposes `language` and `setLanguage()` via `useI18n()` hook. Supports ko, en, zh.
 - **Graduation result**: localStorage key `navi_graduation_result` via helpers in `lib/mock-accounts.ts`.
+
+### Internationalization (i18n)
+
+- **i18next**: Configured in `lib/i18n/index.ts` with `react-i18next`
+- **Translations**: `lib/i18n/locales/{ko,en,zh}.json`
+- **Usage**: `const { t } = useI18n(); t("key.path")` in components. For academic options, use `lib/academic-options.ts` which loads translated options from i18n.
 
 ### UI / Design system
 
@@ -67,9 +74,20 @@ The `LayoutContent` component is the shell for all pages. It handles:
 
 `@/` maps to the project root. Key aliases: `@/components`, `@/lib`, `@/hooks`, `@/components/ui`.
 
-### Form validation
+### Form validation (Zod)
 
-Zod schemas in `lib/schemas/` — one file per form step (e.g., `signup-email.ts`, `signup-password.ts`, `login.ts`).
+Schemas in `lib/schemas/` — one file per form step (e.g., `signup-email.ts`, `signup-password.ts`, `login.ts`).
+
+**Validation conventions**:
+- Extract types: `export type LoginFormValues = z.infer<typeof loginFormSchema>`
+- Error messages: **Korean** via `.refine()` or `message` option
+- Trim strings before validation: `z.string().trim().min(1)`
+- Use `safeParse()` in form submissions: `schema.safeParse(payload)` — handle failures with `error.flatten().fieldErrors`
+- For forms validated against mock accounts, ensure schema rules allow mock credential values
+
+### Figma integration
+
+When user messages contain **"@figma"**, use Figma MCP server tools and resources via `call_mcp_tool` or `fetch_mcp_resource`.
 
 ### Mobile-specific
 

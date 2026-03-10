@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { signupEmailFormSchema } from "@/lib/schemas/signup-email";
+import { sendAuthEmail } from "@/lib/api/auth";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
 const EMAIL_SUFFIX = "@hanyang.ac.kr";
+const SIGNUP_EMAIL_KEY = "signup_email";
 
 const BUTTON_AREA_HEIGHT = 80; // pt-8 + button + paddingBottom
 
@@ -25,6 +27,8 @@ export default function SignupEmailPage() {
 
   const [emailPart, setEmailPart] = useState("");
   const [touched, setTouched] = useState({ emailPart: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const fieldErrors = useMemo(() => {
     if (!touched.emailPart) return {};
@@ -36,13 +40,26 @@ export default function SignupEmailPage() {
 
   const canSubmit = useMemo(() => signupEmailFormSchema.safeParse({ emailPart }).success, [emailPart]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ emailPart: true });
+    setSubmitError(null);
     const parsed = signupEmailFormSchema.safeParse({ emailPart });
     if (!parsed.success) return;
-    // TODO: 인증번호 발송 API 연동
-    withViewTransition(() => router.push("/signup/verify"));
+
+    const fullEmail = `${parsed.data.emailPart}${EMAIL_SUFFIX}`;
+    setIsSubmitting(true);
+    try {
+      await sendAuthEmail({ email: fullEmail });
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(SIGNUP_EMAIL_KEY, fullEmail);
+      }
+      withViewTransition(() => router.push("/signup/verify"));
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "인증번호 발송에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -108,6 +125,11 @@ export default function SignupEmailPage() {
               {t(fieldErrors.emailPart)}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </form>
       </div>
 
@@ -133,7 +155,7 @@ export default function SignupEmailPage() {
               ? "bg-primary text-primary-foreground"
               : "bg-(--ds-bg-disabled) text-ds-disabled"
           )}
-          disabled={!canSubmit}
+          disabled={!canSubmit || isSubmitting}
         >
           {t("signup.email.submit")}
         </Button>
