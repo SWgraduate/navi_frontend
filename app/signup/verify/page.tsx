@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { signupVerifyResendSchema, signupVerifySubmitSchema } from "@/lib/schemas/signup-verify";
-import { sendAuthEmail } from "@/lib/api/auth";
+import { sendAuthEmail, verifyAuthEmail } from "@/lib/api/auth";
 import { Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
@@ -190,7 +190,7 @@ export default function SignupVerifyPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
     if (!canSubmit) return;
@@ -209,8 +209,29 @@ export default function SignupVerifyPage() {
       }
       return;
     }
-    setConsecutiveFail(0);
-    withViewTransition(() => router.push("/signup/name"));
+
+    const email =
+      typeof window !== "undefined" ? sessionStorage.getItem(SIGNUP_EMAIL_KEY) : null;
+    if (!email) {
+      setSubmitError("이메일 정보가 없습니다. 이메일 입력 단계로 돌아가 주세요.");
+      return;
+    }
+
+    try {
+      await verifyAuthEmail({ email, code });
+      setConsecutiveFail(0);
+      withViewTransition(() => router.push("/signup/name"));
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : t("errors.verifyCode.incorrect");
+      setSubmitError(message);
+      const next = consecutiveFail + 1;
+      setConsecutiveFail(next);
+      if (next >= 5) {
+        setLockedUntil(Date.now() + LOCK_HOURS * 60 * 60 * 1000);
+        setIsLocked(true);
+      }
+    }
   };
 
   return (

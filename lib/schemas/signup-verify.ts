@@ -1,13 +1,10 @@
 import { z } from "zod";
 
-const CORRECT_CODE = "000000";
-
-/** 회원가입 3단계 인증번호 6자리 (형식 + 정답 검사) */
+/** 회원가입 3단계 인증번호 6자리 (형식만 검사, 정답 검사는 서버에서 수행) */
 export const signupVerifyCodeSchema = z
   .string()
   .length(6, "errors.verifyCode.length")
-  .regex(/^\d{6}$/, "errors.verifyCode.numeric")
-  .refine((v) => v === CORRECT_CODE, "errors.verifyCode.incorrect");
+  .regex(/^\d{6}$/, "errors.verifyCode.numeric");
 
 export type SignupVerifyCodeValue = z.infer<typeof signupVerifyCodeSchema>;
 
