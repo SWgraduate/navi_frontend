@@ -60,7 +60,7 @@ export default function LoginPage() {
       setLoggedIn(true);
       // 로그인 직후 프로필 프리페치 → 다른 기기/환경에서도 즉시 유저 정보 표시
       getMyProfile().then((profile) => {
-        if (profile && !("statusCode" in profile)) {
+        if (profile && typeof profile === "object" && !("error" in profile)) {
           updateProfileCache(profile);
         }
       }).catch(() => {});
