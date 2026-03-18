@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
+import { completedSemestersToYearSemester, yearSemesterToCompletedSemesters } from "@/lib/academic-options";
 import {
   personalYearSemesterSchema,
   type PersonalYearSemesterValue,
@@ -17,10 +17,11 @@ import { useTranslation } from "react-i18next";
 /** 마이페이지 - 현재 이수한 학년/학기 수정 */
 export default function MyPersonalYearSemesterPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
   const formatValueToDisplay = (value: string): string => {
     if (!value || !value.includes("-")) return "";
@@ -28,9 +29,8 @@ export default function MyPersonalYearSemesterPage() {
     return t("my.personal.yearSemesterPage.display", { y, s });
   };
 
-  const initialValue = MOCK_PERSONAL_INFO.yearSemester;
-
-  const [yearSemester, setYearSemester] = useState<PersonalYearSemesterValue | "">(initialValue);
+  const [localYearSemester, setLocalYearSemester] = useState<PersonalYearSemesterValue | "" | null>(null);
+  const yearSemester = localYearSemester ?? (profile != null ? completedSemestersToYearSemester(profile.completedSemesters) : "");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [touched, setTouched] = useState(false);
 
@@ -43,13 +43,11 @@ export default function MyPersonalYearSemesterPage() {
     [yearSemester]
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
-
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    if (!canSubmit || !profile) return;
+    await update(profile, { completedSemesters: yearSemesterToCompletedSemesters(yearSemester) });
   };
 
   const display = formatValueToDisplay(yearSemester);
@@ -93,6 +91,11 @@ export default function MyPersonalYearSemesterPage() {
               {t("my.personal.yearSemesterPage.error")}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </div>
       </form>
 
@@ -102,7 +105,7 @@ export default function MyPersonalYearSemesterPage() {
         value={yearSemester}
         onOpenChange={setSheetOpen}
         onChange={(next) => {
-          setYearSemester(next as PersonalYearSemesterValue);
+          setLocalYearSemester(next as PersonalYearSemesterValue);
           setTouched(true);
         }}
       />
@@ -130,9 +133,9 @@ export default function MyPersonalYearSemesterPage() {
                 ? " text-white"
                 : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("my.personal.yearSemesterPage.submit")}
+            {isSubmitting ? t("common.loading") : t("my.personal.yearSemesterPage.submit")}
           </Button>
         </div>
       </div>

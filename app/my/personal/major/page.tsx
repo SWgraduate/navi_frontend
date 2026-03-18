@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
 import { useTranslation } from "react-i18next";
 import { getMajorLabel, getMajorOptions, type MajorCode } from "@/lib/academic-options";
@@ -43,26 +42,26 @@ function UpDownIcon({ className }: { className?: string }) {
 /** 마이페이지 - 주전공 수정 (회원가입 주전공 선택 컴포넌트 재사용) */
 export default function MyPersonalMajorPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const majorOptions = getMajorOptions(t);
+  const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
-  const [major, setMajor] = useState<MajorCode | "">(MOCK_PERSONAL_INFO.major);
+  const [localMajor, setLocalMajor] = useState<MajorCode | "" | null>(null);
+  const major = localMajor ?? (profile?.major as MajorCode | "") ?? "";
   const [majorSheetOpen, setMajorSheetOpen] = useState(false);
   const [touched, setTouched] = useState(false);
 
   const hasError = touched && major.trim().length === 0;
   const canSubmit = major.trim().length > 0;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
-
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    if (!canSubmit || !profile) return;
+    await update(profile, { major });
   };
 
   return (
@@ -107,6 +106,11 @@ export default function MyPersonalMajorPage() {
               {t("my.personal.majorPage.error")}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </div>
       </form>
 
@@ -117,7 +121,7 @@ export default function MyPersonalMajorPage() {
         options={majorOptions}
         onOpenChange={setMajorSheetOpen}
         onSelect={(next) => {
-          setMajor(next as MajorCode | "");
+          setLocalMajor(next as MajorCode | "");
           setTouched(true);
         }}
       />
@@ -145,9 +149,9 @@ export default function MyPersonalMajorPage() {
                 ? " text-white"
                 : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("my.personal.majorPage.submit")}
+            {isSubmitting ? t("common.loading") : t("my.personal.majorPage.submit")}
           </Button>
         </div>
       </div>

@@ -1,24 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
+import { inferAdmissionYear } from "@/lib/academic-options";
 import { personalStudentIdSchema } from "@/lib/schemas/personal-info";
 import { useTranslation } from "react-i18next";
 
-/** 마이페이지 - 학번 수정 (이름 수정 페이지와 동일 패턴) */
+/** 마이페이지 - 학번 수정 */
 export default function MyPersonalStudentIdPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
-  const [studentId, setStudentId] = useState<string>(MOCK_PERSONAL_INFO.studentId);
+  const [localStudentId, setLocalStudentId] = useState<string | null>(null);
+  const studentId = localStudentId ?? profile?.studentNumber ?? "";
   const [touched, setTouched] = useState(false);
   const validationResult = useMemo(() => personalStudentIdSchema.safeParse(studentId), [studentId]);
 
@@ -29,13 +31,15 @@ export default function MyPersonalStudentIdPage() {
       ? t(validationResult.error.issues[0]?.message ?? "my.personal.studentIdPage.error")
       : null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
-
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    if (!canSubmit || !profile) return;
+    const newStudentNumber = studentId.trim();
+    await update(profile, {
+      admissionYear: inferAdmissionYear(newStudentNumber),
+      studentNumber: newStudentNumber,
+    });
   };
 
   return (
@@ -69,7 +73,7 @@ export default function MyPersonalStudentIdPage() {
               inputMode="numeric"
               autoComplete="off"
               value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
+              onChange={(e) => setLocalStudentId(e.target.value)}
               onBlur={() => setTouched(true)}
               className="min-w-0 flex-1 bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
               placeholder={t("my.personal.studentIdPage.placeholder")}
@@ -78,6 +82,11 @@ export default function MyPersonalStudentIdPage() {
           {errorMessage && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
               {errorMessage}
+            </p>
+          )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
             </p>
           )}
         </div>
@@ -105,9 +114,9 @@ export default function MyPersonalStudentIdPage() {
               ? " text-white"
               : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
           }
-          disabled={!canSubmit}
+          disabled={!canSubmit || isSubmitting}
           >
-          {t("my.personal.studentIdPage.submit")}
+          {isSubmitting ? t("common.loading") : t("my.personal.studentIdPage.submit")}
         </Button>
       </div>
     </div>

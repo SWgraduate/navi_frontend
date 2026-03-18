@@ -1,24 +1,25 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { personalNameSchema } from "@/lib/schemas/personal-info";
 import { useTranslation } from "react-i18next";
 
 /** Figma 1091-7200: 마이페이지 - 이름 수정 */
 export default function MyPersonalNamePage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
-  const [name, setName] = useState<string>(MOCK_PERSONAL_INFO.name);
+  const [localName, setLocalName] = useState<string | null>(null);
+  const name = localName ?? profile?.name ?? "";
   const [touched, setTouched] = useState(false);
   const validationResult = useMemo(() => personalNameSchema.safeParse(name), [name]);
 
@@ -29,13 +30,11 @@ export default function MyPersonalNamePage() {
       ? t(validationResult.error.issues[0]?.message ?? "my.personal.namePage.error")
       : null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
-
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    if (!canSubmit || !profile) return;
+    await update(profile, { name: name.trim() });
   };
 
   return (
@@ -68,7 +67,7 @@ export default function MyPersonalNamePage() {
               type="text"
               autoComplete="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setLocalName(e.target.value)}
               onBlur={() => setTouched(true)}
               className="min-w-0 flex-1 bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
               placeholder={t("my.personal.namePage.placeholder")}
@@ -77,6 +76,11 @@ export default function MyPersonalNamePage() {
           {errorMessage && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
               {errorMessage}
+            </p>
+          )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
             </p>
           )}
         </div>
@@ -104,9 +108,9 @@ export default function MyPersonalNamePage() {
               ? " text-white"
               : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
           }
-          disabled={!canSubmit}
+          disabled={!canSubmit || isSubmitting}
           >
-          {t("my.personal.namePage.submit")}
+          {isSubmitting ? t("common.loading") : t("my.personal.namePage.submit")}
         </Button>
       </div>
     </div>

@@ -6,17 +6,14 @@ import { RightIcon } from "@/components/icons/header-icons";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { Modal } from "@/components/ui/modal";
 import { useHeaderBackground } from "@/hooks/use-header-background";
-import { setLoggedIn } from "@/lib/auth-storage";
+import { setLoggedIn, getEmail } from "@/lib/auth-storage";
 import { clearGraduationResult } from "@/lib/mock-accounts";
+import { clearProfileCache } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
-
-/* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
-const MOCK_USER = {
-  name: "Navi",
-  email: "aaaaaa@hanyang.ac.kr",
-} as const;
+import { useProfile } from "@/hooks/use-profile";
+import { logout, leave } from "@/lib/api/auth";
 
 const MOCK_VERSION = "1.00";
 
@@ -25,8 +22,14 @@ export default function MyPage() {
   useHeaderBackground("white"); // 헤더·노치 영역 배경 흰색
   const router = useRouter();
   const { t } = useTranslation();
+  const { profile } = useProfile();
+  const email = getEmail();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
   const settingItems = [
     { label: t("my.personalInfo"), href: "/my/personal" },
     {
@@ -36,19 +39,41 @@ export default function MyPage() {
     },
   ];
 
-  const handleLogoutConfirm = () => {
-    setLogoutModalOpen(false);
+  const finalizeLocalLogout = () => {
+    clearProfileCache();
     setLoggedIn(false);
-    clearGraduationResult(); // 로그아웃 시 졸업사정조회 결과 삭제
+    clearGraduationResult();
     withViewTransition(() => router.replace("/login"));
   };
 
-  const handleWithdrawConfirm = () => {
-    setWithdrawModalOpen(false);
-    setLoggedIn(false);
-    clearGraduationResult(); // 탈퇴 시 졸업사정조회 결과 삭제
-    // TODO: 회원 탈퇴 API 호출
-    withViewTransition(() => router.replace("/login"));
+  const handleLogoutConfirm = async () => {
+    if (isLoggingOut) return;
+    setLogoutError(null);
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      setLogoutModalOpen(false);
+      finalizeLocalLogout();
+    } catch (err) {
+      setLogoutError(err instanceof Error ? err.message : "로그아웃에 실패했습니다.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleWithdrawConfirm = async () => {
+    if (isWithdrawing) return;
+    setWithdrawError(null);
+    setIsWithdrawing(true);
+    try {
+      await leave();
+      setWithdrawModalOpen(false);
+      finalizeLocalLogout();
+    } catch (err) {
+      setWithdrawError(err instanceof Error ? err.message : "회원 탈퇴에 실패했습니다.");
+    } finally {
+      setIsWithdrawing(false);
+    }
   };
 
   return (
@@ -56,13 +81,15 @@ export default function MyPage() {
       {/* 사용자 정보 - 메인과 동일한 높이에서 시작 (pt-4) */}
       <section className="px-4 pt-20 pb-16">
         <p className="font-semibold text-ds-title-24-sb leading-ds-title-24-sb text-ds-primary">
-          {t("my.greetingName", { name: MOCK_USER.name })}
+          {t("my.greetingName", { name: profile?.name ?? "" })}
           <br />
           {t("my.greetingText")}
         </p>
-        <p className="mt-1 text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
-          {MOCK_USER.email}
-        </p>
+        {email && (
+          <p className="mt-1 text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
+            {email}
+          </p>
+        )}
       </section>
       <div className="h-2 w-full bg-background" aria-hidden />
 
@@ -109,7 +136,10 @@ export default function MyPage() {
           className={cn(
             "flex w-full items-center py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary active:opacity-70"
           )}
-          onClick={() => setLogoutModalOpen(true)}
+          onClick={() => {
+            setLogoutError(null);
+            setLogoutModalOpen(true);
+          }}
         >
           {t("my.logout")}
         </button>
@@ -118,7 +148,10 @@ export default function MyPage() {
           className={cn(
             "flex w-full items-center py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-destructive active:opacity-70"
           )}
-          onClick={() => setWithdrawModalOpen(true)}
+          onClick={() => {
+            setWithdrawError(null);
+            setWithdrawModalOpen(true);
+          }}
         >
           {t("my.withdraw")}
         </button>
@@ -132,7 +165,14 @@ export default function MyPage() {
         cancelLabel={t("my.cancel")}
         confirmLabel={t("my.logoutConfirm")}
         onConfirm={handleLogoutConfirm}
-      />
+        confirmDisabled={isLoggingOut}
+      >
+        {logoutError && (
+          <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+            {logoutError}
+          </p>
+        )}
+      </Modal>
       <Modal
         open={withdrawModalOpen}
         onOpenChange={setWithdrawModalOpen}
@@ -142,7 +182,14 @@ export default function MyPage() {
         confirmLabel={t("my.withdrawConfirm")}
         confirmVariant="destructive"
         onConfirm={handleWithdrawConfirm}
-      />
+        confirmDisabled={isWithdrawing}
+      >
+        {withdrawError && (
+          <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+            {withdrawError}
+          </p>
+        )}
+      </Modal>
     </div>
   );
 }

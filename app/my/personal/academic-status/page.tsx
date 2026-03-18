@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
+import { apiAcademicStatusToCode, codeToApiAcademicStatus } from "@/lib/academic-options";
 import { personalAcademicStatusSchema, type PersonalAcademicStatusValue } from "@/lib/schemas/personal-info";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -14,14 +14,14 @@ import { useTranslation } from "react-i18next";
 /** 마이페이지 - 학적상태 수정 (재학생 / 휴학생) */
 export default function MyPersonalAcademicStatusPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
-  const initialStatus: PersonalAcademicStatusValue | "" = MOCK_PERSONAL_INFO.academicStatus;
-
-  const [status, setStatus] = useState<PersonalAcademicStatusValue | "">(initialStatus);
+  const [localStatus, setLocalStatus] = useState<PersonalAcademicStatusValue | "" | null>(null);
+  const status = localStatus ?? (profile?.academicStatus ? apiAcademicStatusToCode(profile.academicStatus) : "");
   const [touched, setTouched] = useState(false);
 
   const hasError = useMemo(
@@ -33,13 +33,13 @@ export default function MyPersonalAcademicStatusPage() {
     [status]
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
-
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    if (!canSubmit || !profile || !status) return;
+    await update(profile, {
+      academicStatus: codeToApiAcademicStatus(status as PersonalAcademicStatusValue),
+    });
   };
 
   const labelForStatus = (value: PersonalAcademicStatusValue) =>
@@ -74,7 +74,7 @@ export default function MyPersonalAcademicStatusPage() {
                 key={value}
                 type="button"
                 onClick={() => {
-                  setStatus(value);
+                  setLocalStatus(value);
                   setTouched(true);
                 }}
                 className={cn(
@@ -93,6 +93,11 @@ export default function MyPersonalAcademicStatusPage() {
           {hasError && (
             <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
               {t("my.personal.academicStatusPage.error")}
+            </p>
+          )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
             </p>
           )}
         </div>
@@ -121,9 +126,9 @@ export default function MyPersonalAcademicStatusPage() {
                 ? " text-white"
                 : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("my.personal.academicStatusPage.submit")}
+            {isSubmitting ? t("common.loading") : t("my.personal.academicStatusPage.submit")}
           </Button>
         </div>
       </div>

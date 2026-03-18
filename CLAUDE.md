@@ -42,7 +42,7 @@ app/
 ### Global layout (`components/layout/layout-content.tsx`)
 
 The `LayoutContent` component is the shell for all pages. It handles:
-- Rendering `AppHeader` with per-route titles (defined in `HEADER_TITLE` map)
+- Rendering `AppHeader` with per-route titles (defined in `HEADER_TITLE_KEYS` map)
 - Rendering `BottomBar` only on `/home`, `/graduation`, `/my` routes
 - Rendering `ChatInput` (floating, above keyboard on mobile)
 - Mobile virtual keyboard detection and layout adjustment (see `docs/keyboard-handling.md`)
@@ -50,10 +50,33 @@ The `LayoutContent` component is the shell for all pages. It handles:
 
 ### State management
 
-- **Chat state**: `contexts/chat-context.tsx` — `ChatProvider` wraps the app, exposes `messages`, `isLoading`, `sendMessage`, `startNewChat` via `useChat()` hook. Currently uses mock timeout; API integration is a TODO.
-- **Auth state**: `lib/auth-storage.ts` — localStorage key `navi_logged_in`. Mock credentials in `lib/mock-accounts.ts`.
+- **Chat state**: `contexts/chat-context.tsx` — `ChatProvider` wraps the app, exposes `messages`, `isLoading`, `sendMessage`, `startNewChat` via `useChat()` hook. Uses async task polling (see API section).
+- **Auth state**: `lib/auth-storage.ts` — localStorage key `navi_logged_in`. Mock credentials in `lib/mock-accounts.ts` (real auth API is wired in `lib/api/auth.ts` but signup/login pages still use mock matching).
 - **Language/i18n**: `contexts/i18n-context.tsx` + `lib/i18n-storage.ts` — localStorage key `navi_language`. Exposes `language` and `setLanguage()` via `useI18n()` hook. Supports ko, en, zh.
 - **Graduation result**: localStorage key `navi_graduation_result` via helpers in `lib/mock-accounts.ts`.
+- **Chat history pins**: `lib/history-storage.ts` — localStorage key `navi_history_pins`.
+- **Signup flow state**: `sessionStorage` (email, verification flags — cleared after flow).
+
+### API layer
+
+All HTTP calls go through `lib/api/client.ts` → `apiFetch<T>()`:
+- Adds `Content-Type: application/json` and `credentials: "include"` (session cookie `connect.sid`)
+- Base URL from env var `NEXT_PUBLIC_API_URL`
+- Throws `Error` on non-OK responses
+
+Endpoint modules in `lib/api/`:
+- `auth.ts` — register, login, logout, leave, sendAuthEmail, verifyAuthEmail
+- `chat.ts` — sendChatQuery, getChatStatus (async task polling)
+- `student.ts` — profile CRUD, academic record CRUD, image parsing
+- `rag.ts` — PDF upload via raw `fetch` + `FormData` (not `apiFetch`, since multipart)
+
+**Chat async task pattern**: `POST /chat` returns `{ taskId }` → poll `GET /chat/status/{taskId}` every `POLL_INTERVAL_MS = 1500ms`, up to `MAX_POLL_ATTEMPTS = 60` (90 seconds). Check `status.message || status.result || status.answer` for completion.
+
+### Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL (accessible in browser) |
 
 ### Internationalization (i18n)
 
@@ -69,6 +92,7 @@ The `LayoutContent` component is the shell for all pages. It handles:
 - **Pretendard** font (Korean) — `--font-sans` maps to `--font-pretendard`
 - **Lucide React** for icons; custom icons in `components/icons/`
 - **Framer Motion** for animations
+- **`cn()`** utility in `lib/utils.ts` — combines `clsx` + `tailwind-merge`
 
 ### Path aliases
 
@@ -91,8 +115,8 @@ When user messages contain **"@figma"**, use Figma MCP server tools and resource
 
 ### Mobile-specific
 
-- `hooks/use-keyboard-status.ts` — detects virtual keyboard via VirtualKeyboard API / VisualViewport API
-- `hooks/use-voice-analyser.ts` — audio analysis for voice input
+- `hooks/use-keyboard-status.ts` — detects virtual keyboard via VirtualKeyboard API (primary) / VisualViewport API (fallback). Returns `isKeyboardOpen`, `keyboardHeight`.
+- `hooks/use-voice-analyser.ts` — audio analysis for voice input via Web Audio API (`AudioContext`, `AnalyserNode`)
 - `lib/view-transition.ts` — `withViewTransition()` wraps navigation calls with the View Transitions API crossfade
 - `manifest.ts` / `viewport.ts` — PWA manifest and viewport config (`interactiveWidget: "resizes-visual"` is required for keyboard handling)
 - `components/pwa-register.tsx` — service worker registration

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { setLoggedIn } from "@/lib/auth-storage";
-import { matchMockAccount } from "@/lib/mock-accounts";
+import { setLoggedIn, saveEmail } from "@/lib/auth-storage";
+import { login } from "@/lib/api/auth";
 import { loginFormSchema } from "@/lib/schemas/login";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { withViewTransition } from "@/lib/view-transition";
@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState({ emailPart: false, password: false });
+  const [isLoading, setIsLoading] = useState(false);
   const [credentialsErrors, setCredentialsErrors] = useState<{
     email?: string;
     password?: string;
@@ -40,7 +41,7 @@ export default function LoginPage() {
     };
   }, [emailPart, password, touched.emailPart, touched.password]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ emailPart: true, password: true });
 
@@ -48,15 +49,21 @@ export default function LoginPage() {
     if (!parsed.success) return;
 
     const fullEmail = `${parsed.data.emailPart}${EMAIL_SUFFIX}`.toLowerCase();
-    if (matchMockAccount(fullEmail, parsed.data.password)) {
+
+    setIsLoading(true);
+    try {
+      await login({ email: fullEmail, password: parsed.data.password });
       setCredentialsErrors(null);
+      saveEmail(fullEmail);
       setLoggedIn(true);
       withViewTransition(() => router.replace("/home"));
-    } else {
+    } catch {
       setCredentialsErrors({
         email: t("login.emailError"),
         password: t("login.passwordError"),
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -154,9 +161,10 @@ export default function LoginPage() {
           type="submit"
           variant="primary"
           size="lg"
+          disabled={isLoading}
           className="h-auto w-full py-3 text-ds-body-16-sb leading-ds-body-16-sb text-white mt-4"
         >
-          {t("login.submit")}
+          {isLoading ? t("common.loading") : t("login.submit")}
         </Button>
       </form>
     </div>

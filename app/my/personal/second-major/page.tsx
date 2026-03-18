@@ -1,12 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,9 +13,12 @@ import {
   getMajorOptions,
   getSecondMajorTypeLabel,
   getSecondMajorTypeOptions,
+  apiSecondMajorTypeToCode,
+  codeToApiSecondMajorType,
   type MajorCode,
   type SecondMajorTypeCode,
 } from "@/lib/academic-options";
+import type { SecondMajorType } from "@/lib/api/student";
 
 function DownIcon({ className }: { className?: string }) {
   return (
@@ -72,17 +74,18 @@ function UpDownIcon({ className }: { className?: string }) {
 /** 마이페이지 - 제2전공 수정 (회원가입 제2전공 선택 컴포넌트 재사용) */
 export default function MyPersonalSecondMajorPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const majorOptions = useMemo(() => getMajorOptions(t), [t]);
   const secondMajorTypeOptions = useMemo(() => getSecondMajorTypeOptions(t), [t]);
+  const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
-  const [secondMajorType, setSecondMajorType] = useState<SecondMajorTypeCode | "">(
-    MOCK_PERSONAL_INFO.secondMajorType
-  );
-  const [secondMajor, setSecondMajor] = useState<MajorCode | "">(MOCK_PERSONAL_INFO.secondMajor);
+  const [localSecondMajorType, setLocalSecondMajorType] = useState<SecondMajorTypeCode | "" | null>(null);
+  const [localSecondMajor, setLocalSecondMajor] = useState<MajorCode | "" | null>(null);
+  const secondMajorType = localSecondMajorType ?? (profile ? apiSecondMajorTypeToCode(profile.secondMajorType as SecondMajorType) : "");
+  const secondMajor = localSecondMajor ?? ((profile?.secondMajor ?? "") as MajorCode | "");
   const [secondMajorSheetOpen, setSecondMajorSheetOpen] = useState(false);
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -91,13 +94,14 @@ export default function MyPersonalSecondMajorPage() {
   const hasMajorError = touched && !secondMajor;
   const canSubmit = !!secondMajorType && !!secondMajor;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
-
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    if (!canSubmit || !profile) return;
+    await update(profile, {
+      secondMajorType: codeToApiSecondMajorType(secondMajorType as SecondMajorTypeCode),
+      secondMajor: secondMajor || undefined,
+    });
   };
 
   return (
@@ -171,6 +175,11 @@ export default function MyPersonalSecondMajorPage() {
               {t("my.personal.secondMajorPage.majorError")}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </div>
       </form>
 
@@ -181,8 +190,8 @@ export default function MyPersonalSecondMajorPage() {
         options={secondMajorTypeOptions}
         onOpenChange={setSecondMajorPickerOpen}
         onSelect={(next) => {
-          setSecondMajorType(next as SecondMajorTypeCode | "");
-          if (!next) setSecondMajor("");
+          setLocalSecondMajorType(next as SecondMajorTypeCode | "");
+          if (!next) setLocalSecondMajor("");
           setTouched(true);
         }}
         title={t("my.personal.secondMajorPage.typePlaceholder")}
@@ -195,7 +204,7 @@ export default function MyPersonalSecondMajorPage() {
         options={majorOptions}
         onOpenChange={setSecondMajorSheetOpen}
         onSelect={(next) => {
-          setSecondMajor(next as MajorCode | "");
+          setLocalSecondMajor(next as MajorCode | "");
           setTouched(true);
         }}
         title={t("my.personal.secondMajorPage.title")}
@@ -224,9 +233,9 @@ export default function MyPersonalSecondMajorPage() {
                 ? " text-white"
                 : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("my.personal.secondMajorPage.submit")}
+            {isSubmitting ? t("common.loading") : t("my.personal.secondMajorPage.submit")}
           </Button>
         </div>
       </div>

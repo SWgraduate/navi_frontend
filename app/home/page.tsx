@@ -6,16 +6,15 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatLoading } from "@/components/chat/chat-loading";
 import { useChat } from "@/contexts/chat-context";
 import { isLoggedIn } from "@/lib/auth-storage";
+import { useProfile } from "@/hooks/use-profile";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
-
-/* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
-const MOCK_MAIN_USER = { name: "Navi" } as const;
 
 export default function Home() {
   const router = useRouter();
   const { t } = useTranslation();
   const { messages, isLoading } = useChat();
+  const { profile } = useProfile();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 비로그인 시 스플래시(/)로 보냄 → 스플래시에서 1.5초 후 /login으로 라우팅
@@ -47,7 +46,7 @@ export default function Home() {
       {messages.length === 0 ? (
         // 초기 상태: 환영 문구
         <p className="text-ds-title-24-sb leading-ds-title-24-sb font-semibold text-ds-primary">
-          {t("home.welcomeName", { name: MOCK_MAIN_USER.name })}<br />
+          {t("home.welcomeName", { name: profile?.name ?? "" })}<br />
           <span className="text-ds-brand">{t("home.hanyangUniv")}</span>{t("home.welcomeSuffix")}
         </p>
       ) : (
