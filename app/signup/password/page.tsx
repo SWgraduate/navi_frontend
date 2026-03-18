@@ -14,6 +14,7 @@ import "@/lib/i18n";
 
 const BUTTON_AREA_HEIGHT = 80;
 const SIGNUP_NAME_KEY = "signup_name";
+const SIGNUP_PASSWORD_KEY = "signup_password";
 
 /** Figma 5/6: 회원가입 - 비밀번호 설정 (첫 입력 후 재확인 필드 표시) */
 export default function SignupPasswordPage() {
@@ -64,7 +65,7 @@ export default function SignupPasswordPage() {
     setTouched({ password: true, passwordConfirm: true });
     const parsed = signupPasswordFormSchema.safeParse({ password, passwordConfirm });
     if (!parsed.success) return;
-    // TODO: 회원가입 API (비밀번호 저장)
+    if (typeof window !== "undefined") sessionStorage.setItem(SIGNUP_PASSWORD_KEY, parsed.data.password);
     withViewTransition(() => router.push("/signup/complete"));
   };
 

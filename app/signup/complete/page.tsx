@@ -17,6 +17,9 @@ import {
   type MajorCode,
   type SecondMajorTypeCode,
 } from "@/lib/academic-options";
+import { register } from "@/lib/api/auth";
+import { upsertMyProfile, type SecondMajorType, type AcademicStatus as StudentAcademicStatus } from "@/lib/api/student";
+import { setLoggedIn } from "@/lib/auth-storage";
 
 function UpDownIcon({ className }: { className?: string }) {
   return (
@@ -102,7 +105,7 @@ const sheetPanelVariants = {
   closed: { top: "100%", bottom: "auto" as const },
 };
 
-type AcademicStatus = "enrolled" | "leave";
+type AcademicStatusCode = "enrolled" | "leave";
 
 /** Figma 6/6: 회원가입 - 학적 정보 입력 */
 export default function SignupCompletePage() {
@@ -113,7 +116,7 @@ export default function SignupCompletePage() {
   const [studentId, setStudentId] = useState("");
   const [major, setMajor] = useState<MajorCode | "">("");
   const [secondMajorType, setSecondMajorType] = useState<SecondMajorTypeCode | "">("");
-  const [academicStatus, setAcademicStatus] = useState<AcademicStatus | "">("");
+  const [academicStatus, setAcademicStatus] = useState<AcademicStatusCode | "">("");
   const [yearSemester, setYearSemester] = useState("");
   const [majorSheetOpen, setMajorSheetOpen] = useState(false);
   const [secondMajorSheetOpen, setSecondMajorSheetOpen] = useState(false);
@@ -124,6 +127,8 @@ export default function SignupCompletePage() {
   const [sheetYear, setSheetYear] = useState<number | null>(null);
   const [sheetSemester, setSheetSemester] = useState<number | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const secondMajorTypeDragControls = useDragControls();
   const secondMajorPickerDragControls = useDragControls();
@@ -192,8 +197,50 @@ export default function SignupCompletePage() {
     academicStatus.length > 0 &&
     yearSemester.length > 0;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const mapSecondMajorType = (code: SecondMajorTypeCode | ""): SecondMajorType => {
+    switch (code) {
+      case "multiple":
+        return "다중전공";
+      case "convergence":
+        return "융합전공";
+      case "minor":
+        return "부전공";
+      case "double":
+        return "복수전공";
+      case "linked":
+        return "연계전공";
+      case "micro":
+        return "마이크로전공";
+      default:
+        return "없음";
+    }
+  };
+
+  const mapAcademicStatus = (code: AcademicStatusCode): StudentAcademicStatus => {
+    return code === "enrolled" ? "재학생" : "휴학생";
+  };
+
+  const inferAdmissionYearFromStudentNumber = (studentNumber: string): number => {
+    const prefix = studentNumber.trim().slice(0, 4);
+    const n = Number(prefix);
+    const currentYear = new Date().getFullYear();
+    return Number.isFinite(n) && n >= 1980 && n <= currentYear + 1 ? n : currentYear;
+  };
+
+  const toCompletedSemesters = (ys: string): number => {
+    const [yRaw, sRaw] = ys.split("-");
+    const y = Number(yRaw);
+    const s = Number(sRaw);
+    if (!Number.isFinite(y) || !Number.isFinite(s) || y < 1 || y > 12 || (s !== 1 && s !== 2)) {
+      return 0;
+    }
+    // "현재 이수중인 학년/학기" 기준 → 이미 완료한 학기 수
+    return Math.max(0, (y - 1) * 2 + (s - 1));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     const result = signupCompleteFormSchema.safeParse({
       studentId: studentId.trim(),
       major: major.trim(),
@@ -212,8 +259,41 @@ export default function SignupCompletePage() {
       return;
     }
     setFormErrors({});
-    // TODO: 회원가입 API (학적 정보 저장)
-    withViewTransition(() => router.push("/signup/welcome"));
+
+    const email = typeof window !== "undefined" ? sessionStorage.getItem("signup_email") : null;
+    const name = typeof window !== "undefined" ? sessionStorage.getItem("signup_name") : null;
+    const password = typeof window !== "undefined" ? sessionStorage.getItem("signup_password") : null;
+
+    if (!email || !password) {
+      setSubmitError("회원가입 정보가 누락되었습니다. 이메일 인증 단계부터 다시 진행해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 1) 계정 생성 (Swagger 상 필수: email, password)
+      await register({ email, password, name: name ?? "" });
+
+      // 2) 학적 기본정보 업서트 (세션 쿠키 필요 가능)
+      const studentNumber = result.data.studentId.trim();
+      await upsertMyProfile({
+        admissionYear: inferAdmissionYearFromStudentNumber(studentNumber),
+        studentNumber,
+        name: (name ?? "").trim() || "사용자",
+        major: result.data.major.trim(),
+        secondMajorType: mapSecondMajorType(result.data.secondMajorType as SecondMajorTypeCode | ""),
+        secondMajor: result.data.secondMajor.trim() || undefined,
+        academicStatus: mapAcademicStatus(result.data.academicStatus as AcademicStatusCode),
+        completedSemesters: toCompletedSemesters(result.data.yearSemester),
+      });
+
+      setLoggedIn(true);
+      withViewTransition(() => router.push("/signup/welcome"));
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -703,14 +783,19 @@ export default function SignupCompletePage() {
             size="lg"
             className={cn(
               "mt-4 h-auto w-full rounded-none py-4 text-ds-body-16-sb leading-ds-body-16-sb",
-              canSubmit
+              canSubmit && !isSubmitting
                 ? "bg-primary text-primary-foreground"
                 : "bg-(--ds-bg-disabled) text-ds-disabled"
             )}
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("signup.complete.submit")}
+            {isSubmitting ? "처리 중..." : t("signup.complete.submit")}
           </Button>
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </form>
         </div>
       </div>
