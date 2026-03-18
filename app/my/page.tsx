@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
 import { useProfile } from "@/hooks/use-profile";
+import { logout, leave } from "@/lib/api/auth";
 
 const MOCK_VERSION = "1.00";
 
@@ -25,6 +26,10 @@ export default function MyPage() {
   const email = getEmail();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
   const settingItems = [
     { label: t("my.personalInfo"), href: "/my/personal" },
     {
@@ -34,21 +39,41 @@ export default function MyPage() {
     },
   ];
 
-  const handleLogoutConfirm = () => {
-    setLogoutModalOpen(false);
+  const finalizeLocalLogout = () => {
     clearProfileCache();
     setLoggedIn(false);
     clearGraduationResult();
     withViewTransition(() => router.replace("/login"));
   };
 
-  const handleWithdrawConfirm = () => {
-    setWithdrawModalOpen(false);
-    clearProfileCache();
-    setLoggedIn(false);
-    clearGraduationResult();
-    // TODO: 회원 탈퇴 API 호출
-    withViewTransition(() => router.replace("/login"));
+  const handleLogoutConfirm = async () => {
+    if (isLoggingOut) return;
+    setLogoutError(null);
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      setLogoutModalOpen(false);
+      finalizeLocalLogout();
+    } catch (err) {
+      setLogoutError(err instanceof Error ? err.message : "로그아웃에 실패했습니다.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleWithdrawConfirm = async () => {
+    if (isWithdrawing) return;
+    setWithdrawError(null);
+    setIsWithdrawing(true);
+    try {
+      await leave();
+      setWithdrawModalOpen(false);
+      finalizeLocalLogout();
+    } catch (err) {
+      setWithdrawError(err instanceof Error ? err.message : "회원 탈퇴에 실패했습니다.");
+    } finally {
+      setIsWithdrawing(false);
+    }
   };
 
   return (
@@ -111,7 +136,10 @@ export default function MyPage() {
           className={cn(
             "flex w-full items-center py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary active:opacity-70"
           )}
-          onClick={() => setLogoutModalOpen(true)}
+          onClick={() => {
+            setLogoutError(null);
+            setLogoutModalOpen(true);
+          }}
         >
           {t("my.logout")}
         </button>
@@ -120,7 +148,10 @@ export default function MyPage() {
           className={cn(
             "flex w-full items-center py-3 text-left text-ds-body-16-r leading-ds-body-16-r text-destructive active:opacity-70"
           )}
-          onClick={() => setWithdrawModalOpen(true)}
+          onClick={() => {
+            setWithdrawError(null);
+            setWithdrawModalOpen(true);
+          }}
         >
           {t("my.withdraw")}
         </button>
@@ -134,7 +165,14 @@ export default function MyPage() {
         cancelLabel={t("my.cancel")}
         confirmLabel={t("my.logoutConfirm")}
         onConfirm={handleLogoutConfirm}
-      />
+        confirmDisabled={isLoggingOut}
+      >
+        {logoutError && (
+          <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+            {logoutError}
+          </p>
+        )}
+      </Modal>
       <Modal
         open={withdrawModalOpen}
         onOpenChange={setWithdrawModalOpen}
@@ -144,7 +182,14 @@ export default function MyPage() {
         confirmLabel={t("my.withdrawConfirm")}
         confirmVariant="destructive"
         onConfirm={handleWithdrawConfirm}
-      />
+        confirmDisabled={isWithdrawing}
+      >
+        {withdrawError && (
+          <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+            {withdrawError}
+          </p>
+        )}
+      </Modal>
     </div>
   );
 }
