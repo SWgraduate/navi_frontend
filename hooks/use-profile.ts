@@ -38,7 +38,7 @@ export function useProfile(): ProfileState {
     if (!inflightPromise) {
       inflightPromise = getMyProfile()
         .then((data) => {
-          if (data && typeof data === "object" && "statusCode" in data) {
+          if (data && typeof data === "object" && "error" in data) {
             inflightPromise = null;
             return null;
           }
