@@ -7,6 +7,7 @@
     "graduation": "Graduation",
     "graduationUpload": "Graduation Scan",
     "graduationResult": "Graduation Result",
+    "graduationTimetableScan": "Recent Schedule Scan",
     "my": "My",
     "myTerms": "Terms & Privacy",
     "myLanguage": "Language",
@@ -268,6 +269,27 @@
       "pbl": "PBL Courses",
       "majorIcPbl": "Major IC-PBL",
       "microMajor": "Micro Major Completion"
+    },
+    "timetableScan": {
+      "title1": "Your photo should show",
+      "title2": "the following items.",
+      "caption1": "Scan your latest timetable to update your graduation status.",
+      "caption2": "If your timetable doesn't fit in one photo,",
+      "caption3": "please add multiple photos.",
+      "altExample": "Timetable example",
+      "altUploaded": "Uploaded timetable {{index}}",
+      "camera": "Take photo",
+      "next": "Next",
+      "selectPhoto": "Select photo",
+      "addMore": "Add",
+      "processing": {
+        "title": "Analyzing your timetable",
+        "step1": "Recognizing courses from image...",
+        "step2": "Calculating completion status...",
+        "step3": "Updating graduation status...",
+        "complete": "Update complete!",
+        "completeSubtitle": "Your graduation status has been updated with the latest timetable."
+      }
     },
     "resultRows": {
       "enrollment": "Enrollment & Study Period",

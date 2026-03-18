@@ -7,6 +7,7 @@
     "graduation": "졸업 관리",
     "graduationUpload": "졸업사정조회 스캔",
     "graduationResult": "졸업사정조회 결과",
+    "graduationTimetableScan": "최신 시간표 스캔",
     "my": "마이",
     "myTerms": "약관 및 개인정보 처리 동의",
     "myLanguage": "언어설정",
@@ -268,6 +269,27 @@
       "pbl": "PBL강좌수",
       "majorIcPbl": "전공IC-PBL강좌수",
       "microMajor": "마이크로전공 이수여부"
+    },
+    "timetableScan": {
+      "title1": "사진에 아래와 같은",
+      "title2": "항목들이 보여야해요.",
+      "caption1": "최신 시간표를 스캔하여 졸업사정조회를 업데이트하세요.",
+      "caption2": "시간표가 사진 한장에 담기지 않을 경우,",
+      "caption3": "여러 장을 추가해주세요.",
+      "altExample": "시간표 예시",
+      "altUploaded": "업로드된 시간표 {{index}}",
+      "camera": "촬영하기",
+      "next": "다음",
+      "selectPhoto": "사진 선택",
+      "addMore": "추가",
+      "processing": {
+        "title": "시간표를 분석하고 있어요",
+        "step1": "이미지에서 수강 과목을 인식하고 있어요...",
+        "step2": "이수 현황을 계산하고 있어요...",
+        "step3": "졸업사정조회를 업데이트하고 있어요...",
+        "complete": "업데이트 완료!",
+        "completeSubtitle": "졸업사정조회가 최신 시간표로 업데이트되었어요."
+      }
     },
     "resultRows": {
       "enrollment": "재학(졸업직전) 및 수업연한 충족",
