@@ -164,6 +164,7 @@ export default function TimetableScanPage() {
                     className="relative w-full shrink-0"
                     style={{ scrollSnapAlign: "start" }}
                   >
+                    <div className="relative aspect-square w-full">
                     {/* 이미지 제거 버튼 */}
                     <button
                       type="button"
@@ -192,11 +193,12 @@ export default function TimetableScanPage() {
                       alt={t("graduation.timetableScan.altUploaded", {
                         index: idx + 1,
                       })}
-                      width={800}
-                      height={1200}
-                      className="h-auto max-h-[420px] w-full object-contain"
+                      fill
+                      sizes="100vw"
+                      className="object-contain p-2"
                       unoptimized
                     />
+                    </div>
                   </div>
                 ))}
               </div>
