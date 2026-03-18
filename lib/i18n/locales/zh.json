@@ -282,6 +282,7 @@
       "next": "下一步",
       "selectPhoto": "选择照片",
       "addMore": "添加",
+      "updateSummaryTitle": "查看更新内容",
       "processing": {
         "title": "正在分析课程表",
         "step1": "正在从图像中识别课程...",

@@ -282,6 +282,7 @@
       "next": "Next",
       "selectPhoto": "Select photo",
       "addMore": "Add",
+      "updateSummaryTitle": "Check updated content",
       "processing": {
         "title": "Analyzing your timetable",
         "step1": "Recognizing courses from image...",

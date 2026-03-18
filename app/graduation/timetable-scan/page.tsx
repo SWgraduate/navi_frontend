@@ -81,8 +81,11 @@ export default function TimetableScanPage() {
   };
 
   const handleNext = () => {
+    const firstImageUrl = images[0]?.url ?? "";
     withViewTransition(() =>
-      router.push("/graduation/timetable-scan/processing"),
+      router.push(
+        `/graduation/timetable-scan/processing?image=${encodeURIComponent(firstImageUrl)}`,
+      ),
     );
   };
 
