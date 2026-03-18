@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,9 +14,11 @@ import {
   getMajorOptions,
   getSecondMajorTypeLabel,
   getSecondMajorTypeOptions,
+  apiSecondMajorTypeToCode,
   type MajorCode,
   type SecondMajorTypeCode,
 } from "@/lib/academic-options";
+import type { SecondMajorType } from "@/lib/api/student";
 
 function DownIcon({ className }: { className?: string }) {
   return (
@@ -78,11 +80,12 @@ export default function MyPersonalSecondMajorPage() {
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const majorOptions = useMemo(() => getMajorOptions(t), [t]);
   const secondMajorTypeOptions = useMemo(() => getSecondMajorTypeOptions(t), [t]);
+  const { profile } = useProfile();
 
-  const [secondMajorType, setSecondMajorType] = useState<SecondMajorTypeCode | "">(
-    MOCK_PERSONAL_INFO.secondMajorType
-  );
-  const [secondMajor, setSecondMajor] = useState<MajorCode | "">(MOCK_PERSONAL_INFO.secondMajor);
+  const [localSecondMajorType, setLocalSecondMajorType] = useState<SecondMajorTypeCode | "" | null>(null);
+  const [localSecondMajor, setLocalSecondMajor] = useState<MajorCode | "" | null>(null);
+  const secondMajorType = localSecondMajorType ?? (profile ? apiSecondMajorTypeToCode(profile.secondMajorType as SecondMajorType) : "");
+  const secondMajor = localSecondMajor ?? ((profile?.secondMajor ?? "") as MajorCode | "");
   const [secondMajorSheetOpen, setSecondMajorSheetOpen] = useState(false);
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -181,8 +184,8 @@ export default function MyPersonalSecondMajorPage() {
         options={secondMajorTypeOptions}
         onOpenChange={setSecondMajorPickerOpen}
         onSelect={(next) => {
-          setSecondMajorType(next as SecondMajorTypeCode | "");
-          if (!next) setSecondMajor("");
+          setLocalSecondMajorType(next as SecondMajorTypeCode | "");
+          if (!next) setLocalSecondMajor("");
           setTouched(true);
         }}
         title={t("my.personal.secondMajorPage.typePlaceholder")}
@@ -195,7 +198,7 @@ export default function MyPersonalSecondMajorPage() {
         options={majorOptions}
         onOpenChange={setSecondMajorSheetOpen}
         onSelect={(next) => {
-          setSecondMajor(next as MajorCode | "");
+          setLocalSecondMajor(next as MajorCode | "");
           setTouched(true);
         }}
         title={t("my.personal.secondMajorPage.title")}

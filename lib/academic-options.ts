@@ -54,3 +54,32 @@ export function getSecondMajorTypeOptions(t: TFunction) {
   }));
 }
 
+// ===== API 응답 → UI 코드 역변환 =====
+
+/** API의 한국어 학적상태 → UI 코드 */
+export function apiAcademicStatusToCode(status: "재학생" | "휴학생"): AcademicStatusCode {
+  return status === "재학생" ? "enrolled" : "leave";
+}
+
+/** API의 한국어 제2전공 유형 → UI 코드 */
+export function apiSecondMajorTypeToCode(
+  type: "다중전공" | "융합전공" | "부전공" | "복수전공" | "연계전공" | "마이크로전공" | "없음"
+): SecondMajorTypeCode | "" {
+  switch (type) {
+    case "다중전공": return "multiple";
+    case "융합전공": return "convergence";
+    case "부전공": return "minor";
+    case "복수전공": return "double";
+    case "연계전공": return "linked";
+    case "마이크로전공": return "micro";
+    default: return "";
+  }
+}
+
+/** completedSemesters → "학년-학기" 코드 (toCompletedSemesters의 역함수) */
+export function completedSemestersToYearSemester(completedSemesters: number): YearSemesterCode {
+  const year = Math.min(4, Math.max(1, Math.floor(completedSemesters / 2) + 1)) as 1 | 2 | 3 | 4;
+  const semester = ((completedSemesters % 2) + 1) as 1 | 2;
+  return `${year}-${semester}` as YearSemesterCode;
+}
+

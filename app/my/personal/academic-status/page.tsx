@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { apiAcademicStatusToCode } from "@/lib/academic-options";
 import { personalAcademicStatusSchema, type PersonalAcademicStatusValue } from "@/lib/schemas/personal-info";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -18,10 +19,10 @@ export default function MyPersonalAcademicStatusPage() {
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
 
-  const initialStatus: PersonalAcademicStatusValue | "" = MOCK_PERSONAL_INFO.academicStatus;
-
-  const [status, setStatus] = useState<PersonalAcademicStatusValue | "">(initialStatus);
+  const [localStatus, setLocalStatus] = useState<PersonalAcademicStatusValue | "" | null>(null);
+  const status = localStatus ?? (profile?.academicStatus ? apiAcademicStatusToCode(profile.academicStatus) : "");
   const [touched, setTouched] = useState(false);
 
   const hasError = useMemo(
@@ -74,7 +75,7 @@ export default function MyPersonalAcademicStatusPage() {
                 key={value}
                 type="button"
                 onClick={() => {
-                  setStatus(value);
+                  setLocalStatus(value);
                   setTouched(true);
                 }}
                 className={cn(

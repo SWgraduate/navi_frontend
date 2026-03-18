@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
 import { personalStudentIdSchema } from "@/lib/schemas/personal-info";
 import { useTranslation } from "react-i18next";
 
@@ -17,8 +17,10 @@ export default function MyPersonalStudentIdPage() {
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
 
-  const [studentId, setStudentId] = useState<string>(MOCK_PERSONAL_INFO.studentId);
+  const [localStudentId, setLocalStudentId] = useState<string | null>(null);
+  const studentId = localStudentId ?? profile?.studentNumber ?? "";
   const [touched, setTouched] = useState(false);
   const validationResult = useMemo(() => personalStudentIdSchema.safeParse(studentId), [studentId]);
 
@@ -69,7 +71,7 @@ export default function MyPersonalStudentIdPage() {
               inputMode="numeric"
               autoComplete="off"
               value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
+              onChange={(e) => setLocalStudentId(e.target.value)}
               onBlur={() => setTouched(true)}
               className="min-w-0 flex-1 bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
               placeholder={t("my.personal.studentIdPage.placeholder")}

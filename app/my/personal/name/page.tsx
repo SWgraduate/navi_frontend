@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
 import { personalNameSchema } from "@/lib/schemas/personal-info";
 import { useTranslation } from "react-i18next";
 
@@ -17,8 +17,10 @@ export default function MyPersonalNamePage() {
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
 
-  const [name, setName] = useState<string>(MOCK_PERSONAL_INFO.name);
+  const [localName, setLocalName] = useState<string | null>(null);
+  const name = localName ?? profile?.name ?? "";
   const [touched, setTouched] = useState(false);
   const validationResult = useMemo(() => personalNameSchema.safeParse(name), [name]);
 
@@ -68,7 +70,7 @@ export default function MyPersonalNamePage() {
               type="text"
               autoComplete="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setLocalName(e.target.value)}
               onBlur={() => setTouched(true)}
               className="min-w-0 flex-1 bg-transparent p-4 text-ds-body-16-r leading-ds-body-16-r text-ds-primary placeholder:text-ds-tertiary focus:outline-none focus:ring-0"
               placeholder={t("my.personal.namePage.placeholder")}

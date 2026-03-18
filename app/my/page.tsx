@@ -11,12 +11,7 @@ import { clearGraduationResult } from "@/lib/mock-accounts";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
-
-/* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
-const MOCK_USER = {
-  name: "Navi",
-  email: "aaaaaa@hanyang.ac.kr",
-} as const;
+import { useProfile } from "@/hooks/use-profile";
 
 const MOCK_VERSION = "1.00";
 
@@ -25,6 +20,7 @@ export default function MyPage() {
   useHeaderBackground("white"); // 헤더·노치 영역 배경 흰색
   const router = useRouter();
   const { t } = useTranslation();
+  const { profile } = useProfile();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const settingItems = [
@@ -56,12 +52,9 @@ export default function MyPage() {
       {/* 사용자 정보 - 메인과 동일한 높이에서 시작 (pt-4) */}
       <section className="px-4 pt-20 pb-16">
         <p className="font-semibold text-ds-title-24-sb leading-ds-title-24-sb text-ds-primary">
-          {t("my.greetingName", { name: MOCK_USER.name })}
+          {t("my.greetingName", { name: profile?.name ?? "" })}
           <br />
           {t("my.greetingText")}
-        </p>
-        <p className="mt-1 text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
-          {MOCK_USER.email}
         </p>
       </section>
       <div className="h-2 w-full bg-background" aria-hidden />

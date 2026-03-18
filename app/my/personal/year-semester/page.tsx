@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
+import { completedSemestersToYearSemester } from "@/lib/academic-options";
 import {
   personalYearSemesterSchema,
   type PersonalYearSemesterValue,
@@ -21,6 +22,7 @@ export default function MyPersonalYearSemesterPage() {
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
+  const { profile } = useProfile();
 
   const formatValueToDisplay = (value: string): string => {
     if (!value || !value.includes("-")) return "";
@@ -28,9 +30,8 @@ export default function MyPersonalYearSemesterPage() {
     return t("my.personal.yearSemesterPage.display", { y, s });
   };
 
-  const initialValue = MOCK_PERSONAL_INFO.yearSemester;
-
-  const [yearSemester, setYearSemester] = useState<PersonalYearSemesterValue | "">(initialValue);
+  const [localYearSemester, setLocalYearSemester] = useState<PersonalYearSemesterValue | "" | null>(null);
+  const yearSemester = localYearSemester ?? (profile != null ? completedSemestersToYearSemester(profile.completedSemesters) : "");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [touched, setTouched] = useState(false);
 
@@ -102,7 +103,7 @@ export default function MyPersonalYearSemesterPage() {
         value={yearSemester}
         onOpenChange={setSheetOpen}
         onChange={(next) => {
-          setYearSemester(next as PersonalYearSemesterValue);
+          setLocalYearSemester(next as PersonalYearSemesterValue);
           setTouched(true);
         }}
       />

@@ -3,34 +3,58 @@
 import { RightIcon } from "@/components/icons/header-icons";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { useHeaderBackground } from "@/hooks/use-header-background";
-import { MOCK_PERSONAL_INFO } from "@/lib/mock-accounts";
+import { useProfile } from "@/hooks/use-profile";
 import { useTranslation } from "react-i18next";
-import { getMajorLabel } from "@/lib/academic-options";
+import {
+  getMajorLabel,
+  apiAcademicStatusToCode,
+  apiSecondMajorTypeToCode,
+  completedSemestersToYearSemester,
+  type MajorCode,
+} from "@/lib/academic-options";
+import type { SecondMajorType } from "@/lib/api/student";
 
 /** Figma 1091-6843: 마이페이지 - 개인정보 설정 */
 export default function MyPersonalPage() {
   useHeaderBackground("white");
   const { t } = useTranslation();
-  const [year, semester] = MOCK_PERSONAL_INFO.yearSemester.split("-").map(Number);
+  const { profile } = useProfile();
+
+  const yearSemesterCode = profile
+    ? completedSemestersToYearSemester(profile.completedSemesters)
+    : "";
+  const [year, semester] = yearSemesterCode ? yearSemesterCode.split("-").map(Number) : [null, null];
   const yearSemesterValue =
-    Number.isFinite(year) && Number.isFinite(semester)
+    year != null && semester != null
       ? t("my.personal.yearSemesterPage.display", { y: year, s: semester })
-      : MOCK_PERSONAL_INFO.yearSemester;
+      : "";
+
+  const secondMajorCode = profile?.secondMajorType
+    ? apiSecondMajorTypeToCode(profile.secondMajorType as SecondMajorType)
+    : "";
+
+  const academicStatusCode = profile?.academicStatus
+    ? apiAcademicStatusToCode(profile.academicStatus)
+    : null;
+
   const personalItems: Array<{ label: string; value: string; href?: string }> = [
-    { label: t("my.personal.name"), value: MOCK_PERSONAL_INFO.name, href: "/my/personal/name" },
-    { label: t("my.personal.studentId"), value: MOCK_PERSONAL_INFO.studentId, href: "/my/personal/student-id" },
-    { label: t("my.personal.major"), value: getMajorLabel(t, MOCK_PERSONAL_INFO.major), href: "/my/personal/major" },
+    { label: t("my.personal.name"), value: profile?.name ?? "", href: "/my/personal/name" },
+    { label: t("my.personal.studentId"), value: profile?.studentNumber ?? "", href: "/my/personal/student-id" },
+    { label: t("my.personal.major"), value: profile ? getMajorLabel(t, profile.major as MajorCode) : "", href: "/my/personal/major" },
     {
       label: t("my.personal.secondMajor"),
-      value: MOCK_PERSONAL_INFO.secondMajor ? getMajorLabel(t, MOCK_PERSONAL_INFO.secondMajor) : t("common.none"),
+      value: secondMajorCode && profile?.secondMajor
+        ? getMajorLabel(t, profile.secondMajor as MajorCode)
+        : t("common.none"),
       href: "/my/personal/second-major",
     },
     {
       label: t("my.personal.academicStatus"),
-      value:
-        MOCK_PERSONAL_INFO.academicStatus === "leave"
-          ? t("my.personal.academicStatusPage.leave")
-          : t("my.personal.academicStatusPage.enrolled"),
+      value: academicStatusCode === "leave"
+        ? t("my.personal.academicStatusPage.leave")
+        : academicStatusCode === "enrolled"
+          ? t("my.personal.academicStatusPage.enrolled")
+          : "",
       href: "/my/personal/academic-status",
     },
     {
