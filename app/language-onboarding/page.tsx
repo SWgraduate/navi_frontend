@@ -7,7 +7,6 @@ import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import i18n from "@/lib/i18n";
 import { setStoredLanguage, type Language } from "@/lib/i18n-storage";
-import { isLoggedIn } from "@/lib/auth-storage";
 import { withViewTransition } from "@/lib/view-transition";
 
 const LANGUAGE_OPTIONS: { code: Language; label: string }[] = [
@@ -31,9 +30,8 @@ export default function LanguageOnboardingPage() {
     document.documentElement.lang = lang;
     await i18n.changeLanguage(lang);
 
-    const loggedIn = isLoggedIn();
-    const nextPath = loggedIn ? "/home" : "/login";
-    withViewTransition(() => router.replace(nextPath));
+    // TODO: GET /auth/me 엔드포인트 추가 시 세션 체크 후 /home 분기 복구
+    withViewTransition(() => router.replace("/login"));
   };
 
   return (

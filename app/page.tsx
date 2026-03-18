@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { SplashScreen } from "@/components/splash-screen";
-import { isLoggedIn } from "@/lib/auth-storage";
 import { hasStoredLanguage } from "@/lib/i18n-storage";
 import { useRouter } from "next/navigation";
 import { withViewTransition } from "@/lib/view-transition";
@@ -11,11 +10,13 @@ import { withViewTransition } from "@/lib/view-transition";
 const MIN_DWELL_MS = 1500;
 
 /**
- * 로그인 여부 + 언어 설정 여부를 기준으로 이동할 경로 결정.
- * 스플래시를 벗어날 시점에 한 번만 호출해 최신 상태로 보낸다.
+ * 언어 설정 여부 + (추후) 세션 유효성 검증을 기준으로 이동할 경로 결정.
+ * TODO: GET /auth/me 엔드포인트 추가 시 세션 체크 후 /home 분기 복구
+ *   if (await checkSession()) return "/home";
  */
-function resolveDestination(): "/home" | "/login" | "/language-onboarding" {
-  if (isLoggedIn()) return "/home";
+function resolveDestination(): "/login" | "/language-onboarding" {
+  // TODO: 세션 유효성 API 엔드포인트 준비되면 아래 주석 복구
+  // if (isLoggedIn()) return "/home";
   if (!hasStoredLanguage()) return "/language-onboarding";
   return "/login";
 }

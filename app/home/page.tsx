@@ -1,30 +1,20 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatLoading } from "@/components/chat/chat-loading";
 import { useChat } from "@/contexts/chat-context";
-import { isLoggedIn } from "@/lib/auth-storage";
 import { useProfile } from "@/hooks/use-profile";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
 export default function Home() {
-  const router = useRouter();
   const { t } = useTranslation();
   const { messages, isLoading } = useChat();
   const { profile } = useProfile();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 비로그인 시 스플래시(/)로 보냄 → 스플래시에서 1.5초 후 /login으로 라우팅
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!isLoggedIn()) {
-      router.replace("/");
-      return;
-    }
-  }, [router]);
+  // TODO: GET /auth/me 엔드포인트 추가 시 세션 만료 감지 후 /login 리다이렉트 복구
 
   // 메시지·로딩 상태가 바뀔 때마다 스크롤을 가장 아래로
   useEffect(() => {
