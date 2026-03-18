@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { useProfile, updateProfileCache } from "@/hooks/use-profile";
-import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { completedSemestersToYearSemester, yearSemesterToCompletedSemesters } from "@/lib/academic-options";
 import {
   personalYearSemesterSchema,
@@ -19,11 +17,11 @@ import { useTranslation } from "react-i18next";
 /** 마이페이지 - 현재 이수한 학년/학기 수정 */
 export default function MyPersonalYearSemesterPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
   const formatValueToDisplay = (value: string): string => {
     if (!value || !value.includes("-")) return "";
@@ -45,34 +43,11 @@ export default function MyPersonalYearSemesterPage() {
     [yearSemester]
   );
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
     if (!canSubmit || !profile) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const result = await upsertMyProfile({
-        admissionYear: profile.admissionYear,
-        studentNumber: profile.studentNumber,
-        name: profile.name,
-        major: profile.major,
-        secondMajorType: profile.secondMajorType,
-        secondMajor: profile.secondMajor,
-        academicStatus: profile.academicStatus,
-        completedSemesters: yearSemesterToCompletedSemesters(yearSemester),
-      });
-      updateProfileCache(result as StudentResponse);
-      withViewTransition(() => router.back());
-    } catch {
-      setSubmitError(t("errors.saveFailed"));
-    } finally {
-      setIsSubmitting(false);
-    }
+    await update(profile, { completedSemesters: yearSemesterToCompletedSemesters(yearSemester) });
   };
 
   const display = formatValueToDisplay(yearSemester);

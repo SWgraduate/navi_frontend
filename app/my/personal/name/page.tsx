@@ -1,32 +1,27 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { useProfile, updateProfileCache } from "@/hooks/use-profile";
-import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { personalNameSchema } from "@/lib/schemas/personal-info";
 import { useTranslation } from "react-i18next";
 
 /** Figma 1091-7200: 마이페이지 - 이름 수정 */
 export default function MyPersonalNamePage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
   const [localName, setLocalName] = useState<string | null>(null);
   const name = localName ?? profile?.name ?? "";
   const [touched, setTouched] = useState(false);
   const validationResult = useMemo(() => personalNameSchema.safeParse(name), [name]);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const hasError = touched && !validationResult.success;
   const canSubmit = validationResult.success;
@@ -39,27 +34,7 @@ export default function MyPersonalNamePage() {
     e.preventDefault();
     setTouched(true);
     if (!canSubmit || !profile) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const result = await upsertMyProfile({
-        admissionYear: profile.admissionYear,
-        studentNumber: profile.studentNumber,
-        name: name.trim(),
-        major: profile.major,
-        secondMajorType: profile.secondMajorType,
-        secondMajor: profile.secondMajor,
-        academicStatus: profile.academicStatus,
-        completedSemesters: profile.completedSemesters,
-      });
-      updateProfileCache(result as StudentResponse);
-      withViewTransition(() => router.back());
-    } catch {
-      setSubmitError(t("errors.saveFailed"));
-    } finally {
-      setIsSubmitting(false);
-    }
+    await update(profile, { name: name.trim() });
   };
 
   return (

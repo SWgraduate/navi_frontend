@@ -1,33 +1,28 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { useProfile, updateProfileCache } from "@/hooks/use-profile";
-import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { inferAdmissionYear } from "@/lib/academic-options";
 import { personalStudentIdSchema } from "@/lib/schemas/personal-info";
 import { useTranslation } from "react-i18next";
 
-/** 마이페이지 - 학번 수정 (이름 수정 페이지와 동일 패턴) */
+/** 마이페이지 - 학번 수정 */
 export default function MyPersonalStudentIdPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
   const [localStudentId, setLocalStudentId] = useState<string | null>(null);
   const studentId = localStudentId ?? profile?.studentNumber ?? "";
   const [touched, setTouched] = useState(false);
   const validationResult = useMemo(() => personalStudentIdSchema.safeParse(studentId), [studentId]);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const hasError = touched && !validationResult.success;
   const canSubmit = validationResult.success;
@@ -40,28 +35,11 @@ export default function MyPersonalStudentIdPage() {
     e.preventDefault();
     setTouched(true);
     if (!canSubmit || !profile) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const newStudentNumber = studentId.trim();
-      const result = await upsertMyProfile({
-        admissionYear: inferAdmissionYear(newStudentNumber),
-        studentNumber: newStudentNumber,
-        name: profile.name,
-        major: profile.major,
-        secondMajorType: profile.secondMajorType,
-        secondMajor: profile.secondMajor,
-        academicStatus: profile.academicStatus,
-        completedSemesters: profile.completedSemesters,
-      });
-      updateProfileCache(result as StudentResponse);
-      withViewTransition(() => router.back());
-    } catch {
-      setSubmitError(t("errors.saveFailed"));
-    } finally {
-      setIsSubmitting(false);
-    }
+    const newStudentNumber = studentId.trim();
+    await update(profile, {
+      admissionYear: inferAdmissionYear(newStudentNumber),
+      studentNumber: newStudentNumber,
+    });
   };
 
   return (

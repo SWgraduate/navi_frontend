@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { useProfile, updateProfileCache } from "@/hooks/use-profile";
-import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
 import { useTranslation } from "react-i18next";
 import {
@@ -76,13 +74,13 @@ function UpDownIcon({ className }: { className?: string }) {
 /** 마이페이지 - 제2전공 수정 (회원가입 제2전공 선택 컴포넌트 재사용) */
 export default function MyPersonalSecondMajorPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const majorOptions = useMemo(() => getMajorOptions(t), [t]);
   const secondMajorTypeOptions = useMemo(() => getSecondMajorTypeOptions(t), [t]);
   const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
   const [localSecondMajorType, setLocalSecondMajorType] = useState<SecondMajorTypeCode | "" | null>(null);
   const [localSecondMajor, setLocalSecondMajor] = useState<MajorCode | "" | null>(null);
@@ -92,9 +90,6 @@ export default function MyPersonalSecondMajorPage() {
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
   const [touched, setTouched] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
   const hasTypeError = touched && !secondMajorType;
   const hasMajorError = touched && !secondMajor;
   const canSubmit = !!secondMajorType && !!secondMajor;
@@ -103,27 +98,10 @@ export default function MyPersonalSecondMajorPage() {
     e.preventDefault();
     setTouched(true);
     if (!canSubmit || !profile) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const result = await upsertMyProfile({
-        admissionYear: profile.admissionYear,
-        studentNumber: profile.studentNumber,
-        name: profile.name,
-        major: profile.major,
-        secondMajorType: codeToApiSecondMajorType(secondMajorType as SecondMajorTypeCode),
-        secondMajor: secondMajor || undefined,
-        academicStatus: profile.academicStatus,
-        completedSemesters: profile.completedSemesters,
-      });
-      updateProfileCache(result as StudentResponse);
-      withViewTransition(() => router.back());
-    } catch {
-      setSubmitError(t("errors.saveFailed"));
-    } finally {
-      setIsSubmitting(false);
-    }
+    await update(profile, {
+      secondMajorType: codeToApiSecondMajorType(secondMajorType as SecondMajorTypeCode),
+      secondMajor: secondMajor || undefined,
+    });
   };
 
   return (

@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
-import { withViewTransition } from "@/lib/view-transition";
-import { useProfile, updateProfileCache } from "@/hooks/use-profile";
-import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
+import { useProfile } from "@/hooks/use-profile";
+import { useProfileUpdate } from "@/hooks/use-profile-update";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
 import { useTranslation } from "react-i18next";
 import { getMajorLabel, getMajorOptions, type MajorCode } from "@/lib/academic-options";
@@ -44,20 +42,17 @@ function UpDownIcon({ className }: { className?: string }) {
 /** 마이페이지 - 주전공 수정 (회원가입 주전공 선택 컴포넌트 재사용) */
 export default function MyPersonalMajorPage() {
   useHeaderBackground("white");
-  const router = useRouter();
   const { t } = useTranslation();
   const { keyboardHeight } = useKeyboardStatus();
   const effectiveKeyboardInset = Math.max(0, Math.round(keyboardHeight));
   const majorOptions = getMajorOptions(t);
   const { profile } = useProfile();
+  const { isSubmitting, submitError, update } = useProfileUpdate();
 
   const [localMajor, setLocalMajor] = useState<MajorCode | "" | null>(null);
   const major = localMajor ?? (profile?.major as MajorCode | "") ?? "";
   const [majorSheetOpen, setMajorSheetOpen] = useState(false);
   const [touched, setTouched] = useState(false);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const hasError = touched && major.trim().length === 0;
   const canSubmit = major.trim().length > 0;
@@ -66,27 +61,7 @@ export default function MyPersonalMajorPage() {
     e.preventDefault();
     setTouched(true);
     if (!canSubmit || !profile) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const result = await upsertMyProfile({
-        admissionYear: profile.admissionYear,
-        studentNumber: profile.studentNumber,
-        name: profile.name,
-        major: major,
-        secondMajorType: profile.secondMajorType,
-        secondMajor: profile.secondMajor,
-        academicStatus: profile.academicStatus,
-        completedSemesters: profile.completedSemesters,
-      });
-      updateProfileCache(result as StudentResponse);
-      withViewTransition(() => router.back());
-    } catch {
-      setSubmitError(t("errors.saveFailed"));
-    } finally {
-      setIsSubmitting(false);
-    }
+    await update(profile, { major });
   };
 
   return (
