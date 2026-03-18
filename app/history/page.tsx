@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { HistoryItemPopover } from "@/components/history/history-item-popover";
 import { HistoryRow } from "@/components/history/history-row";
+import { getPinnedMap, togglePinned } from "@/lib/history-storage";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
@@ -13,6 +14,7 @@ interface HistoryItem {
   title: string;
   date: string;
   time: string;
+  pinned: boolean;
 }
 
 const MOCK_HISTORY: HistoryItem[] = [
@@ -21,24 +23,34 @@ const MOCK_HISTORY: HistoryItem[] = [
     title: "example 1",
     date: "xxxx-xx-xx",
     time: "00:00",
+    pinned: false,
   },
   {
     id: "2",
     title: "example 2",
     date: "xxxx-xx-xx",
     time: "00:00",
+    pinned: false,
   },
   {
     id: "3",
     title: "example 3",
     date: "xxxx-xx-xx",
     time: "00:00",
+    pinned: false,
   },
 ];
 
 export default function HistoryPage() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [items, setItems] = useState<HistoryItem[]>(() => {
+    const pinnedMap = getPinnedMap();
+    return MOCK_HISTORY.map((item) => ({
+      ...item,
+      pinned: !!pinnedMap[item.id],
+    }));
+  });
   const [popover, setPopover] = useState<{
     item: HistoryItem;
     x: number;
@@ -47,9 +59,18 @@ export default function HistoryPage() {
 
   useHeaderBackground("white");
 
-  const filteredHistory = MOCK_HISTORY.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredHistory = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const byQuery = q.length
+      ? items.filter((item) => item.title.toLowerCase().includes(q))
+      : items;
+
+    return [...byQuery].sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return 0;
+    });
+  }, [items, searchQuery]);
 
   const handleLongPress = useCallback((item: HistoryItem, e: React.TouchEvent | React.MouseEvent) => {
     const clientX = "touches" in e ? e.touches[0]?.clientX ?? e.changedTouches?.[0]?.clientX : e.clientX;
@@ -62,8 +83,18 @@ export default function HistoryPage() {
   const closePopover = useCallback(() => setPopover(null), []);
 
   const handlePin = useCallback(() => {
-    // TODO: 고정 API
-  }, []);
+    if (!popover) return;
+    const { id } = popover.item;
+
+    setItems((prev) => {
+      const current = prev.find((item) => item.id === id);
+      const isPinned = current?.pinned ?? false;
+      togglePinned(id, isPinned);
+      return prev.map((item) =>
+        item.id === id ? { ...item, pinned: !isPinned } : item
+      );
+    });
+  }, [popover]);
   const handleRename = useCallback(() => {
     // TODO: 이름 변경
   }, []);
@@ -106,7 +137,7 @@ export default function HistoryPage() {
             placeholder={t("history.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg bg-secondary py-4 pl-12 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-body-16-r placeholder:leading-ds-body-16-r placeholder:text-ds-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-lg bg-secondary py-4 pl-12 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-body-16-r placeholder:leading-ds-body-16-r placeholder:text-ds-tertiary focus:outline-none"
           />
         </div>
       </div>
@@ -139,6 +170,7 @@ export default function HistoryPage() {
             x={popover.x}
             y={popover.y}
             onClose={closePopover}
+            isPinned={popover.item.pinned}
             onPin={handlePin}
             onRename={handleRename}
             onDelete={handleDelete}

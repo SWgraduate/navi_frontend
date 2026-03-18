@@ -23,6 +23,8 @@ const HEADER_TITLE_KEYS: Record<string, string> = {
   "/graduation/upload": "header.graduationUpload",
   "/graduation/upload/processing": "header.graduationUpload",
   "/graduation/result": "header.graduationResult",
+  "/graduation/timetable-scan": "header.graduationTimetableScan",
+  "/graduation/timetable-scan/processing": "header.graduationTimetableScan",
   "/my": "header.my",
   "/my/terms": "header.myTerms",
   "/my/language": "header.myLanguage",
@@ -76,6 +78,7 @@ function AppHeaderWithSearchParams({
   isGraduationUploadPage,
   isGraduationProcessingPage,
   isGraduationResultPage,
+  isGraduationTimetableScanPage,
   scrolled,
   router,
   startNewChat,
@@ -89,6 +92,7 @@ function AppHeaderWithSearchParams({
   isGraduationUploadPage: boolean;
   isGraduationProcessingPage: boolean;
   isGraduationResultPage: boolean;
+  isGraduationTimetableScanPage: boolean;
   scrolled: boolean;
   router: ReturnType<typeof useRouter>;
   startNewChat: () => void;
@@ -142,14 +146,14 @@ function AppHeaderWithSearchParams({
         !isLoginPage &&
         !isSignupPage &&
         !isMySection &&
-        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage && !isGraduationTimetableScanPage))
       }
       showAdd={
         !isHistoryPage &&
         !isLoginPage &&
         !isSignupPage &&
         !isMySection &&
-        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage))
+        (isGraduationHeaderWithIcons || (!isGraduationUploadPage && !isGraduationProcessingPage && !isGraduationTimetableScanPage))
       }
       historyIcon={
         isGraduationHeaderWithIcons ? <EditIcon /> : undefined
@@ -195,6 +199,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isGraduationUploadPage = pathname === "/graduation/upload";
   const isGraduationProcessingPage = pathname === "/graduation/upload/processing";
   const isGraduationResultPage = pathname === "/graduation/result" || pathname.startsWith("/graduation/result/");
+  const isGraduationTimetableScanPage = pathname === "/graduation/timetable-scan" || pathname.startsWith("/graduation/timetable-scan/");
   const isGraduationHeaderWithIcons = isGraduationResultPage;
   const isHistoryPage = pathname === "/history" || pathname.startsWith("/history/");
   const isLoginPage = pathname === "/login" || pathname.startsWith("/login/");
@@ -215,11 +220,13 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     isGraduationUploadPage ||
     isGraduationProcessingPage ||
     isGraduationResultPage ||
+    isGraduationTimetableScanPage ||
     pathname === "/speak" ||
     isSignupTermsPage ||
     isSignupTermsAgreePage ||
     isLoginPage ||
-    isLanguageOnboardingPage;
+    isLanguageOnboardingPage ||
+    isHistoryPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);
@@ -267,6 +274,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     !isSplash &&
     routeShowsBottomBar &&
     !isMyPersonalPage &&
+    !isGraduationTimetableScanPage &&
     !keyboardActive &&
     !isGraduationUploadPage &&
     !isGraduationProcessingPage;
@@ -518,6 +526,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
               isGraduationUploadPage={isGraduationUploadPage}
               isGraduationProcessingPage={isGraduationProcessingPage}
               isGraduationResultPage={isGraduationResultPage}
+              isGraduationTimetableScanPage={isGraduationTimetableScanPage}
               scrolled={scrolled}
               router={router}
               startNewChat={startNewChat}
@@ -604,7 +613,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
                     type="button"
                     role="menuitem"
                     className="whitespace-nowrap px-4 py-3 text-left text-ds-body-16-r text-ds-primary hover:bg-ds-tertiary/10 active:bg-ds-tertiary/15"
-                    onClick={() => setScanMenuOpen(false)}
+                    onClick={() => {
+                      setScanMenuOpen(false);
+                      withViewTransition(() => router.push("/graduation/timetable-scan"));
+                    }}
                   >
                     {t("scan.schedule")}
                   </button>

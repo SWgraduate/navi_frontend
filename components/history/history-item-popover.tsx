@@ -12,6 +12,8 @@ export interface HistoryItemPopoverProps {
   onClose: () => void;
   /** 고정 클릭 */
   onPin?: () => void;
+  /** 현재 항목이 고정 상태인지 여부 */
+  isPinned?: boolean;
   /** 이름 변경 클릭 */
   onRename?: () => void;
   /** 삭제 클릭 */
@@ -30,6 +32,7 @@ export function HistoryItemPopover({
   y,
   onClose,
   onPin,
+  isPinned,
   onRename,
   onDelete,
   className,
@@ -71,7 +74,7 @@ export function HistoryItemPopover({
             onClick={() => handleAction(onPin)}
           >
             <Pin className="shrink-0 text-ds-tertiary" style={{ width: 24, height: 24 }} />
-            {t("historyMenu.pin")}
+            {t(isPinned ? "historyMenu.unpin" : "historyMenu.pin")}
           </button>
         )}
         {onRename != null && (

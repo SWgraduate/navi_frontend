@@ -7,6 +7,7 @@
     "graduation": "毕业管理",
     "graduationUpload": "毕业扫描",
     "graduationResult": "毕业结果",
+    "graduationTimetableScan": "最近课程表扫描",
     "my": "我的",
     "myTerms": "条款与隐私",
     "myLanguage": "语言",
@@ -268,6 +269,28 @@
       "pbl": "PBL课程",
       "majorIcPbl": "专业IC-PBL",
       "microMajor": "微专业完成"
+    },
+    "timetableScan": {
+      "title1": "照片中应包含",
+      "title2": "以下项目。",
+      "caption1": "扫描最新课程表以更新毕业审查状态。",
+      "caption2": "如果课程表无法在一张照片中显示，",
+      "caption3": "请添加多张照片。",
+      "altExample": "课程表示例",
+      "altUploaded": "已上传课程表 {{index}}",
+      "camera": "拍照",
+      "next": "下一步",
+      "selectPhoto": "选择照片",
+      "addMore": "添加",
+      "updateSummaryTitle": "查看更新内容",
+      "processing": {
+        "title": "正在分析课程表",
+        "step1": "正在从图像中识别课程...",
+        "step2": "正在计算完成状态...",
+        "step3": "正在更新毕业审查状态...",
+        "complete": "更新完成！",
+        "completeSubtitle": "您的毕业审查状态已根据最新课程表更新。"
+      }
     },
     "resultRows": {
       "enrollment": "入学及修业年限",

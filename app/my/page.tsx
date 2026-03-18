@@ -64,7 +64,7 @@ export default function MyPage() {
           {MOCK_USER.email}
         </p>
       </section>
-      <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
+      <div className="h-2 w-full bg-background" aria-hidden />
 
       {/* 설정 메뉴 */}
       <nav className="px-4" aria-label={t("my.personalInfo")}>
@@ -82,7 +82,7 @@ export default function MyPage() {
           </TransitionLink>
         ))}
       </nav>
-      <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
+      <div className="h-2 w-full bg-background" aria-hidden />
 
       {/* 약관 및 개인정보 처리 동의 */}
       <nav className="px-4" aria-label={t("my.terms")}>
@@ -94,7 +94,7 @@ export default function MyPage() {
           <RightIcon className="text-ds-tertiary" />
         </TransitionLink>
       </nav>
-      <div className="h-2 w-full bg-(--ds-gray-10)" aria-hidden />
+      <div className="h-2 w-full bg-background" aria-hidden />
 
       {/* 버전 정보 · 로그아웃 */}
       <nav className="px-4" aria-label={t("my.versionLabel")}>
