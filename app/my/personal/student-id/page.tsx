@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { useProfile } from "@/hooks/use-profile";
+import { useProfile, updateProfileCache } from "@/hooks/use-profile";
+import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
+import { inferAdmissionYear } from "@/lib/academic-options";
 import { personalStudentIdSchema } from "@/lib/schemas/personal-info";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +26,9 @@ export default function MyPersonalStudentIdPage() {
   const [touched, setTouched] = useState(false);
   const validationResult = useMemo(() => personalStudentIdSchema.safeParse(studentId), [studentId]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const hasError = touched && !validationResult.success;
   const canSubmit = validationResult.success;
   const errorMessage =
@@ -31,13 +36,32 @@ export default function MyPersonalStudentIdPage() {
       ? t(validationResult.error.issues[0]?.message ?? "my.personal.studentIdPage.error")
       : null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
+    if (!canSubmit || !profile) return;
 
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const newStudentNumber = studentId.trim();
+      const result = await upsertMyProfile({
+        admissionYear: inferAdmissionYear(newStudentNumber),
+        studentNumber: newStudentNumber,
+        name: profile.name,
+        major: profile.major,
+        secondMajorType: profile.secondMajorType,
+        secondMajor: profile.secondMajor,
+        academicStatus: profile.academicStatus,
+        completedSemesters: profile.completedSemesters,
+      });
+      updateProfileCache(result as StudentResponse);
+      withViewTransition(() => router.back());
+    } catch {
+      setSubmitError(t("errors.saveFailed"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -82,6 +106,11 @@ export default function MyPersonalStudentIdPage() {
               {errorMessage}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </div>
       </form>
 
@@ -107,9 +136,9 @@ export default function MyPersonalStudentIdPage() {
               ? " text-white"
               : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
           }
-          disabled={!canSubmit}
+          disabled={!canSubmit || isSubmitting}
           >
-          {t("my.personal.studentIdPage.submit")}
+          {isSubmitting ? t("common.loading") : t("my.personal.studentIdPage.submit")}
         </Button>
       </div>
     </div>

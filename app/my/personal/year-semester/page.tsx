@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { useProfile } from "@/hooks/use-profile";
-import { completedSemestersToYearSemester } from "@/lib/academic-options";
+import { useProfile, updateProfileCache } from "@/hooks/use-profile";
+import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
+import { completedSemestersToYearSemester, yearSemesterToCompletedSemesters } from "@/lib/academic-options";
 import {
   personalYearSemesterSchema,
   type PersonalYearSemesterValue,
@@ -44,13 +45,34 @@ export default function MyPersonalYearSemesterPage() {
     [yearSemester]
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
+    if (!canSubmit || !profile) return;
 
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const result = await upsertMyProfile({
+        admissionYear: profile.admissionYear,
+        studentNumber: profile.studentNumber,
+        name: profile.name,
+        major: profile.major,
+        secondMajorType: profile.secondMajorType,
+        secondMajor: profile.secondMajor,
+        academicStatus: profile.academicStatus,
+        completedSemesters: yearSemesterToCompletedSemesters(yearSemester),
+      });
+      updateProfileCache(result as StudentResponse);
+      withViewTransition(() => router.back());
+    } catch {
+      setSubmitError(t("errors.saveFailed"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const display = formatValueToDisplay(yearSemester);
@@ -94,6 +116,11 @@ export default function MyPersonalYearSemesterPage() {
               {t("my.personal.yearSemesterPage.error")}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </div>
       </form>
 
@@ -131,9 +158,9 @@ export default function MyPersonalYearSemesterPage() {
                 ? " text-white"
                 : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("my.personal.yearSemesterPage.submit")}
+            {isSubmitting ? t("common.loading") : t("my.personal.yearSemesterPage.submit")}
           </Button>
         </div>
       </div>

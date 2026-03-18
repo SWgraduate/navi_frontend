@@ -14,6 +14,11 @@ let profileCache: StudentResponse | null = null;
 // 동시 마운트 시 중복 요청 방지용 inflight promise
 let inflightPromise: Promise<StudentResponse | null> | null = null;
 
+/** 프로필 캐시 갱신 (upsert 성공 후 호출) */
+export function updateProfileCache(updated: StudentResponse): void {
+  profileCache = updated;
+}
+
 /** 프로필 캐시 초기화 (로그아웃/탈퇴 시 호출) */
 export function clearProfileCache(): void {
   profileCache = null;

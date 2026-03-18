@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { useProfile } from "@/hooks/use-profile";
+import { useProfile, updateProfileCache } from "@/hooks/use-profile";
+import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
 import { MajorSelectSheet } from "@/components/personal/major-select-sheet";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,6 +16,7 @@ import {
   getSecondMajorTypeLabel,
   getSecondMajorTypeOptions,
   apiSecondMajorTypeToCode,
+  codeToApiSecondMajorType,
   type MajorCode,
   type SecondMajorTypeCode,
 } from "@/lib/academic-options";
@@ -90,17 +92,38 @@ export default function MyPersonalSecondMajorPage() {
   const [secondMajorPickerOpen, setSecondMajorPickerOpen] = useState(false);
   const [touched, setTouched] = useState(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const hasTypeError = touched && !secondMajorType;
   const hasMajorError = touched && !secondMajor;
   const canSubmit = !!secondMajorType && !!secondMajor;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
+    if (!canSubmit || !profile) return;
 
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const result = await upsertMyProfile({
+        admissionYear: profile.admissionYear,
+        studentNumber: profile.studentNumber,
+        name: profile.name,
+        major: profile.major,
+        secondMajorType: codeToApiSecondMajorType(secondMajorType as SecondMajorTypeCode),
+        secondMajor: secondMajor || undefined,
+        academicStatus: profile.academicStatus,
+        completedSemesters: profile.completedSemesters,
+      });
+      updateProfileCache(result as StudentResponse);
+      withViewTransition(() => router.back());
+    } catch {
+      setSubmitError(t("errors.saveFailed"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -174,6 +197,11 @@ export default function MyPersonalSecondMajorPage() {
               {t("my.personal.secondMajorPage.majorError")}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </div>
       </form>
 
@@ -227,9 +255,9 @@ export default function MyPersonalSecondMajorPage() {
                 ? " text-white"
                 : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("my.personal.secondMajorPage.submit")}
+            {isSubmitting ? t("common.loading") : t("my.personal.secondMajorPage.submit")}
           </Button>
         </div>
       </div>

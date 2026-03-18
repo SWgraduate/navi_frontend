@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { useKeyboardStatus } from "@/hooks/use-keyboard-status";
 import { withViewTransition } from "@/lib/view-transition";
-import { useProfile } from "@/hooks/use-profile";
-import { apiAcademicStatusToCode } from "@/lib/academic-options";
+import { useProfile, updateProfileCache } from "@/hooks/use-profile";
+import { apiAcademicStatusToCode, codeToApiAcademicStatus } from "@/lib/academic-options";
+import { upsertMyProfile, type StudentResponse } from "@/lib/api/student";
 import { personalAcademicStatusSchema, type PersonalAcademicStatusValue } from "@/lib/schemas/personal-info";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -34,13 +35,34 @@ export default function MyPersonalAcademicStatusPage() {
     [status]
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!canSubmit) return;
+    if (!canSubmit || !profile || !status) return;
 
-    // TODO: 실제 API 연동 및 상태 저장
-    withViewTransition(() => router.back());
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const result = await upsertMyProfile({
+        admissionYear: profile.admissionYear,
+        studentNumber: profile.studentNumber,
+        name: profile.name,
+        major: profile.major,
+        secondMajorType: profile.secondMajorType,
+        secondMajor: profile.secondMajor,
+        academicStatus: codeToApiAcademicStatus(status as PersonalAcademicStatusValue),
+        completedSemesters: profile.completedSemesters,
+      });
+      updateProfileCache(result as StudentResponse);
+      withViewTransition(() => router.back());
+    } catch {
+      setSubmitError(t("errors.saveFailed"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const labelForStatus = (value: PersonalAcademicStatusValue) =>
@@ -96,6 +118,11 @@ export default function MyPersonalAcademicStatusPage() {
               {t("my.personal.academicStatusPage.error")}
             </p>
           )}
+          {submitError && (
+            <p className="text-ds-caption-14-r leading-ds-caption-14-r text-destructive">
+              {submitError}
+            </p>
+          )}
         </div>
       </form>
 
@@ -122,9 +149,9 @@ export default function MyPersonalAcademicStatusPage() {
                 ? " text-white"
                 : " bg-(--ds-bg-disabled) text-ds-disabled hover:bg-(--ds-bg-disabled) active:bg-(--ds-bg-disabled)")
             }
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
           >
-            {t("my.personal.academicStatusPage.submit")}
+            {isSubmitting ? t("common.loading") : t("my.personal.academicStatusPage.submit")}
           </Button>
         </div>
       </div>

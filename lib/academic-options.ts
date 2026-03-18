@@ -54,6 +54,47 @@ export function getSecondMajorTypeOptions(t: TFunction) {
   }));
 }
 
+// ===== UI 코드 → API 값 변환 =====
+
+/** UI 학적상태 코드 → API 한국어 값 */
+export function codeToApiAcademicStatus(code: AcademicStatusCode): "재학생" | "휴학생" {
+  return code === "enrolled" ? "재학생" : "휴학생";
+}
+
+/** UI 제2전공 유형 코드 → API 한국어 값 */
+export function codeToApiSecondMajorType(
+  code: SecondMajorTypeCode | ""
+): "다중전공" | "융합전공" | "부전공" | "복수전공" | "연계전공" | "마이크로전공" | "없음" {
+  switch (code) {
+    case "multiple": return "다중전공";
+    case "convergence": return "융합전공";
+    case "minor": return "부전공";
+    case "double": return "복수전공";
+    case "linked": return "연계전공";
+    case "micro": return "마이크로전공";
+    default: return "없음";
+  }
+}
+
+/** "학년-학기" 코드 → completedSemesters 변환 */
+export function yearSemesterToCompletedSemesters(ys: string): number {
+  const [yRaw, sRaw] = ys.split("-");
+  const y = Number(yRaw);
+  const s = Number(sRaw);
+  if (!Number.isFinite(y) || !Number.isFinite(s) || y < 1 || y > 12 || (s !== 1 && s !== 2)) {
+    return 0;
+  }
+  return Math.max(0, (y - 1) * 2 + (s - 1));
+}
+
+/** 학번 앞 4자리에서 입학연도 추론 */
+export function inferAdmissionYear(studentNumber: string): number {
+  const prefix = studentNumber.trim().slice(0, 4);
+  const n = Number(prefix);
+  const currentYear = new Date().getFullYear();
+  return Number.isFinite(n) && n >= 1980 && n <= currentYear + 1 ? n : currentYear;
+}
+
 // ===== API 응답 → UI 코드 역변환 =====
 
 /** API의 한국어 학적상태 → UI 코드 */
