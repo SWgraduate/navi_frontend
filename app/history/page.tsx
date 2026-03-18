@@ -137,7 +137,7 @@ export default function HistoryPage() {
             placeholder={t("history.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg bg-secondary py-4 pl-12 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-body-16-r placeholder:leading-ds-body-16-r placeholder:text-ds-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-lg bg-secondary py-4 pl-12 pr-4 text-ds-body-16-r leading-ds-body-16-r text-ds-gray-90 placeholder:text-ds-body-16-r placeholder:leading-ds-body-16-r placeholder:text-ds-tertiary focus:outline-none"
           />
         </div>
       </div>
