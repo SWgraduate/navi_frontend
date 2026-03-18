@@ -1,3 +1,10 @@
+/**
+ * API 바렐(export) 파일입니다.
+ *
+ * - **어떨 때 쓰나**: 앱 코드에서 `@/lib/api` 한 곳에서 함수/타입을 import 하고 싶을 때 사용합니다.
+ * - **구성**: `auth`, `chat`, `student`, `rag` 모듈을 재-export 합니다.
+ */
+
 export { apiFetch } from "./client";
 export type { ApiError } from "./client";
 export {

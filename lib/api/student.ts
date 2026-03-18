@@ -1,5 +1,17 @@
 import { apiFetch, type ApiError } from "./client";
 
+/**
+ * 학생(Student) / 학적·이수 현황 관련 API 모음입니다.
+ *
+ * - **어떤 화면/흐름에서 쓰나**
+ *   - (추후) 마이페이지/프로필 입력 및 수정
+ *   - (추후) 졸업사정/이수 현황 조회
+ *   - (추후) `app/graduation/*`에서 이미지 파싱 결과를 백엔드에 반영할 때
+ *
+ * - **인증**: Swagger 기준 세션 쿠키(`connect.sid`)가 필요할 수 있어 `apiFetch` 기본값(`credentials: include`)을 사용합니다.
+ * - **타입**: 아래 타입들은 Swagger 스키마를 그대로 옮긴 “API 경계 타입”입니다.
+ */
+
 export type ApiErrorShape = ApiError;
 
 // ===== Schemas (from Swagger) =====

@@ -1,5 +1,15 @@
 import type { ApiError } from "./client";
 
+/**
+ * RAG(문서 인제스트) 관련 API 모음입니다.
+ *
+ * - **어떤 화면/흐름에서 쓰나**
+ *   - (추후) PDF 업로드 기능이 생길 때, 사용자가 문서를 업로드하면 백엔드에서
+ *     텍스트 추출/청킹/임베딩/저장 파이프라인을 돌리기 위해 사용합니다.
+ *
+ * - **형식**: `multipart/form-data` 업로드라 `apiFetch`(JSON body) 대신 `fetch + FormData`로 구현합니다.
+ */
+
 export type IngestionStatus = "pending" | "processing" | "processed" | "failed";
 
 export type IngestPdfResult = {
