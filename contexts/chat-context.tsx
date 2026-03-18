@@ -38,19 +38,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
 
     try {
-      const { taskId, message: initialMessage } = await sendChatQuery({ query: text.trim() });
-
-      // 초기 메시지가 있으면 바로 표시 (동기 응답인 경우)
-      if (initialMessage?.trim()) {
-        const assistantMessage: Message = {
-          id: `assistant-${taskId}`,
-          text: initialMessage,
-          isUser: false,
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-        setIsLoading(false);
-        return;
-      }
+      const { taskId } = await sendChatQuery({ query: text.trim() });
 
       // 비동기 처리: taskId로 상태 폴링
       let attempts = 0;
