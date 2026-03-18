@@ -19,7 +19,7 @@ import {
 } from "@/lib/academic-options";
 import { register } from "@/lib/api/auth";
 import { upsertMyProfile, type SecondMajorType, type AcademicStatus as StudentAcademicStatus } from "@/lib/api/student";
-import { setLoggedIn } from "@/lib/auth-storage";
+import { setLoggedIn, saveEmail } from "@/lib/auth-storage";
 
 function UpDownIcon({ className }: { className?: string }) {
   return (
@@ -287,6 +287,7 @@ export default function SignupCompletePage() {
         completedSemesters: toCompletedSemesters(result.data.yearSemester),
       });
 
+      if (email) saveEmail(email);
       setLoggedIn(true);
       withViewTransition(() => router.push("/signup/welcome"));
     } catch (err) {

@@ -6,8 +6,9 @@ import { RightIcon } from "@/components/icons/header-icons";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { Modal } from "@/components/ui/modal";
 import { useHeaderBackground } from "@/hooks/use-header-background";
-import { setLoggedIn } from "@/lib/auth-storage";
+import { setLoggedIn, getEmail } from "@/lib/auth-storage";
 import { clearGraduationResult } from "@/lib/mock-accounts";
+import { clearProfileCache } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,7 @@ export default function MyPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { profile } = useProfile();
+  const email = getEmail();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const settingItems = [
@@ -34,15 +36,17 @@ export default function MyPage() {
 
   const handleLogoutConfirm = () => {
     setLogoutModalOpen(false);
+    clearProfileCache();
     setLoggedIn(false);
-    clearGraduationResult(); // 로그아웃 시 졸업사정조회 결과 삭제
+    clearGraduationResult();
     withViewTransition(() => router.replace("/login"));
   };
 
   const handleWithdrawConfirm = () => {
     setWithdrawModalOpen(false);
+    clearProfileCache();
     setLoggedIn(false);
-    clearGraduationResult(); // 탈퇴 시 졸업사정조회 결과 삭제
+    clearGraduationResult();
     // TODO: 회원 탈퇴 API 호출
     withViewTransition(() => router.replace("/login"));
   };
@@ -56,6 +60,11 @@ export default function MyPage() {
           <br />
           {t("my.greetingText")}
         </p>
+        {email && (
+          <p className="mt-1 text-ds-body-16-r leading-ds-body-16-r text-ds-tertiary">
+            {email}
+          </p>
+        )}
       </section>
       <div className="h-2 w-full bg-background" aria-hidden />
 

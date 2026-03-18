@@ -4,6 +4,7 @@
  */
 
 const AUTH_STORAGE_KEY = "navi_logged_in";
+const EMAIL_STORAGE_KEY = "navi_email";
 
 export function isLoggedIn(): boolean {
   if (typeof window === "undefined") return false;
@@ -16,5 +17,16 @@ export function setLoggedIn(value: boolean): void {
     localStorage.setItem(AUTH_STORAGE_KEY, "1");
   } else {
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(EMAIL_STORAGE_KEY);
   }
+}
+
+export function saveEmail(email: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(EMAIL_STORAGE_KEY, email);
+}
+
+export function getEmail(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(EMAIL_STORAGE_KEY);
 }
