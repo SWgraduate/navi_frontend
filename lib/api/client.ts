@@ -21,6 +21,8 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   const res = await fetch(url, {
     ...init,
+    // Swagger 상 sessionAuth(connect.sid) 기반 인증을 사용하므로 기본적으로 쿠키를 포함합니다.
+    credentials: init.credentials ?? "include",
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
