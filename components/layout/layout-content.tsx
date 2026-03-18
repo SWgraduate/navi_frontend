@@ -219,7 +219,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     isSignupTermsPage ||
     isSignupTermsAgreePage ||
     isLoginPage ||
-    isLanguageOnboardingPage;
+    isLanguageOnboardingPage ||
+    isHistoryPage;
 
   const [chatInputFocused, setChatInputFocused] = useState(false);
   const [scanMenuOpen, setScanMenuOpen] = useState(false);

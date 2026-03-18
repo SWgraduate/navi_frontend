@@ -298,6 +298,7 @@
   },
   "historyMenu": {
     "pin": "고정",
+    "unpin": "고정 해제",
     "rename": "이름 변경",
     "delete": "삭제"
   },
