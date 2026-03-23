@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules
+
+- 코드를 작성하거나 수정하기 전에, 해당 디렉토리 또는 상위 디렉토리에 `README.md`가 있으면 반드시 먼저 읽고 내용을 반영한다.
+
 ## Commands
 
 ```bash
