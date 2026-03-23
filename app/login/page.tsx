@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { setLoggedIn, saveEmail } from "@/lib/auth-storage";
+import { setLoggedIn, saveEmail, saveAccessToken, saveUserInfo } from "@/lib/auth-storage";
 import { login } from "@/lib/api/auth";
-import { getMyProfile } from "@/lib/api/student";
-import { updateProfileCache } from "@/hooks/use-profile";
 import { loginFormSchema } from "@/lib/schemas/login";
 import { TransitionLink } from "@/components/layout/transition-link";
 import { withViewTransition } from "@/lib/view-transition";
@@ -54,16 +52,12 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      await login({ email: fullEmail, password: parsed.data.password });
+      const res = await login({ email: fullEmail, password: parsed.data.password });
       setCredentialsErrors(null);
-      saveEmail(fullEmail);
+      saveAccessToken(res.accessToken);
+      saveEmail(res.user.email);
+      saveUserInfo(res.user.id, res.user.role);
       setLoggedIn(true);
-      // 로그인 직후 프로필 프리페치 → 다른 기기/환경에서도 즉시 유저 정보 표시
-      getMyProfile().then((profile) => {
-        if (profile && typeof profile === "object" && !("error" in profile)) {
-          updateProfileCache(profile);
-        }
-      }).catch(() => {});
       withViewTransition(() => router.replace("/home"));
     } catch {
       setCredentialsErrors({

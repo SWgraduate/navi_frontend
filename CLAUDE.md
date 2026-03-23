@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules
+
+- 코드를 작성하거나 수정하기 전에, 해당 디렉토리 또는 상위 디렉토리에 `README.md`가 있으면 반드시 먼저 읽고 내용을 반영한다.
+
 ## Commands
 
 ```bash
@@ -60,7 +64,8 @@ The `LayoutContent` component is the shell for all pages. It handles:
 ### API layer
 
 All HTTP calls go through `lib/api/client.ts` → `apiFetch<T>()`:
-- Adds `Content-Type: application/json` and `credentials: "include"` (session cookie `connect.sid`)
+- Adds `Content-Type: application/json` and `Authorization: Bearer <token>`
+- JWT accessToken은 localStorage `navi_access_token`에서 읽어 헤더에 자동 포함
 - Base URL from env var `NEXT_PUBLIC_API_URL`
 - Throws `Error` on non-OK responses
 

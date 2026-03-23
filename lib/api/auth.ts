@@ -21,6 +21,16 @@ export type AuthResponse = {
   [key: string]: unknown;
 };
 
+/** POST /auth/login 성공 응답 */
+export type LoginResponse = {
+  user: {
+    role: string;
+    email: string;
+    id: string;
+  };
+  accessToken: string;
+};
+
 // ============ POST /auth/register ============
 
 /** POST /auth/register 요청 */
@@ -37,8 +47,8 @@ export type RegisterRequest = {
 };
 
 /** 회원가입 (이메일 인증 완료 후 호출) */
-export async function register(payload: RegisterRequest): Promise<AuthResponse> {
-  return apiFetch<AuthResponse>("/auth/register", {
+export async function register(payload: RegisterRequest): Promise<LoginResponse> {
+  return apiFetch<LoginResponse>("/auth/register", {
     method: "POST",
     body: payload,
   });
@@ -53,8 +63,8 @@ export type LoginRequest = {
 };
 
 /** 로그인 */
-export async function login(payload: LoginRequest): Promise<AuthResponse> {
-  return apiFetch<AuthResponse>("/auth/login", {
+export async function login(payload: LoginRequest): Promise<LoginResponse> {
+  return apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
     body: payload,
   });

@@ -6,12 +6,76 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import {
-  getGraduationResult,
-  setGraduationResult,
   getDefaultCredits,
   MAJOR_TYPE,
   type MajorType,
 } from "@/lib/mock-accounts";
+import {
+  getMyAcademicRecord,
+  updateMyAcademicRecord,
+  parseAndUpdateMyAcademicRecordFromImage,
+  getMyProfile,
+  type AcademicRecordResponse,
+  type UpdateAcademicRecordRequest,
+} from "@/lib/api/student";
+
+function mapAcademicRecordToCredits(record: AcademicRecordResponse) {
+  const { earnedCredits, secondMajorCredits, completedConditions } = record;
+  return {
+    ...getDefaultCredits(),
+    graduation: String(earnedCredits.total),
+    major: String(earnedCredits.majorTotal),
+    coreMajor: String(earnedCredits.majorCore),
+    advancedMajor: String(earnedCredits.majorAdvanced),
+    industryCooperation: String(earnedCredits.industry),
+    generalElective: String(earnedCredits.generalElective),
+    socialService: String(earnedCredits.socialService),
+    secondMajor: String(secondMajorCredits.majorTotal),
+    secondCoreMajor: String(secondMajorCredits.majorCore),
+    prerequisite: completedConditions.hasPrerequisite ? "Y" : "N",
+    uncompleted: completedConditions.hasMandatoryCourse ? "Y" : "N",
+    thesis: completedConditions.hasThesis ? "Y" : "N",
+    englishOnly: String(completedConditions.englishCourses),
+    pbl: String(completedConditions.pblTotal),
+    majorIcPbl: String(completedConditions.pblMajor),
+  };
+}
+
+function creditsToUpdateRequest(credits: ReturnType<typeof getDefaultCredits>): UpdateAcademicRecordRequest {
+  const parseNum = (v: string) => {
+    const m = v.match(/^(\d+(?:\.\d+)?)/);
+    return m ? parseFloat(m[1]) : 0;
+  };
+  return {
+    earnedCredits: {
+      total: parseNum(credits.graduation),
+      majorCore: parseNum(credits.coreMajor),
+      majorAdvanced: parseNum(credits.advancedMajor),
+      majorTotal: parseNum(credits.major),
+      generalElective: parseNum(credits.generalElective),
+      socialService: parseNum(credits.socialService),
+      industry: parseNum(credits.industryCooperation),
+    },
+    secondMajorCredits: {
+      majorTotal: parseNum(credits.secondMajor),
+      majorCore: parseNum(credits.secondCoreMajor),
+    },
+    completedConditions: {
+      englishCourses: parseNum(credits.englishOnly),
+      pblTotal: parseNum(credits.pbl),
+      pblMajor: parseNum(credits.majorIcPbl),
+      hasPrerequisite: credits.prerequisite === "Y",
+      hasMandatoryCourse: credits.uncompleted === "Y",
+      hasThesis: credits.thesis === "Y",
+    },
+  };
+}
+
+function getMajorTypeFromSecondMajorType(secondMajorType: string): MajorType {
+  if (secondMajorType === "마이크로전공") return MAJOR_TYPE.MICRO;
+  if (!secondMajorType || secondMajorType === "없음" || secondMajorType === "부전공") return MAJOR_TYPE.BASIC;
+  return MAJOR_TYPE.DOUBLE;
+}
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
 
@@ -25,37 +89,13 @@ function GraduationProcessingContent() {
   const { t } = useTranslation();
   const imageUrl = searchParams.get("image");
   
-  // 전공 타입 파싱 및 검증
-  const getMajorType = (): MajorType => {
-    const type = searchParams.get("type");
-    if (type === MAJOR_TYPE.BASIC || type === MAJOR_TYPE.DOUBLE || type === MAJOR_TYPE.MICRO) {
-      return type;
-    }
-    // 개발용: 기본값 변경하여 테스트 가능
-    // BASIC: 제1전공만, DOUBLE: 제1전공+제2전공, MICRO: 제1전공+마이크로
-    return MAJOR_TYPE.DOUBLE; // 기본값 (여기를 MAJOR_TYPE.BASIC 또는 MAJOR_TYPE.MICRO로 변경 가능)
-  };
-  const majorType = getMajorType();
-  const savedResult = getGraduationResult();
   const isEditMode = !imageUrl;
-  
-  // 수정 모드인데 저장된 데이터가 없으면 업로드 페이지로 리다이렉트
-  useEffect(() => {
-    if (isEditMode && !savedResult) {
-      router.push("/graduation/upload");
-    }
-  }, [isEditMode, savedResult, router]);
-  
-  const effectiveMajorType: MajorType = isEditMode && savedResult ? savedResult.type : majorType;
 
-  const [progress, setProgress] = useState(() => (!imageUrl ? 100 : 0));
-  const [isComplete, setIsComplete] = useState(() => !imageUrl);
-  const [credits, setCredits] = useState(() => {
-    if (!imageUrl && savedResult) {
-      return { ...savedResult.credits };
-    }
-    return getDefaultCredits();
-  });
+  const [effectiveMajorType, setEffectiveMajorType] = useState<MajorType>(MAJOR_TYPE.BASIC);
+  const [progress, setProgress] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+  const [credits, setCredits] = useState(getDefaultCredits);
+  const [isSaving, setIsSaving] = useState(false);
 
   // 현재 focus된 입력 필드 추적
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -276,27 +316,63 @@ function GraduationProcessingContent() {
     return true;
   };
 
+  // 프로필에서 전공 타입 가져오기
   useEffect(() => {
-    if (!imageUrl && !isEditMode) {
+    getMyProfile()
+      .then((profile) => {
+        if ("secondMajorType" in profile) {
+          setEffectiveMajorType(getMajorTypeFromSecondMajorType(profile.secondMajorType));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // 이미지 파싱 API 호출
+  useEffect(() => {
+    if (!imageUrl) return;
+
+    const base64 = sessionStorage.getItem("navi_graduation_image_base64");
+    if (!base64) {
       router.replace("/graduation/upload");
       return;
     }
-  }, [imageUrl, isEditMode, router]);
 
-  useEffect(() => {
-    if (!imageUrl) return;
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsComplete(true);
-          return 100;
-        }
-        return prev + 1;
-      });
+      setProgress((prev) => (prev < 90 ? prev + 1 : prev));
     }, 50);
+
+    parseAndUpdateMyAcademicRecordFromImage({ imageBase64: base64 })
+      .then((record) => {
+        if ("id" in record) {
+          setCredits(mapAcademicRecordToCredits(record as AcademicRecordResponse));
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        clearInterval(interval);
+        setProgress(100);
+        setIsComplete(true);
+        sessionStorage.removeItem("navi_graduation_image_base64");
+      });
+
     return () => clearInterval(interval);
-  }, [imageUrl]);
+  }, [imageUrl, router]);
+
+  // 수정 모드: 기존 학적 데이터 가져오기
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    getMyAcademicRecord()
+      .then((record) => {
+        if ("id" in record) {
+          setCredits(mapAcademicRecordToCredits(record as AcademicRecordResponse));
+        }
+        setIsComplete(true);
+      })
+      .catch(() => {
+        router.push("/graduation/upload");
+      });
+  }, [isEditMode, router]);
 
   // 100% 완료 후 결과 화면 (이미지 있음) 또는 수정 모드 (이미지 없음, 현황만)
   if (isComplete) {
@@ -855,7 +931,7 @@ function GraduationProcessingContent() {
 
         {imageUrl && (
           <div className="shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
-            {validationError && (
+            {(validationError) && (
               <div className="mb-3 rounded-lg bg-red-50 px-4 py-3 text-center">
                 <p className="text-ds-body-14-r leading-ds-body-14-r text-red-600">
                   {validationError}
@@ -867,14 +943,21 @@ function GraduationProcessingContent() {
               variant="primary"
               size="lg"
               className="w-full text-white"
-              onClick={() => {
-                if (validateInputs()) {
-                  setGraduationResult({ type: effectiveMajorType, credits });
+              disabled={isSaving}
+              onClick={async () => {
+                if (!validateInputs()) return;
+                setIsSaving(true);
+                try {
+                  await updateMyAcademicRecord(creditsToUpdateRequest(credits));
                   withViewTransition(() => router.push("/graduation/result"));
+                } catch {
+                  setValidationError("저장에 실패했습니다. 다시 시도해주세요.");
+                } finally {
+                  setIsSaving(false);
                 }
               }}
             >
-              {t("graduation.processing.confirmCta")}
+              {isSaving ? "저장 중..." : t("graduation.processing.confirmCta")}
             </Button>
           </div>
         )}
@@ -882,7 +965,19 @@ function GraduationProcessingContent() {
     );
   }
 
-  // 처리 중 화면
+  // 수정 모드 로딩 중 (API 응답 대기)
+  if (isEditMode) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-white">
+        <div
+          className="rounded-full bg-ds-gray-30 animate-pulse-scale"
+          style={{ width: 32, height: 32 }}
+        />
+      </div>
+    );
+  }
+
+  // 처리 중 화면 (이미지 스캔)
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       {/* 검은 배경 영역 - 업로드된 이미지 */}
