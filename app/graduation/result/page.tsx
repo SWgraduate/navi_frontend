@@ -139,8 +139,13 @@ export default function GraduationResultPage() {
           setMajorType(getMajorTypeFromSecondMajorType(profile.secondMajorType));
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        // 데이터 없음 → 시작 화면으로
+        sessionStorage.setItem(SKIP_SAVED_RESULT_KEY, "1");
+        router.replace("/graduation");
+      })
       .finally(() => setIsLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -159,7 +164,7 @@ export default function GraduationResultPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-background">
+      <div className="flex h-full w-full items-center justify-center bg-white">
         <div
           className="rounded-full bg-ds-gray-30 animate-pulse-scale"
           style={{ width: 32, height: 32 }}

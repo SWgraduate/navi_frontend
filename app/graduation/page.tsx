@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { getMyAcademicRecord } from "@/lib/api/student";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
@@ -33,14 +32,8 @@ function GraduationContent() {
       return;
     }
 
-    // API로 학적 데이터 존재 여부 확인
-    getMyAcademicRecord()
-      .then(() => {
-        withViewTransition(() => router.push("/graduation/result"));
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+    // result 페이지에서 API 호출 + 데이터 없으면 다시 돌아오므로 바로 리다이렉트
+    withViewTransition(() => router.push("/graduation/result"));
   }, [router, skipSavedResult]);
 
   const handleStart = () => {
