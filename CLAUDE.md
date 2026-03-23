@@ -60,7 +60,8 @@ The `LayoutContent` component is the shell for all pages. It handles:
 ### API layer
 
 All HTTP calls go through `lib/api/client.ts` → `apiFetch<T>()`:
-- Adds `Content-Type: application/json` and `credentials: "include"` (session cookie `connect.sid`)
+- Adds `Content-Type: application/json` and `Authorization: Bearer <token>`
+- JWT accessToken은 localStorage `navi_access_token`에서 읽어 헤더에 자동 포함
 - Base URL from env var `NEXT_PUBLIC_API_URL`
 - Throws `Error` on non-OK responses
 
