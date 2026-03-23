@@ -186,11 +186,22 @@ export default function GraduationResultPage() {
   const renderRow = (
     label: string,
     fieldKey: CreditKey,
-    allocation: string | number
+    allocation: string | number,
+    showRemaining = false
   ) => {
     const value = credits[fieldKey];
     const completion = calculateCompletion(value, allocation);
     const isComplete = completion === "Y";
+
+    let displayValue = value || "-";
+    if (showRemaining && value && typeof allocation === "number") {
+      const num = parseFloat(value);
+      if (!isNaN(num)) {
+        const remaining = allocation - num;
+        displayValue = `${value}(${remaining})`;
+      }
+    }
+
     return (
       <tr key={fieldKey} className="border-b border-[#EEEFF1]">
         <td className="text-ds-body-16-r leading-ds-body-16-r text-ds-secondary" style={CELL_STYLE}>
@@ -210,7 +221,7 @@ export default function GraduationResultPage() {
               boxSizing: "border-box",
             }}
           >
-            {value || "-"}
+            {displayValue}
           </span>
         </td>
         <td className="text-ds-body-16-r leading-ds-body-16-r text-ds-secondary" style={CELL_STYLE}>
@@ -257,7 +268,7 @@ export default function GraduationResultPage() {
               <tbody>
                 {majorType === MAJOR_TYPE.MICRO &&
                   renderRow(rowLabel("enrollment"), "enrollment", getAllocation(majorType, "enrollment"))}
-                {renderRow(rowLabel("graduation"), "graduation", getAllocation(majorType, "graduation"))}
+                {renderRow(rowLabel("graduation"), "graduation", getAllocation(majorType, "graduation"), true)}
                 {renderRow(rowLabel("major"), "major", getAllocation(majorType, "major"))}
                 {renderRow(rowLabel("coreMajor"), "coreMajor", getAllocation(majorType, "coreMajor"))}
                 {renderRow(rowLabel("advancedMajor"), "advancedMajor", getAllocation(majorType, "advancedMajor"))}
