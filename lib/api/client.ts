@@ -35,6 +35,12 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const data = (await res.json().catch(() => ({}))) as T | ApiError;
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("navi_access_token");
+      localStorage.removeItem("navi_logged_in");
+      window.location.href = "/login";
+      throw new Error("인증이 만료되었습니다.");
+    }
     const err = (data as ApiError).error ?? res.statusText ?? "요청에 실패했습니다.";
     throw new Error(typeof err === "string" ? err : JSON.stringify(err));
   }
