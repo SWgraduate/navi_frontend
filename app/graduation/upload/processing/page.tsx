@@ -965,7 +965,19 @@ function GraduationProcessingContent() {
     );
   }
 
-  // 처리 중 화면
+  // 수정 모드 로딩 중 (API 응답 대기)
+  if (isEditMode) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-white">
+        <div
+          className="rounded-full bg-ds-gray-30 animate-pulse-scale"
+          style={{ width: 32, height: 32 }}
+        />
+      </div>
+    );
+  }
+
+  // 처리 중 화면 (이미지 스캔)
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       {/* 검은 배경 영역 - 업로드된 이미지 */}
