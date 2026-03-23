@@ -282,6 +282,12 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const onFocus = (e: FocusEvent) => {
       const focused = isFocusableInput(e.target);
+      // iOS Safari: 입력 포커스 시 window를 자동 스크롤하는 현상 즉시 차단
+      if (focused) {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
       setChatInputFocused(focused && e.target instanceof Element && isInsideChatInput(e.target));
     };
     const onBlur = () => {
@@ -340,6 +346,12 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
     if (!wasKeyboardActive && keyboardActive) {
       savedMainScrollTopRef.current = mainRef.current?.scrollTop ?? 0;
+      // iOS Safari가 키보드 열릴 때 window를 스크롤하는 것을 rAF 타이밍에서도 차단
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
       // Home에서 키보드 열리면 mainHeight transition(220ms) 완료 후 마지막 메시지로 스크롤
       if (isHome) {
         recoveryTimeoutIdsRef.current.push(
