@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { hasGraduationResult } from "@/lib/mock-accounts";
+import { getMyAcademicRecord } from "@/lib/api/student";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
@@ -19,29 +19,28 @@ function GraduationContent() {
   const skipSavedResult = searchParams.get("skipSavedResult") === "1";
 
   useEffect(() => {
-    // 로컬스토리지 확인 후 라우팅 결정
-    const checkAndRoute = () => {
-      const shouldSkipSavedResult =
-        skipSavedResult ||
-        (typeof window !== "undefined" &&
-          sessionStorage.getItem(SKIP_SAVED_RESULT_KEY) === "1");
+    const shouldSkipSavedResult =
+      skipSavedResult ||
+      (typeof window !== "undefined" &&
+        sessionStorage.getItem(SKIP_SAVED_RESULT_KEY) === "1");
 
-      if (typeof window !== "undefined" && shouldSkipSavedResult) {
-        sessionStorage.removeItem(SKIP_SAVED_RESULT_KEY);
-      }
+    if (typeof window !== "undefined" && shouldSkipSavedResult) {
+      sessionStorage.removeItem(SKIP_SAVED_RESULT_KEY);
+    }
 
-      if (!shouldSkipSavedResult && hasGraduationResult()) {
-        // 저장된 데이터가 있으면 result 페이지로 리다이렉트
+    if (shouldSkipSavedResult) {
+      setIsLoading(false);
+      return;
+    }
+
+    // API로 학적 데이터 존재 여부 확인
+    getMyAcademicRecord()
+      .then(() => {
         withViewTransition(() => router.push("/graduation/result"));
-      } else {
-        // 데이터가 없으면 시작하기 화면 표시
+      })
+      .catch(() => {
         setIsLoading(false);
-      }
-    };
-
-    // 약간의 지연을 두어 로딩 상태를 보여줌
-    const timer = setTimeout(checkAndRoute, 100);
-    return () => clearTimeout(timer);
+      });
   }, [router, skipSavedResult]);
 
   const handleStart = () => {

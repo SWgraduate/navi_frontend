@@ -1,17 +1,53 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import {
-  getGraduationResult,
   MAJOR_TYPE,
   type MajorType,
   type CreditKey,
   type Credits,
 } from "@/lib/mock-accounts";
+import {
+  getMyAcademicRecord,
+  getMyProfile,
+  type AcademicRecordResponse,
+} from "@/lib/api/student";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
+
+function mapAcademicRecordToCredits(record: AcademicRecordResponse): Credits {
+  const { earnedCredits, secondMajorCredits, completedConditions } = record;
+  return {
+    enrollment: "",
+    graduation: String(earnedCredits.total),
+    major: String(earnedCredits.majorTotal),
+    coreMajor: String(earnedCredits.majorCore),
+    advancedMajor: String(earnedCredits.majorAdvanced),
+    industryCooperation: String(earnedCredits.industry),
+    generalElective: String(earnedCredits.generalElective),
+    secondMajor: String(secondMajorCredits.majorTotal),
+    secondCoreMajor: String(secondMajorCredits.majorCore),
+    secondPrerequisite: "",
+    secondUncompleted: "",
+    prerequisite: completedConditions.hasPrerequisite ? "Y" : "N",
+    uncompleted: completedConditions.hasMandatoryCourse ? "Y" : "N",
+    thesis: completedConditions.hasThesis ? "Y" : "N",
+    englishOnly: String(completedConditions.englishCourses),
+    graduationGpa: "",
+    socialService: String(earnedCredits.socialService),
+    pbl: String(completedConditions.pblTotal),
+    majorIcPbl: String(completedConditions.pblMajor),
+    microMajor: "",
+  };
+}
+
+function getMajorTypeFromSecondMajorType(secondMajorType: string): MajorType {
+  if (secondMajorType === "마이크로전공") return MAJOR_TYPE.MICRO;
+  if (!secondMajorType || secondMajorType === "없음" || secondMajorType === "부전공") return MAJOR_TYPE.BASIC;
+  return MAJOR_TYPE.DOUBLE;
+}
 
 const SKIP_SAVED_RESULT_KEY = "navi_skip_saved_graduation_result_once";
 
@@ -82,13 +118,30 @@ const CELL_STYLE = {
   textAlign: "center" as const,
 };
 
-/** 졸업사정조회 결과 페이지: Navi 사용자 데이터 표시 (로컬스토리지에서 조회) */
+/** 졸업사정조회 결과 페이지: API에서 학적 데이터 조회 */
 export default function GraduationResultPage() {
   const router = useRouter();
   useHeaderBackground("white");
   const { t } = useTranslation();
-  const saved = getGraduationResult();
   const rowLabel = (key: CreditKey) => t(`graduation.resultRows.${key}`);
+
+  const [majorType, setMajorType] = useState<MajorType>(MAJOR_TYPE.BASIC);
+  const [credits, setCredits] = useState<Credits | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([getMyAcademicRecord(), getMyProfile()])
+      .then(([record, profile]) => {
+        if ("id" in record) {
+          setCredits(mapAcademicRecordToCredits(record as AcademicRecordResponse));
+        }
+        if ("secondMajorType" in profile) {
+          setMajorType(getMajorTypeFromSecondMajorType(profile.secondMajorType));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -103,8 +156,19 @@ export default function GraduationResultPage() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [router]);
-  
-  if (!saved) {
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-background">
+        <div
+          className="rounded-full bg-ds-gray-30 animate-pulse-scale"
+          style={{ width: 32, height: 32 }}
+        />
+      </div>
+    );
+  }
+
+  if (!credits) {
     return (
       <div className="flex h-full w-full items-center justify-center px-4 py-10">
         <p className="text-center text-ds-body-16-r text-ds-tertiary">
@@ -113,9 +177,6 @@ export default function GraduationResultPage() {
       </div>
     );
   }
-  
-  const majorType: MajorType = saved.type;
-  const credits: Credits = saved.credits;
 
   const renderRow = (
     label: string,

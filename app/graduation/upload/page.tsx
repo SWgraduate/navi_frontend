@@ -38,12 +38,15 @@ export default function GraduationUploadPage() {
 
   const handleUpload = () => {
     if (!selectedFile || !previewUrl) return;
-    // 이미지 인식 처리 페이지로 이동
-    // 개발용: 타입을 변경하여 테스트 가능 (BASIC, DOUBLE, MICRO)
-    const majorType = "DOUBLE"; // 여기를 BASIC, DOUBLE, MICRO로 변경하여 테스트
-    withViewTransition(() => {
-      router.push(`/graduation/upload/processing?image=${encodeURIComponent(previewUrl)}&type=${majorType}`);
-    });
+    const reader = new FileReader();
+    reader.readAsDataURL(selectedFile);
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(",")[1];
+      sessionStorage.setItem("navi_graduation_image_base64", base64);
+      withViewTransition(() => {
+        router.push(`/graduation/upload/processing?image=${encodeURIComponent(previewUrl)}`);
+      });
+    };
   };
 
   return (
