@@ -340,6 +340,16 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
     if (!wasKeyboardActive && keyboardActive) {
       savedMainScrollTopRef.current = mainRef.current?.scrollTop ?? 0;
+      // Home에서 키보드 열리면 mainHeight transition(220ms) 완료 후 마지막 메시지로 스크롤
+      if (isHome) {
+        recoveryTimeoutIdsRef.current.push(
+          window.setTimeout(() => {
+            if (!previousKeyboardActiveRef.current) return; // 이미 닫혔으면 무시
+            const mainEl = mainRef.current;
+            if (mainEl) mainEl.scrollTop = mainEl.scrollHeight;
+          }, 240)
+        );
+      }
       return;
     }
 
@@ -356,7 +366,8 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
       const mainEl = mainRef.current;
       if (!mainEl) return;
 
-      mainEl.scrollTop = savedMainScrollTopRef.current;
+      // Home은 항상 맨 아래로 (채팅 UX), 다른 페이지는 저장된 위치로 복원
+      mainEl.scrollTop = isHome ? mainEl.scrollHeight : savedMainScrollTopRef.current;
     };
 
     clearRecoveryTimers();
@@ -371,7 +382,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
     retryDelays.forEach((delay) => {
       recoveryTimeoutIdsRef.current.push(window.setTimeout(restoreViewportAndFocus, delay));
     });
-  }, [keyboardActive]);
+  }, [keyboardActive, isHome]);
 
   useEffect(() => {
     return () => {
