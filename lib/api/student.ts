@@ -105,6 +105,22 @@ export type ParseImageRequest = {
   imageBase64: string;
 };
 
+// ===== In-memory cache =====
+
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5분
+
+type CacheEntry<T> = { data: T; timestamp: number };
+
+const studentCache: {
+  academicRecord?: CacheEntry<AcademicRecordResponse | ApiErrorShape>;
+  profile?: CacheEntry<StudentResponse | ApiErrorShape>;
+} = {};
+
+export function invalidateStudentCache() {
+  delete studentCache.academicRecord;
+  delete studentCache.profile;
+}
+
 // ===== Endpoints =====
 
 /** POST /student/me/profile */
@@ -119,35 +135,51 @@ export async function upsertMyProfile(
 
 /** GET /student/me/profile */
 export async function getMyProfile(): Promise<StudentResponse | ApiErrorShape> {
-  return apiFetch<StudentResponse | ApiErrorShape>("/student/me/profile", {
+  const now = Date.now();
+  if (studentCache.profile && now - studentCache.profile.timestamp < CACHE_TTL_MS) {
+    return studentCache.profile.data;
+  }
+  const result = await apiFetch<StudentResponse | ApiErrorShape>("/student/me/profile", {
     method: "GET",
   });
+  studentCache.profile = { data: result, timestamp: now };
+  return result;
 }
 
 /** GET /student/me/academic-record */
 export async function getMyAcademicRecord(): Promise<AcademicRecordResponse | ApiErrorShape> {
-  return apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record", {
+  const now = Date.now();
+  if (studentCache.academicRecord && now - studentCache.academicRecord.timestamp < CACHE_TTL_MS) {
+    return studentCache.academicRecord.data;
+  }
+  const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record", {
     method: "GET",
   });
+  studentCache.academicRecord = { data: result, timestamp: now };
+  return result;
 }
 
 /** PUT /student/me/academic-record */
 export async function updateMyAcademicRecord(
   payload: UpdateAcademicRecordRequest
 ): Promise<AcademicRecordResponse | ApiErrorShape> {
-  return apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record", {
+  const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record", {
     method: "PUT",
     body: payload,
   });
+  invalidateStudentCache();
+  return result;
 }
 
 /** POST /student/me/academic-record/parse */
 export async function parseAndUpdateMyAcademicRecordFromImage(
   payload: ParseImageRequest
 ): Promise<AcademicRecordResponse | ApiErrorShape> {
-  return apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record/parse", {
+  const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record/parse", {
     method: "POST",
     body: payload,
   });
+  invalidateStudentCache();
+  return result;
 }
 
