@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { setLoggedIn, saveEmail } from "@/lib/auth-storage";
+import { setLoggedIn, saveEmail, saveAccessToken, saveUserInfo } from "@/lib/auth-storage";
 import { login } from "@/lib/api/auth";
 import { loginFormSchema } from "@/lib/schemas/login";
 import { TransitionLink } from "@/components/layout/transition-link";
@@ -52,9 +52,11 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      await login({ email: fullEmail, password: parsed.data.password });
+      const res = await login({ email: fullEmail, password: parsed.data.password });
       setCredentialsErrors(null);
-      saveEmail(fullEmail);
+      saveAccessToken(res.accessToken);
+      saveEmail(res.user.email);
+      saveUserInfo(res.user.id, res.user.role);
       setLoggedIn(true);
       withViewTransition(() => router.replace("/home"));
     } catch {

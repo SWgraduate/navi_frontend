@@ -19,7 +19,7 @@ import {
 } from "@/lib/academic-options";
 import { register } from "@/lib/api/auth";
 import { upsertMyProfile, type SecondMajorType, type AcademicStatus as StudentAcademicStatus } from "@/lib/api/student";
-import { setLoggedIn, saveEmail } from "@/lib/auth-storage";
+import { setLoggedIn, saveEmail, saveAccessToken, saveUserInfo } from "@/lib/auth-storage";
 
 function UpDownIcon({ className }: { className?: string }) {
   return (
@@ -271,10 +271,12 @@ export default function SignupCompletePage() {
 
     setIsSubmitting(true);
     try {
-      // 1) 계정 생성 (Swagger 상 필수: email, password)
-      await register({ email, password, name: name ?? "" });
+      // 1) 계정 생성 — 응답의 accessToken을 즉시 저장해야 이후 API 호출에 인증 헤더가 붙음
+      const registerRes = await register({ email, password, name: name ?? "" });
+      saveAccessToken(registerRes.accessToken);
+      saveUserInfo(registerRes.user.id, registerRes.user.role);
 
-      // 2) 학적 기본정보 업서트 (세션 쿠키 필요 가능)
+      // 2) 학적 기본정보 업서트
       const studentNumber = result.data.studentId.trim();
       await upsertMyProfile({
         admissionYear: inferAdmissionYearFromStudentNumber(studentNumber),
@@ -287,7 +289,7 @@ export default function SignupCompletePage() {
         completedSemesters: toCompletedSemesters(result.data.yearSemester),
       });
 
-      if (email) saveEmail(email);
+      saveEmail(registerRes.user.email);
       setLoggedIn(true);
       withViewTransition(() => router.push("/signup/welcome"));
     } catch (err) {
