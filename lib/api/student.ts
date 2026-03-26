@@ -52,6 +52,7 @@ export type UpsertProfileRequest = {
 };
 
 export type EarnedCredits = {
+  gpa: number;
   total: number;
   majorCore: number;
   majorAdvanced: number;
@@ -92,6 +93,7 @@ export type AcademicRecordResponse = {
   secondMajorCredits: SecondMajorCredits;
   completedConditions: CompletedConditions;
   takenCourses: TakenCourse[];
+  updateMessages: string[];
 };
 
 export type UpdateAcademicRecordRequest = {
