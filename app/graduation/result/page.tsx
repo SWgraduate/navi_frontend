@@ -8,7 +8,7 @@ import {
   type MajorType,
   type CreditKey,
   type Credits,
-} from "@/lib/mock-accounts";
+} from "@/lib/types/graduation";
 import {
   getMyAcademicRecord,
   getMyProfile,
@@ -35,7 +35,7 @@ function mapAcademicRecordToCredits(record: AcademicRecordResponse): Credits {
     uncompleted: completedConditions.hasMandatoryCourse ? "Y" : "N",
     thesis: completedConditions.hasThesis ? "Y" : "N",
     englishOnly: String(completedConditions.englishCourses),
-    graduationGpa: "",
+    graduationGpa: String(earnedCredits.gpa),
     socialService: String(earnedCredits.socialService),
     pbl: String(completedConditions.pblTotal),
     majorIcPbl: String(completedConditions.pblMajor),

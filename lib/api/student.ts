@@ -52,6 +52,7 @@ export type UpsertProfileRequest = {
 };
 
 export type EarnedCredits = {
+  gpa: number;
   total: number;
   majorCore: number;
   majorAdvanced: number;
@@ -92,6 +93,7 @@ export type AcademicRecordResponse = {
   secondMajorCredits: SecondMajorCredits;
   completedConditions: CompletedConditions;
   takenCourses: TakenCourse[];
+  updateMessages: string[];
 };
 
 export type UpdateAcademicRecordRequest = {
@@ -176,6 +178,18 @@ export async function parseAndUpdateMyAcademicRecordFromImage(
   payload: ParseImageRequest
 ): Promise<AcademicRecordResponse | ApiErrorShape> {
   const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record/parse", {
+    method: "POST",
+    body: payload,
+  });
+  invalidateStudentCache();
+  return result;
+}
+
+/** POST /student/me/timetable/parse */
+export async function parseAndUpdateMyTimetableFromImage(
+  payload: ParseImageRequest
+): Promise<AcademicRecordResponse | ApiErrorShape> {
+  const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record/parse-timetable", {
     method: "POST",
     body: payload,
   });

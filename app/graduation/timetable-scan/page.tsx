@@ -81,12 +81,19 @@ export default function TimetableScanPage() {
   };
 
   const handleNext = () => {
-    const firstImageUrl = images[0]?.url ?? "";
-    withViewTransition(() =>
-      router.push(
-        `/graduation/timetable-scan/processing?image=${encodeURIComponent(firstImageUrl)}`,
-      ),
-    );
+    const firstImage = images[0];
+    if (!firstImage) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(firstImage.file);
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(",")[1];
+      sessionStorage.setItem("navi_timetable_image_base64", base64);
+      withViewTransition(() =>
+        router.push(
+          `/graduation/timetable-scan/processing?image=${encodeURIComponent(firstImage.url)}`,
+        ),
+      );
+    };
   };
 
   const hasImages = images.length > 0;

@@ -9,7 +9,7 @@ import {
   getDefaultCredits,
   MAJOR_TYPE,
   type MajorType,
-} from "@/lib/mock-accounts";
+} from "@/lib/types/graduation";
 import {
   getMyAcademicRecord,
   updateMyAcademicRecord,
@@ -36,6 +36,7 @@ function mapAcademicRecordToCredits(record: AcademicRecordResponse) {
     uncompleted: completedConditions.hasMandatoryCourse ? "Y" : "N",
     thesis: completedConditions.hasThesis ? "Y" : "N",
     englishOnly: String(completedConditions.englishCourses),
+    graduationGpa: String(earnedCredits.gpa),
     pbl: String(completedConditions.pblTotal),
     majorIcPbl: String(completedConditions.pblMajor),
   };
@@ -48,6 +49,7 @@ function creditsToUpdateRequest(credits: ReturnType<typeof getDefaultCredits>): 
   };
   return {
     earnedCredits: {
+      gpa: parseNum(credits.graduationGpa),
       total: parseNum(credits.graduation),
       majorCore: parseNum(credits.coreMajor),
       majorAdvanced: parseNum(credits.advancedMajor),

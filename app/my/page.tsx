@@ -7,7 +7,6 @@ import { TransitionLink } from "@/components/layout/transition-link";
 import { Modal } from "@/components/ui/modal";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { setLoggedIn, getEmail } from "@/lib/auth-storage";
-import { clearGraduationResult } from "@/lib/mock-accounts";
 import { clearProfileCache } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import { withViewTransition } from "@/lib/view-transition";
@@ -42,7 +41,7 @@ export default function MyPage() {
   const finalizeLocalLogout = () => {
     clearProfileCache();
     setLoggedIn(false);
-    clearGraduationResult();
+    localStorage.removeItem("navi_graduation_result");
     withViewTransition(() => router.replace("/login"));
   };
 

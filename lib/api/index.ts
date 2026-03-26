@@ -33,6 +33,7 @@ export {
   getMyAcademicRecord,
   updateMyAcademicRecord,
   parseAndUpdateMyAcademicRecordFromImage,
+  parseAndUpdateMyTimetableFromImage,
 } from "./student";
 export type {
   ApiErrorShape,
