@@ -6,13 +6,18 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import {
-  getGraduationResult,
-  setGraduationResult,
   MAJOR_TYPE,
   type MajorType,
-  type Credits as StoredCredits,
   type CreditKey,
+  getDefaultCredits,
 } from "@/lib/mock-accounts";
+import {
+  parseAndUpdateMyTimetableFromImage,
+  updateMyAcademicRecord,
+  getMyProfile,
+  type AcademicRecordResponse,
+  type UpdateAcademicRecordRequest,
+} from "@/lib/api/student";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
@@ -20,44 +25,67 @@ import { AnimatePresence, motion } from "framer-motion";
 
 /** Figma 2163-11231: 최신 시간표 스캔 처리 중 / 업데이트 확인 페이지 */
 
-type Credits = StoredCredits;
+type Credits = ReturnType<typeof getDefaultCredits>;
 type CreditKeyStr = CreditKey;
 
-/** 스캔 후 mock 업데이트 적용 및 변경 목록 생성 */
-function applyMockUpdates(
-  saved: NonNullable<ReturnType<typeof getGraduationResult>>,
-  t: (key: string) => string,
-): { updatedCredits: Credits; changes: string[] } {
-  const base = { ...saved.credits };
-  const changes: string[] = [];
+function getMajorTypeFromSecondMajorType(secondMajorType: string): MajorType {
+  if (secondMajorType === "마이크로전공") return MAJOR_TYPE.MICRO;
+  if (!secondMajorType || secondMajorType === "없음" || secondMajorType === "부전공") return MAJOR_TYPE.BASIC;
+  return MAJOR_TYPE.DOUBLE;
+}
 
-  const extractNum = (v: string) => {
+function mapAcademicRecordToCredits(record: AcademicRecordResponse): Credits {
+  const { earnedCredits, secondMajorCredits, completedConditions } = record;
+  return {
+    ...getDefaultCredits(),
+    graduation: String(earnedCredits.total),
+    major: String(earnedCredits.majorTotal),
+    coreMajor: String(earnedCredits.majorCore),
+    advancedMajor: String(earnedCredits.majorAdvanced),
+    industryCooperation: String(earnedCredits.industry),
+    generalElective: String(earnedCredits.generalElective),
+    socialService: String(earnedCredits.socialService),
+    secondMajor: String(secondMajorCredits.majorTotal),
+    secondCoreMajor: String(secondMajorCredits.majorCore),
+    prerequisite: completedConditions.hasPrerequisite ? "Y" : "N",
+    uncompleted: completedConditions.hasMandatoryCourse ? "Y" : "N",
+    thesis: completedConditions.hasThesis ? "Y" : "N",
+    englishOnly: String(completedConditions.englishCourses),
+    graduationGpa: String(earnedCredits.gpa),
+    pbl: String(completedConditions.pblTotal),
+    majorIcPbl: String(completedConditions.pblMajor),
+  };
+}
+
+function creditsToUpdateRequest(credits: Credits): UpdateAcademicRecordRequest {
+  const parseNum = (v: string) => {
     const m = v.match(/^(\d+(?:\.\d+)?)/);
-    return m ? parseFloat(m[1]) : null;
+    return m ? parseFloat(m[1]) : 0;
   };
-
-  const tryAdd = (
-    key: CreditKeyStr,
-    amount: number,
-    labelKey: string,
-  ) => {
-    const cur = extractNum(base[key]);
-    if (cur === null) return;
-    const next = cur + amount;
-    const old = base[key];
-    base[key] = String(next);
-    changes.push(
-      `${t(`graduation.fields.${labelKey}`)}이 ${old}학점에서 ${next}학점으로 업데이트 되었어요.`,
-    );
+  return {
+    earnedCredits: {
+      gpa: parseNum(credits.graduationGpa),
+      total: parseNum(credits.graduation),
+      majorCore: parseNum(credits.coreMajor),
+      majorAdvanced: parseNum(credits.advancedMajor),
+      majorTotal: parseNum(credits.major),
+      generalElective: parseNum(credits.generalElective),
+      socialService: parseNum(credits.socialService),
+      industry: parseNum(credits.industryCooperation),
+    },
+    secondMajorCredits: {
+      majorTotal: parseNum(credits.secondMajor),
+      majorCore: parseNum(credits.secondCoreMajor),
+    },
+    completedConditions: {
+      englishCourses: parseNum(credits.englishOnly),
+      pblTotal: parseNum(credits.pbl),
+      pblMajor: parseNum(credits.majorIcPbl),
+      hasPrerequisite: credits.prerequisite === "Y",
+      hasMandatoryCourse: credits.uncompleted === "Y",
+      hasThesis: credits.thesis === "Y",
+    },
   };
-
-  const gradNum = extractNum(base.graduation as string);
-  if (gradNum !== null && gradNum <= 130) tryAdd("graduation", 5, "graduation");
-
-  const majorNum = extractNum(base.major as string);
-  if (majorNum !== null && majorNum <= 40) tryAdd("major", 3, "major");
-
-  return { updatedCredits: base, changes };
 }
 
 function TimetableScanProcessingContent() {
@@ -66,42 +94,51 @@ function TimetableScanProcessingContent() {
   const { t } = useTranslation();
 
   const imageUrl = searchParams.get("image");
-  const savedResult = getGraduationResult();
 
-  useEffect(() => {
-    if (!savedResult) {
-      router.replace("/graduation/upload");
-    }
-  }, [savedResult, router]);
-
-  const effectiveMajorType: MajorType =
-    savedResult?.type ?? MAJOR_TYPE.DOUBLE;
-
+  const [effectiveMajorType, setEffectiveMajorType] = useState<MajorType>(MAJOR_TYPE.DOUBLE);
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [updateSummaryOpen, setUpdateSummaryOpen] = useState(true);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
-
-  const { updatedCredits, changes } = savedResult
-    ? applyMockUpdates(savedResult, t)
-    : { updatedCredits: ({} as unknown as Credits), changes: [] };
-
-  const [credits, setCredits] = useState<Credits>(() => updatedCredits);
+  const [credits, setCredits] = useState<Credits>(getDefaultCredits);
+  const [changes, setChanges] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    const base64 = sessionStorage.getItem("navi_timetable_image_base64");
+    if (!base64) {
+      router.replace("/graduation/upload");
+      return;
+    }
+
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsComplete(true);
-          return 100;
-        }
-        return prev + 1;
-      });
+      setProgress((prev) => (prev < 90 ? prev + 1 : prev));
     }, 50);
+
+    Promise.all([
+      parseAndUpdateMyTimetableFromImage({ imageBase64: base64 }),
+      getMyProfile(),
+    ])
+      .then(([record, profile]) => {
+        if ("id" in record) {
+          setCredits(mapAcademicRecordToCredits(record as AcademicRecordResponse));
+          setChanges((record as AcademicRecordResponse).updateMessages ?? []);
+        }
+        if ("secondMajorType" in profile) {
+          setEffectiveMajorType(getMajorTypeFromSecondMajorType(profile.secondMajorType));
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        clearInterval(interval);
+        setProgress(100);
+        setIsComplete(true);
+        sessionStorage.removeItem("navi_timetable_image_base64");
+      });
+
     return () => clearInterval(interval);
-  }, []);
+  }, [router]);
 
   const rowLabel = (key: CreditKeyStr) =>
     t(`graduation.resultRows.${key}`);
@@ -759,14 +796,21 @@ function TimetableScanProcessingContent() {
           variant="primary"
           size="lg"
           className="w-full text-white"
-          onClick={() => {
-            if (validateInputs()) {
-              setGraduationResult({ type: effectiveMajorType, credits });
+          disabled={isSaving}
+          onClick={async () => {
+            if (!validateInputs()) return;
+            setIsSaving(true);
+            try {
+              await updateMyAcademicRecord(creditsToUpdateRequest(credits));
               withViewTransition(() => router.push("/graduation/result"));
+            } catch {
+              setValidationError("저장에 실패했습니다. 다시 시도해주세요.");
+            } finally {
+              setIsSaving(false);
             }
           }}
         >
-          {t("graduation.processing.confirmCta")}
+          {isSaving ? "저장 중..." : t("graduation.processing.confirmCta")}
         </Button>
       </div>
     </div>

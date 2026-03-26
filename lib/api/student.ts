@@ -185,3 +185,15 @@ export async function parseAndUpdateMyAcademicRecordFromImage(
   return result;
 }
 
+/** POST /student/me/timetable/parse */
+export async function parseAndUpdateMyTimetableFromImage(
+  payload: ParseImageRequest
+): Promise<AcademicRecordResponse | ApiErrorShape> {
+  const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/timetable/parse", {
+    method: "POST",
+    body: payload,
+  });
+  invalidateStudentCache();
+  return result;
+}
+
