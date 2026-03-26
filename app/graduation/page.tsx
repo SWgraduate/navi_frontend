@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -14,27 +14,29 @@ function GraduationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(true);
   const skipSavedResult = searchParams.get("skipSavedResult") === "1";
 
-  useEffect(() => {
-    const shouldSkipSavedResult =
-      skipSavedResult ||
-      (typeof window !== "undefined" &&
-        sessionStorage.getItem(SKIP_SAVED_RESULT_KEY) === "1");
-
-    if (typeof window !== "undefined" && shouldSkipSavedResult) {
+  // lazy initializer: 렌더 시점에 sessionStorage 확인 후 초기 로딩 상태 결정
+  const [shouldRedirectToResult] = useState(() => {
+    if (skipSavedResult) return false;
+    if (typeof window !== "undefined" && sessionStorage.getItem(SKIP_SAVED_RESULT_KEY) === "1") {
       sessionStorage.removeItem(SKIP_SAVED_RESULT_KEY);
+      return false;
     }
+    return true;
+  });
 
-    if (shouldSkipSavedResult) {
-      setIsLoading(false);
-      return;
-    }
+  const isLoading = shouldRedirectToResult;
+  const hasRun = useRef(false);
+
+  useEffect(() => {
+    if (!shouldRedirectToResult) return;
+    if (hasRun.current) return;
+    hasRun.current = true;
 
     // result 페이지에서 API 호출 + 데이터 없으면 다시 돌아오므로 바로 리다이렉트
     withViewTransition(() => router.push("/graduation/result"));
-  }, [router, skipSavedResult]);
+  }, [router, shouldRedirectToResult]);
 
   const handleStart = () => {
     withViewTransition(() => router.push("/graduation/upload"));
