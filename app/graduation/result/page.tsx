@@ -8,7 +8,7 @@ import {
   type MajorType,
   type CreditKey,
   type Credits,
-} from "@/lib/mock-accounts";
+} from "@/lib/types/graduation";
 import {
   getMyAcademicRecord,
   getMyProfile,

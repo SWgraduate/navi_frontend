@@ -9,7 +9,7 @@ import {
   getDefaultCredits,
   MAJOR_TYPE,
   type MajorType,
-} from "@/lib/mock-accounts";
+} from "@/lib/types/graduation";
 import {
   getMyAcademicRecord,
   updateMyAcademicRecord,

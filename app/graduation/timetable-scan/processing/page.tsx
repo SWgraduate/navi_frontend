@@ -10,7 +10,7 @@ import {
   type MajorType,
   type CreditKey,
   getDefaultCredits,
-} from "@/lib/mock-accounts";
+} from "@/lib/types/graduation";
 import {
   parseAndUpdateMyTimetableFromImage,
   updateMyAcademicRecord,
