@@ -189,7 +189,7 @@ export async function parseAndUpdateMyAcademicRecordFromImage(
 export async function parseAndUpdateMyTimetableFromImage(
   payload: ParseImageRequest
 ): Promise<AcademicRecordResponse | ApiErrorShape> {
-  const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/timetable/parse", {
+  const result = await apiFetch<AcademicRecordResponse | ApiErrorShape>("/student/me/academic-record/parse-timetable", {
     method: "POST",
     body: payload,
   });
