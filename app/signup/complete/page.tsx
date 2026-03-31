@@ -94,8 +94,8 @@ function DropdownUpIcon({ className }: { className?: string }) {
   );
 }
 
-const WHEEL_ITEM_H = 52;
-const WHEEL_VISIBLE = 5;
+const WHEEL_ITEM_H = 48;
+const WHEEL_VISIBLE = 3;
 const WHEEL_PAD = ((WHEEL_VISIBLE - 1) / 2) * WHEEL_ITEM_H; // 104px
 
 function WheelPickerColumn<T extends number>({
@@ -398,7 +398,7 @@ export default function SignupCompletePage() {
           touchAction: "pan-y",
         }}
       >
-        <div className="flex min-h-screen flex-col gap-4 pb-24">
+        <div className="flex flex-col gap-4 pb-24">
         <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-primary">
           <span className="text-ds-brand">6</span> / 6
         </p>
@@ -540,19 +540,21 @@ export default function SignupCompletePage() {
                   dragControls={secondMajorTypeDragControls}
                   onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setSecondMajorSheetOpen(false))}
                 >
-                <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
-                  <div
-                    className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
-                    aria-hidden
-                    onPointerDown={(e) => secondMajorTypeDragControls.start(e)}
-                  >
-                    <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
-                    <h2 id="second-major-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
+                  <div className="flex shrink-0 flex-col gap-[20px] px-4 pt-2">
+                    <div className="flex w-full justify-center py-2" aria-hidden>
+                      <div
+                        className="h-1.5 w-12 cursor-grab rounded-full bg-[#EEEFF1] active:cursor-grabbing"
+                        onPointerDown={(e) => secondMajorTypeDragControls.start(e)}
+                      />
+                    </div>
+                    <h2
+                      id="second-major-sheet-title"
+                      className="w-full text-left text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none"
+                    >
                       {t("signup.complete.secondMajorTypePickerTitle")}
                     </h2>
                   </div>
-                </div>
-                <ul className="flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
+                <ul className="mt-3 flex flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 max-h-[60vh] touch-manipulation [-webkit-overflow-scrolling:touch]">
                   {secondMajorTypeOptions.map((option) => (
                     <li key={option.value} className="flex">
                       <button
@@ -641,17 +643,19 @@ export default function SignupCompletePage() {
                   dragControls={secondMajorPickerDragControls}
                   onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setSecondMajorPickerOpen(false))}
                 >
-                  <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
-                    <div
-                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
-                      aria-hidden
-                      onPointerDown={(e) => secondMajorPickerDragControls.start(e)}
-                    >
-                      <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
-                      <h2 id="second-major-picker-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
-                        {t("signup.complete.secondMajorPickerTitle")}
-                      </h2>
+                  <div className="flex shrink-0 flex-col gap-[20px] px-4 pt-2">
+                    <div className="flex w-full justify-center py-2" aria-hidden>
+                      <div
+                        className="h-1.5 w-12 cursor-grab rounded-full bg-[#EEEFF1] active:cursor-grabbing"
+                        onPointerDown={(e) => secondMajorPickerDragControls.start(e)}
+                      />
                     </div>
+                    <h2
+                      id="second-major-picker-sheet-title"
+                      className="w-full text-left text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none"
+                    >
+                      {t("signup.complete.secondMajorPickerTitle")}
+                    </h2>
                     <div className="relative flex min-h-[48px] items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
                       <Search className="absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary pointer-events-none" aria-hidden />
                       <input
@@ -794,17 +798,19 @@ export default function SignupCompletePage() {
                   dragControls={yearSemesterDragControls}
                   onDragEnd={(e, info) => handleSheetDragEnd(e, info, () => setYearSemesterSheetOpen(false))}
                 >
-                  <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
-                    <div
-                      className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
-                      aria-hidden
-                      onPointerDown={(e) => yearSemesterDragControls.start(e)}
-                    >
-                      <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
-                      <h2 id="year-semester-sheet-title" className="text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none">
-                        {t("signup.complete.yearSemesterPickerTitle")}
-                      </h2>
+                  <div className="flex shrink-0 flex-col gap-[20px] px-4 pt-2">
+                    <div className="flex w-full justify-center py-2" aria-hidden>
+                      <div
+                        className="h-1.5 w-12 cursor-grab rounded-full bg-[#EEEFF1] active:cursor-grabbing"
+                        onPointerDown={(e) => yearSemesterDragControls.start(e)}
+                      />
                     </div>
+                    <h2
+                      id="year-semester-sheet-title"
+                      className="w-full text-left text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary pointer-events-none"
+                    >
+                      {t("signup.complete.yearSemesterPickerTitle")}
+                    </h2>
                   </div>
                   <div className="flex gap-2 px-4 py-2">
                     <WheelPickerColumn

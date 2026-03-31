@@ -107,17 +107,16 @@ export function MajorSelectSheet({
             dragControls={dragControls}
             onDragEnd={handleDragEnd}
           >
-            <div className="flex shrink-0 flex-col gap-2 px-4 pt-2">
-              <div
-                className="flex min-h-[56px] cursor-grab active:cursor-grabbing flex-col items-center justify-center gap-2 py-2 touch-none"
-                aria-hidden
-                onPointerDown={(e) => dragControls.start(e)}
-              >
-                <div className="h-1.5 w-12 rounded-full bg-[#EEEFF1]" />
-                <h2 className="pointer-events-none text-center text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
-                  {resolvedTitle}
-                </h2>
+            <div className="flex shrink-0 flex-col gap-[20px] px-4 pt-2">
+              <div className="flex w-full justify-center py-2" aria-hidden>
+                <div
+                  className="h-1.5 w-12 cursor-grab rounded-full bg-[#EEEFF1] active:cursor-grabbing"
+                  onPointerDown={(e) => dragControls.start(e)}
+                />
               </div>
+              <h2 className="pointer-events-none w-full text-left text-ds-title-18-sb leading-ds-title-18-sb font-semibold text-ds-primary">
+                {resolvedTitle}
+              </h2>
               <div className="relative flex min-h-[48px] items-center rounded-md border-2 border-transparent bg-secondary focus-within:border-primary">
                 <Search
                   className="pointer-events-none absolute left-3 h-5 w-5 shrink-0 text-ds-tertiary"
