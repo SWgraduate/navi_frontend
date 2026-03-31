@@ -508,11 +508,13 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
 
   const mainHeight = useMemo(() => {
     if (effectiveViewportHeight == null) return undefined;
-    const topInset = showHeader ? headerHeight : 0;
+    // 키보드 활성 시 paddingTop이 headerHeight를 이미 처리하므로 topInset 제외
+    // (키보드 비활성 시에는 flex + BottomBar 높이 고려가 필요해 유지)
+    const topInset = showHeader && !keyboardActive ? headerHeight : 0;
     // 졸업관리 루트 페이지는 bottomBar를 main 높이에 포함 (paddingBottom 없으므로)
     const bottomInset = isGraduationRootPage && showBottomBar ? bottomBarHeight : 0;
     return Math.max(0, effectiveViewportHeight - topInset - bottomInset);
-  }, [effectiveViewportHeight, headerHeight, showHeader, isGraduationRootPage, showBottomBar, bottomBarHeight]);
+  }, [effectiveViewportHeight, headerHeight, showHeader, keyboardActive, isGraduationRootPage, showBottomBar, bottomBarHeight]);
 
   const resolvedPaddingTop = showHeader
     ? headerHeight > 0
