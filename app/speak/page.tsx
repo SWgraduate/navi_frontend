@@ -120,8 +120,7 @@ export default function SpeakPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 마이크 시각화는 항상 micOn에 연동 (세션과 독립적으로 파동 표시)
-  const { wavePulse, waveHeights, permissionState, errorMessage } =
-    useVoiceAnalyser(micOn);
+  const { bandLevels, permissionState, errorMessage } = useVoiceAnalyser(micOn);
 
   const {
     status: sessionStatus,
@@ -172,30 +171,33 @@ export default function SpeakPage() {
         data-name="VoiceVisualizer"
       >
         <div className="flex h-8 items-center justify-center gap-1" aria-hidden>
-          {waveHeights.map((h, i) => (
-            <motion.div
-              key={
-                micOn && wavePulse > 0 ? `pulse-${wavePulse}-${i}` : `idle-${i}`
-              }
-              className="w-0.5 shrink-0 rounded-[10px] bg-primary/50 origin-center"
-              initial={{ scaleY: 0.15, opacity: 1 }}
-              animate={
-                micOn && wavePulse > 0
-                  ? {
-                      scaleY: [0.15, 1, 1, 0.15],
-                      opacity: [1, 1, 1, 1],
-                    }
-                  : { scaleY: 0.15, opacity: 1 }
-              }
-              transition={{
-                duration: micOn ? 0.85 : 0.2,
-                times: micOn ? [0, 0.22, 0.55, 0.85] : undefined,
-                ease: "easeOut",
-              }}
-              style={{ height: h }}
-              data-name="VoiceVisualizer/el"
-            />
-          ))}
+          {bandLevels.map((level, i) => {
+            const normalized = micOn ? level / 100 : 0;
+            const centerIndex = (bandLevels.length - 1) / 2;
+            const distFromCenter = Math.abs(i - centerIndex);
+            const t = distFromCenter / centerIndex; // 0(중앙) ~ 1(끝)
+            const centerWeight = 1 - t * t; // 중앙 1, 양 끝 0로 부드럽게 감소
+            const emphasis = 0.3 + centerWeight * 0.9; // 0.3~1.2 사이 가중치
+            const scaleY = 0.2 + normalized * emphasis * 2.0;
+
+            return (
+              <motion.div
+                key={`bar-${i}`}
+                className="w-0.5 shrink-0 rounded-[10px] bg-primary/50 origin-center"
+                initial={{ scaleY: 0.15, opacity: 1 }}
+                animate={{
+                  scaleY: micOn ? scaleY : 0.15,
+                  opacity: 1,
+                }}
+                transition={{
+                  duration: 0.08,
+                  ease: "linear",
+                }}
+                style={{ height: 32 }}
+                data-name="VoiceVisualizer/el"
+              />
+            );
+          })}
         </div>
       </div>
 
