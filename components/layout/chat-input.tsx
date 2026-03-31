@@ -83,7 +83,12 @@ function ChatInput({
     if (!inputValue.trim()) return;
     sendMessage(inputValue, attachments.map((a) => a.file));
     setInputValue("");
-    setAttachments([]);
+    setAttachments((prev) => {
+      prev.forEach(({ previewUrl }) => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+      });
+      return [];
+    });
     // 키보드를 닫지 않고 포커스 유지
     inputRef.current?.focus();
   };
