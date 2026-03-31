@@ -54,26 +54,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         attempts += 1;
 
         const status = await getChatStatus(taskId);
-        const answer =
-          status.message ?? status.result ?? (status as { answer?: string }).answer ?? "";
-
-        if (answer.trim()) {
-          const assistantMessage: Message = {
-            id: `assistant-${taskId}`,
-            text: answer.trim(),
-            isUser: false,
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
-          setIsLoading(false);
-          return;
-        }
-
-        // completed/done 상태이지만 메시지가 없는 경우
-        const done = status.status === "completed" || status.status === "done";
-        if (done) {
+        const isDone = status.progress === "done" || status.status === "completed";
+        if (isDone) {
+          const answer = status.result?.answer?.trim() ?? "";
           setMessages((prev) => [
             ...prev,
-            { id: `assistant-${taskId}`, text: "처리가 완료되었습니다.", isUser: false },
+            {
+              id: `assistant-${taskId}`,
+              text: answer || "처리가 완료되었습니다.",
+              isUser: false,
+            },
           ]);
           setIsLoading(false);
           return;
