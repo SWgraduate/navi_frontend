@@ -1,5 +1,7 @@
 import { apiFetch } from "./client";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+
 /**
  * 채팅(Chat) 관련 API 모음입니다.
  *
@@ -13,12 +15,15 @@ import { apiFetch } from "./client";
 /** POST /chat 요청 */
 export type ChatRequest = {
   query: string;
+  conversationId?: string;
+  hasAttachments?: boolean;
 };
 
 /** POST /chat 성공 응답 (200) - 비동기 처리용 taskId 발급 */
 export type ChatTaskResponse = {
   taskId: string;
   message: string;
+  conversationId?: string;
 };
 
 /** 질문을 전송하고 비동기 작업(taskId)을 생성합니다. */
@@ -48,6 +53,50 @@ export type ChatStatusResponse = {
 export async function getChatStatus(taskId: string): Promise<ChatStatusResponse> {
   return apiFetch<ChatStatusResponse>(`/chat/status/${encodeURIComponent(taskId)}`, {
     method: "GET",
+  });
+}
+
+// ============ POST /chat/conversations ============
+
+export async function createConversation(title?: string): Promise<Conversation> {
+  return apiFetch<Conversation>("/chat/conversations", {
+    method: "POST",
+    body: title ? { title } : {},
+  });
+}
+
+// ============ POST /chat/context/uploads ============
+
+export type UploadChatFileResponse = {
+  documentId: string;
+};
+
+export async function uploadChatFile(file: File): Promise<UploadChatFileResponse> {
+  const url = `${API_BASE}/chat/context/uploads`.replace(/([^:]\/)\/+/g, "$1");
+  const token = typeof window !== "undefined" ? localStorage.getItem("navi_access_token") : null;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error("파일 업로드에 실패했습니다.");
+  }
+  return res.json() as Promise<UploadChatFileResponse>;
+}
+
+// ============ POST /chat/context/bindings ============
+
+export async function bindDocument(conversationId: string, documentId: string): Promise<void> {
+  return apiFetch<void>("/chat/context/bindings", {
+    method: "POST",
+    body: { conversationId, documentId },
   });
 }
 

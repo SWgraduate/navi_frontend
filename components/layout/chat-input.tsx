@@ -81,8 +81,9 @@ function ChatInput({
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
-    sendMessage(inputValue);
+    sendMessage(inputValue, attachments.map((a) => a.file));
     setInputValue("");
+    setAttachments([]);
     // 키보드를 닫지 않고 포커스 유지
     inputRef.current?.focus();
   };
