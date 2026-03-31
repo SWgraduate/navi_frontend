@@ -338,9 +338,10 @@
     "close": "닫기",
     "attach": "첨부",
     "permissionDenied": "마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.",
-    "dummyLine1": "입력한 값이 보이는 곳",
-    "dummyLine2": "입력한 값이 보이는 곳",
-    "dummyLine3": "새로 입력 될 수록 진함"
+    "connecting": "연결 중...",
+    "listening": "말씀하세요",
+    "tapToSpeak": "마이크를 눌러 시작하세요",
+    "error": "연결 오류가 발생했습니다"
   },
   "my": {
     "greetingName": "{{name}}님",

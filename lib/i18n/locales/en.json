@@ -337,9 +337,10 @@
     "close": "Close",
     "attach": "Attach",
     "permissionDenied": "Microphone access required. Please allow it in browser settings.",
-    "dummyLine1": "Spoken text appears here",
-    "dummyLine2": "Spoken text appears here",
-    "dummyLine3": "Newest input appears darker"
+    "connecting": "Connecting...",
+    "listening": "Listening...",
+    "tapToSpeak": "Tap mic to start",
+    "error": "Connection error"
   },
   "my": {
     "greetingName": "{{name}}",

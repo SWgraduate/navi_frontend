@@ -337,9 +337,10 @@
     "close": "关闭",
     "attach": "附件",
     "permissionDenied": "需要麦克风权限。请在浏览器设置中允许。",
-    "dummyLine1": "这里会显示输入内容",
-    "dummyLine2": "这里会显示输入内容",
-    "dummyLine3": "越新的输入会越深"
+    "connecting": "连接中...",
+    "listening": "请说话",
+    "tapToSpeak": "点击麦克风开始",
+    "error": "连接错误"
   },
   "my": {
     "greetingName": "{{name}}",

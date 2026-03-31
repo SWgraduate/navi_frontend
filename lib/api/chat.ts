@@ -58,8 +58,12 @@ export async function getChatStatus(taskId: string): Promise<ChatStatusResponse>
 
 // ============ POST /chat/conversations ============
 
-export async function createConversation(title?: string): Promise<Conversation> {
-  return apiFetch<Conversation>("/chat/conversations", {
+export type CreateConversationResponse = {
+  conversationId: string;
+};
+
+export async function createConversation(title?: string): Promise<CreateConversationResponse> {
+  return apiFetch<CreateConversationResponse>("/chat/conversations", {
     method: "POST",
     body: title ? { title } : {},
   });
@@ -141,5 +145,22 @@ export async function renameConversation(conversationId: string, title: string):
   return apiFetch<void>(`/chat/conversations/${encodeURIComponent(conversationId)}/title`, {
     method: "PATCH",
     body: { title },
+  });
+}
+
+// ============ POST /chat/{chatId}/voice-session ============
+
+/** POST /chat/{chatId}/voice-session 응답 */
+export type VoiceSessionResponse = {
+  /** 1회성 세션 인증 토큰 (60초 이내 WebSocket 연결에 사용) */
+  token: string;
+  /** WebSocket 연결 경로 (토큰 포함) */
+  wsUrl: string;
+};
+
+/** 실시간 음성 대화를 위한 일회성 WebSocket 세션 토큰을 발급합니다. */
+export async function createVoiceSession(chatId: string): Promise<VoiceSessionResponse> {
+  return apiFetch<VoiceSessionResponse>(`/chat/${encodeURIComponent(chatId)}/voice-session`, {
+    method: "POST",
   });
 }

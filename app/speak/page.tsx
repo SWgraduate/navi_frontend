@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -11,6 +11,8 @@ import { ScrollFade } from "@/components/ui/scroll-fade";
 import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
+import { useVoiceSession } from "@/hooks/use-voice-session";
+import { useChat } from "@/contexts/chat-context";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
@@ -96,6 +98,9 @@ const btnBase =
 export default function SpeakPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { conversationId, ensureConversation } = useChat();
+  const [chatId, setChatId] = useState<string | null>(conversationId);
+  const [chatIdError, setChatIdError] = useState<string | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [attachments, setAttachments] = useState<
@@ -103,16 +108,28 @@ export default function SpeakPage() {
   >([]);
   const clipButtonRef = useRef<HTMLButtonElement>(null);
 
+  // 페이지 진입 시 conversationId 확보
+  useEffect(() => {
+    if (!chatId) {
+      ensureConversation()
+        .then(setChatId)
+        .catch((err) =>
+          setChatIdError(err instanceof Error ? err.message : "대화를 시작할 수 없습니다.")
+        );
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 마이크 시각화는 항상 micOn에 연동 (세션과 독립적으로 파동 표시)
   const { wavePulse, waveHeights, permissionState, errorMessage } =
     useVoiceAnalyser(micOn);
-  const dummySpeechLines = useMemo(
-    () => [
-      { text: t("speak.dummyLine1"), color: "text-ds-tertiary" },
-      { text: t("speak.dummyLine2"), color: "text-ds-secondary" },
-      { text: t("speak.dummyLine3"), color: "text-ds-primary" },
-    ],
-    [t]
-  );
+
+  const {
+    status: sessionStatus,
+    sttTranscript,
+    sttIsFinal,
+    ttsText,
+    error: sessionError,
+  } = useVoiceSession(chatId, micOn && !!chatId);
 
   const handleFileSelect = (files: File[]) => {
     setAttachments((prev) => [
@@ -182,7 +199,7 @@ export default function SpeakPage() {
         </div>
       </div>
 
-      {/* 음성 인식 텍스트: 비주얼라이저·원 중간(절대 위치), 3줄만 노출 */}
+      {/* 음성 인식 텍스트: 비주얼라이저·원 중간(절대 위치), STT/TTS 실시간 표시 */}
       <div
         className="absolute left-0 right-0 z-1 flex justify-center px-4"
         style={{
@@ -198,17 +215,45 @@ export default function SpeakPage() {
           className="relative flex max-h-18 w-full max-w-(--app-max-width) flex-col items-center justify-center overflow-hidden"
         >
           <div className="flex flex-col items-center justify-center gap-0">
-            {dummySpeechLines.map((line, i) => (
+            {/* chatId 생성 실패 */}
+            {chatIdError ? (
+              <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-destructive">
+                {chatIdError}
+              </p>
+            ) : ttsText ? (
+              /* TTS 답변 텍스트 */
+              <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-ds-primary">
+                {ttsText}
+              </p>
+            ) : sttTranscript ? (
+              /* STT 인식 텍스트 */
               <p
-                key={i}
                 className={cn(
                   "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
-                  line.color
+                  sttIsFinal ? "text-ds-primary" : "text-ds-secondary"
                 )}
               >
-                {line.text}
+                {sttTranscript}
               </p>
-            ))}
+            ) : (
+              /* 세션 상태 안내 */
+              <p
+                className={cn(
+                  "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
+                  sessionStatus === "error" ? "text-destructive" : "text-ds-tertiary"
+                )}
+              >
+                {!chatId
+                  ? t("speak.connecting")
+                  : sessionStatus === "connecting"
+                    ? t("speak.connecting")
+                    : sessionStatus === "connected"
+                      ? t("speak.listening")
+                      : sessionStatus === "error"
+                        ? (sessionError ?? t("speak.error"))
+                        : t("speak.tapToSpeak")}
+              </p>
+            )}
           </div>
         </ScrollFade>
       </div>
@@ -234,7 +279,7 @@ export default function SpeakPage() {
         />
       </div>
 
-      {/* 마이크 권한 에러/거부 시 안내 (필요 시 노출) */}
+      {/* 마이크 권한 에러/거부 시 안내 */}
       {permissionState === "denied" && (
         <p className="absolute left-4 right-4 top-1/2 z-10 -translate-y-1/2 text-center text-sm text-ds-tertiary">
           {t("speak.permissionDenied")}

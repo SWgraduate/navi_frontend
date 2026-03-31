@@ -18,9 +18,12 @@ interface Message {
 interface ChatContextType {
   messages: Message[];
   isLoading: boolean;
+  conversationId: string | null;
   sendMessage: (text: string, attachments?: File[]) => void;
   /** 새 채팅 시작 (메시지 초기화 후 메인으로 이동할 때 사용) */
   startNewChat: () => void;
+  /** 활성 conversationId를 반환하고, 없으면 새로 생성합니다. */
+  ensureConversation: () => Promise<string>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -52,8 +55,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           // conversationId 없으면 새 대화 생성
           if (!activeConversationId) {
             const conv = await createConversation();
-            activeConversationId = conv.id;
-            setConversationId(conv.id);
+            activeConversationId = conv.conversationId;
+            setConversationId(conv.conversationId);
           }
 
           // 파일 업로드 → 바인딩 (순차 처리)
@@ -125,8 +128,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setConversationId(null);
   };
 
+  const ensureConversation = useCallback(async (): Promise<string> => {
+    if (conversationId) return conversationId;
+    const conv = await createConversation();
+    setConversationId(conv.conversationId);
+    return conv.conversationId;
+  }, [conversationId]);
+
   return (
-    <ChatContext.Provider value={{ messages, isLoading, sendMessage, startNewChat }}>
+    <ChatContext.Provider value={{ messages, isLoading, conversationId, sendMessage, startNewChat, ensureConversation }}>
       {children}
     </ChatContext.Provider>
   );
