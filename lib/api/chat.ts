@@ -35,9 +35,13 @@ export async function sendChatQuery(payload: ChatRequest): Promise<ChatTaskRespo
 export type ChatStatusResponse = {
   taskId?: string;
   status?: string;
-  message?: string;
-  result?: string;
-  [key: string]: unknown;
+  progress?: string;
+  displayMessage?: string;
+  result?: {
+    answer?: string;
+    sources?: unknown[];
+    retrievalMeta?: unknown;
+  };
 };
 
 /** taskId의 처리 상태/결과를 조회합니다(폴링용). */
