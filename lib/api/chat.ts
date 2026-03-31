@@ -50,3 +50,47 @@ export async function getChatStatus(taskId: string): Promise<ChatStatusResponse>
     method: "GET",
   });
 }
+
+// ============ GET /chat/conversations ============
+
+export type Conversation = {
+  id: string;
+  title: string;
+  createdAt: string;
+  pinned: boolean;
+};
+
+export type ListConversationsResponse = {
+  conversations: Conversation[];
+};
+
+export async function listConversations(searchQuery?: string): Promise<ListConversationsResponse> {
+  const params = searchQuery ? `?searchQuery=${encodeURIComponent(searchQuery)}` : "";
+  return apiFetch<ListConversationsResponse>(`/chat/conversations${params}`, { method: "GET" });
+}
+
+// ============ DELETE /chat/conversations/{id} ============
+
+export async function deleteConversation(conversationId: string): Promise<void> {
+  return apiFetch<void>(`/chat/conversations/${encodeURIComponent(conversationId)}`, {
+    method: "DELETE",
+  });
+}
+
+// ============ PATCH /chat/conversations/{id}/pin ============
+
+export async function pinConversation(conversationId: string, pinned: boolean): Promise<void> {
+  return apiFetch<void>(`/chat/conversations/${encodeURIComponent(conversationId)}/pin`, {
+    method: "PATCH",
+    body: { pinned },
+  });
+}
+
+// ============ PATCH /chat/conversations/{id}/title ============
+
+export async function renameConversation(conversationId: string, title: string): Promise<void> {
+  return apiFetch<void>(`/chat/conversations/${encodeURIComponent(conversationId)}/title`, {
+    method: "PATCH",
+    body: { title },
+  });
+}
