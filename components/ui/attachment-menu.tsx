@@ -198,7 +198,7 @@ export function AttachmentMenu({
       <input
         ref={fileInputRef}
         type="file"
-        accept="*/*"
+        accept="application/pdf"
         multiple
         className="sr-only"
         aria-hidden
