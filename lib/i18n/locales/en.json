@@ -453,7 +453,7 @@
     "password": {
       "minLength": "Password must be at least 8 characters",
       "korean": "Password cannot contain Korean characters",
-      "rule": "8-16 characters / uppercase, lowercase, numbers, and special characters"
+      "rule": "8-16 characters / letters, numbers, and special characters"
     },
     "passwordConfirm": {
       "empty": "Please re-enter your password",
