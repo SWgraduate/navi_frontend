@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { HistoryItemPopover } from "@/components/history/history-item-popover";
 import { HistoryRow } from "@/components/history/history-row";
@@ -11,6 +12,7 @@ import {
   pinConversation,
   renameConversation,
 } from "@/lib/api/chat";
+import { useChat } from "@/contexts/chat-context";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
@@ -31,6 +33,8 @@ function toHistoryItem(conv: Conversation): HistoryItem {
 
 export default function HistoryPage() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { loadConversation } = useChat();
   const [searchQuery, setSearchQuery] = useState("");
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -191,9 +195,10 @@ export default function HistoryPage() {
                 key={item.id}
                 item={item}
                 onLongPress={handleLongPress}
-                onClick={() => {
+                onClick={async () => {
                   if (popover?.item.id === item.id) return;
-                  // TODO: 기록 상세 페이지로 이동 또는 채팅 재개
+                  await loadConversation(item.id);
+                  router.push("/home");
                 }}
               />
             ))}

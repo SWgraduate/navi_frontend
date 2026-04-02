@@ -7,6 +7,7 @@ import {
   createConversation,
   uploadChatFile,
   bindDocument,
+  getConversationMessages,
 } from "@/lib/api/chat";
 
 interface Message {
@@ -24,6 +25,8 @@ interface ChatContextType {
   startNewChat: () => void;
   /** 활성 conversationId를 반환하고, 없으면 새로 생성합니다. */
   ensureConversation: () => Promise<string>;
+  /** 기존 대화를 불러옵니다 (히스토리에서 재개할 때 사용). */
+  loadConversation: (conversationId: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -91,9 +94,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           attempts += 1;
 
           const status = await getChatStatus(taskId);
-          const isDone = status.progress === "done" || status.status === "completed";
+          const isDone = status.status === "completed";
           if (isDone) {
-            const answer = status.result?.answer?.trim() ?? "";
+            const resultAnswer =
+              typeof status.result === "string"
+                ? status.result
+                : status.result?.answer ?? "";
+            const answer = resultAnswer.trim();
             setMessages((prev) => [
               ...prev,
               {
@@ -101,6 +108,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 text: answer || "처리가 완료되었습니다.",
                 isUser: false,
               },
+            ]);
+            setIsLoading(false);
+            return;
+          }
+
+          if (status.status === "failed") {
+            setMessages((prev) => [
+              ...prev,
+              { id: `err-${Date.now()}`, text: status.error ?? "요청 처리에 실패했습니다.", isUser: false },
             ]);
             setIsLoading(false);
             return;
@@ -128,6 +144,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setConversationId(null);
   };
 
+  const loadConversation = useCallback(async (id: string): Promise<void> => {
+    setMessages([]);
+    setIsLoading(false);
+    setConversationId(id);
+    const res = await getConversationMessages(id);
+    const loaded: Message[] = res.messages.map((m) => ({
+      id: m.id,
+      text: m.content,
+      isUser: m.role === "user",
+    }));
+    setMessages(loaded);
+  }, []);
+
   const ensureConversation = useCallback(async (): Promise<string> => {
     if (conversationId) return conversationId;
     const conv = await createConversation();
@@ -136,7 +165,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [conversationId]);
 
   return (
-    <ChatContext.Provider value={{ messages, isLoading, conversationId, sendMessage, startNewChat, ensureConversation }}>
+    <ChatContext.Provider value={{ messages, isLoading, conversationId, sendMessage, startNewChat, ensureConversation, loadConversation }}>
       {children}
     </ChatContext.Provider>
   );

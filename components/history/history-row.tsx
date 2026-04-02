@@ -12,7 +12,7 @@ export interface HistoryRowProps {
     pinned: boolean;
   };
   onLongPress: (item: HistoryRowProps["item"], e: React.TouchEvent | React.MouseEvent) => void;
-  onClick: () => void;
+  onClick: () => void | Promise<void>;
 }
 
 export function HistoryRow({ item, onLongPress, onClick }: HistoryRowProps) {

@@ -39,14 +39,11 @@ export async function sendChatQuery(payload: ChatRequest): Promise<ChatTaskRespo
 /** GET /chat/status/{taskId} 응답 */
 export type ChatStatusResponse = {
   taskId?: string;
-  status?: string;
+  status?: "queued" | "processing" | "completed" | "failed";
   progress?: string;
   displayMessage?: string;
-  result?: {
-    answer?: string;
-    sources?: unknown[];
-    retrievalMeta?: unknown;
-  };
+  result?: { answer?: string; sources?: unknown[]; retrievalMeta?: unknown } | string;
+  error?: string;
 };
 
 /** taskId의 처리 상태/결과를 조회합니다(폴링용). */
@@ -146,6 +143,26 @@ export async function renameConversation(conversationId: string, title: string):
     method: "PATCH",
     body: { title },
   });
+}
+
+// ============ GET /chat/conversations/{id}/messages ============
+
+export type ConversationMessage = {
+  id: string;
+  content: string;
+  role: "user" | "assistant";
+  createdAt: string;
+};
+
+export type GetConversationMessagesResponse = {
+  messages: ConversationMessage[];
+};
+
+export async function getConversationMessages(conversationId: string): Promise<GetConversationMessagesResponse> {
+  return apiFetch<GetConversationMessagesResponse>(
+    `/chat/conversations/${encodeURIComponent(conversationId)}/messages`,
+    { method: "GET" }
+  );
 }
 
 // ============ POST /chat/{chatId}/voice-session ============
