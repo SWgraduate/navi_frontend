@@ -147,11 +147,16 @@ export async function renameConversation(conversationId: string, title: string):
 
 // ============ GET /chat/conversations/{id}/messages ============
 
+// 백엔드가 query/answer 쌍 또는 content/role 개별 형식으로 반환할 수 있음
 export type ConversationMessage = {
-  id: string;
-  content: string;
-  role: "user" | "assistant";
-  createdAt: string;
+  id?: string;
+  // query/answer 쌍 형식
+  query?: string;
+  answer?: string;
+  // content/role 개별 형식
+  content?: string;
+  role?: "user" | "assistant";
+  createdAt?: string;
 };
 
 export type GetConversationMessagesResponse = {

@@ -149,11 +149,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
     setConversationId(id);
     const res = await getConversationMessages(id);
-    const loaded: Message[] = res.messages.map((m) => ({
-      id: m.id,
-      text: m.content,
-      isUser: m.role === "user",
-    }));
+    const loaded: Message[] = res.messages.flatMap((m, i) => {
+      // query/answer 쌍 형식
+      if (m.query !== undefined || m.answer !== undefined) {
+        const pair: Message[] = [];
+        if (m.query) pair.push({ id: `${m.id ?? i}-q`, text: m.query, isUser: true });
+        if (m.answer) pair.push({ id: `${m.id ?? i}-a`, text: m.answer, isUser: false });
+        return pair;
+      }
+      // content/role 개별 형식
+      return [{ id: m.id ?? `${i}`, text: m.content ?? "", isUser: m.role === "user" }];
+    });
     setMessages(loaded);
   }, []);
 

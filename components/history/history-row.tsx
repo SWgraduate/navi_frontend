@@ -18,7 +18,7 @@ export interface HistoryRowProps {
 export function HistoryRow({ item, onLongPress, onClick }: HistoryRowProps) {
   const longPress = useLongPress(
     (e) => onLongPress(item, e),
-    { duration: 200 }
+    { duration: 150 }
   );
 
   return (
