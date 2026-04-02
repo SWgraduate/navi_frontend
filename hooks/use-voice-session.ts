@@ -23,11 +23,17 @@ function float32ToInt16(float32: Float32Array): ArrayBuffer {
 
 export type VoiceSessionStatus = "idle" | "connecting" | "connected" | "error" | "closed";
 
+export interface SubtitleLine {
+  text: string;
+  type: "stt" | "tts";
+}
+
 export interface VoiceSessionState {
   status: VoiceSessionStatus;
   sttTranscript: string;
   sttIsFinal: boolean;
   ttsText: string;
+  pastLines: SubtitleLine[];
   error: string | null;
 }
 
@@ -44,6 +50,7 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
     sttTranscript: "",
     sttIsFinal: false,
     ttsText: "",
+    pastLines: [],
     error: null,
   });
 
@@ -61,7 +68,7 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
   useEffect(() => {
     if (!active || !chatId) {
       cleanup();
-      setState({ status: "idle", sttTranscript: "", sttIsFinal: false, ttsText: "", error: null });
+      setState({ status: "idle", sttTranscript: "", sttIsFinal: false, ttsText: "", pastLines: [], error: null });
       return;
     }
 
@@ -177,9 +184,19 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
                 | { type: "stt"; transcript: string; isFinal: boolean }
                 | { type: "tts"; text: string };
               if (msg.type === "stt") {
-                setState((s) => ({ ...s, sttTranscript: msg.transcript, sttIsFinal: msg.isFinal }));
+                setState((s) => {
+                  const next: VoiceSessionState = { ...s, sttTranscript: msg.transcript, sttIsFinal: msg.isFinal };
+                  if (msg.isFinal && msg.transcript && !s.sttIsFinal) {
+                    next.pastLines = [...s.pastLines, { text: msg.transcript, type: "stt" }];
+                  }
+                  return next;
+                });
               } else if (msg.type === "tts") {
-                setState((s) => ({ ...s, ttsText: msg.text }));
+                setState((s) => ({
+                  ...s,
+                  ttsText: msg.text,
+                  pastLines: [...s.pastLines, { text: msg.text, type: "tts" }],
+                }));
                 // tts 이벤트 수신 즉시 타이머 해제 후 바로 재생 시도
                 if (playTimerRef.current) clearTimeout(playTimerRef.current);
                 flushTtsChunks();

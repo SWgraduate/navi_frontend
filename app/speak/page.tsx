@@ -7,7 +7,6 @@ import { X } from "lucide-react";
 import { withViewTransition } from "@/lib/view-transition";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { ScrollFade } from "@/components/ui/scroll-fade";
 import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
@@ -107,6 +106,7 @@ export default function SpeakPage() {
     { id: string; file: File; previewUrl?: string }[]
   >([]);
   const clipButtonRef = useRef<HTMLButtonElement>(null);
+  const subtitleEndRef = useRef<HTMLDivElement>(null);
 
   // 페이지 진입 시 conversationId 확보
   useEffect(() => {
@@ -127,8 +127,14 @@ export default function SpeakPage() {
     sttTranscript,
     sttIsFinal,
     ttsText,
+    pastLines,
     error: sessionError,
   } = useVoiceSession(chatId, micOn && !!chatId);
+
+  // 새 자막 추가 시 하단으로 스크롤
+  useEffect(() => {
+    subtitleEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [pastLines]);
 
   const handleFileSelect = (files: File[]) => {
     setAttachments((prev) => [
@@ -205,59 +211,67 @@ export default function SpeakPage() {
       <div
         className="absolute left-0 right-0 z-1 flex justify-center px-4"
         style={{
-          top: "calc(3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem + (50vh - (3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem)) * 0.2)",
+          top: "calc(3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem + (50vh - (3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem)) * 0.3)",
           transform: "translateY(-50%)",
         }}
       >
-        <ScrollFade
-          axis="y"
-          fadeSize={24}
-          fadeColor="white"
-          showBottom={false}
-          className="relative flex max-h-18 w-full max-w-(--app-max-width) flex-col items-center justify-center overflow-hidden"
-        >
-          <div className="flex flex-col items-center justify-center gap-0">
-            {/* chatId 생성 실패 */}
-            {chatIdError ? (
-              <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-destructive">
-                {chatIdError}
-              </p>
-            ) : ttsText ? (
-              /* TTS 답변 텍스트 */
-              <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-ds-primary">
-                {ttsText}
-              </p>
-            ) : sttTranscript ? (
-              /* STT 인식 텍스트 */
-              <p
-                className={cn(
-                  "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
-                  sttIsFinal ? "text-ds-primary" : "text-ds-secondary"
-                )}
-              >
-                {sttTranscript}
-              </p>
-            ) : (
-              /* 세션 상태 안내 */
-              <p
-                className={cn(
-                  "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
-                  sessionStatus === "error" ? "text-destructive" : "text-ds-tertiary"
-                )}
-              >
-                {!chatId
+        <div className="relative flex w-full max-w-(--app-max-width) flex-col items-center gap-1">
+          {/* 과거 자막: 위쪽 fade, 스크롤 */}
+          {pastLines.length > 0 && (
+            <div className="relative w-full overflow-hidden" style={{ maxHeight: "8rem" }}>
+              <div
+                className="pointer-events-none absolute left-0 right-0 top-0 z-10"
+                style={{
+                  height: 32,
+                  background: "linear-gradient(to bottom, white, transparent)",
+                }}
+                aria-hidden
+              />
+              <div className="flex flex-col items-center gap-0.5 overflow-y-auto" style={{ maxHeight: "8rem" }}>
+                {pastLines.map((line, i) => (
+                  <p
+                    key={i}
+                    className={cn(
+                      "w-full text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
+                      line.type === "tts" ? "text-ds-brand" : "text-ds-tertiary"
+                    )}
+                  >
+                    {line.text}
+                  </p>
+                ))}
+                <div ref={subtitleEndRef} />
+              </div>
+            </div>
+          )}
+
+          {/* 현재 자막: 페이드 없이 항상 선명하게 */}
+          {chatIdError ? (
+            <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-destructive">
+              {chatIdError}
+            </p>
+          ) : sttTranscript && !sttIsFinal ? (
+            <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-ds-primary">
+              {sttTranscript}
+            </p>
+          ) : !sttTranscript && pastLines.length === 0 ? (
+            <p
+              className={cn(
+                "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
+                sessionStatus === "error" ? "text-destructive" : "text-ds-tertiary"
+              )}
+            >
+              {!chatId
+                ? t("speak.connecting")
+                : sessionStatus === "connecting"
                   ? t("speak.connecting")
-                  : sessionStatus === "connecting"
-                    ? t("speak.connecting")
-                    : sessionStatus === "connected"
-                      ? t("speak.listening")
-                      : sessionStatus === "error"
-                        ? (sessionError ?? t("speak.error"))
-                        : t("speak.tapToSpeak")}
-              </p>
-            )}
-          </div>
-        </ScrollFade>
+                  : sessionStatus === "connected"
+                    ? t("speak.listening")
+                    : sessionStatus === "error"
+                      ? (sessionError ?? t("speak.error"))
+                      : t("speak.tapToSpeak")}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {/* 화면 중앙 원: mic On일 때만 144→192→144 크기 반복, Off일 때 정지 */}
