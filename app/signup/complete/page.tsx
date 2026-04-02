@@ -851,7 +851,7 @@ export default function SignupCompletePage() {
             variant="primary"
             size="lg"
             className={cn(
-              "mt-4 h-auto w-full rounded-none py-4 text-ds-body-16-sb leading-ds-body-16-sb",
+              "mt-4 h-auto w-full rounded-md py-4 text-ds-body-16-sb leading-ds-body-16-sb ",
               canSubmit && !isSubmitting
                 ? "bg-primary text-primary-foreground"
                 : "bg-(--ds-bg-disabled) text-ds-disabled"

@@ -337,9 +337,10 @@
     "close": "关闭",
     "attach": "附件",
     "permissionDenied": "需要麦克风权限。请在浏览器设置中允许。",
-    "dummyLine1": "这里会显示输入内容",
-    "dummyLine2": "这里会显示输入内容",
-    "dummyLine3": "越新的输入会越深"
+    "connecting": "连接中...",
+    "listening": "请说话",
+    "tapToSpeak": "点击麦克风开始",
+    "error": "连接错误"
   },
   "my": {
     "greetingName": "{{name}}",
@@ -453,7 +454,7 @@
     "password": {
       "minLength": "密码至少需要8个字符",
       "korean": "密码不能包含韩文字符",
-      "rule": "8-16位 / 须包含大小写字母、数字和特殊字符"
+      "rule": "8-16位 / 须包含字母、数字和特殊字符"
     },
     "passwordConfirm": {
       "empty": "请再次输入密码",

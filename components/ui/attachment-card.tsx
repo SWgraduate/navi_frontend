@@ -88,11 +88,6 @@ export function AttachmentImageCard({
   className?: string;
 }) {
   const { t } = useTranslation();
-  React.useEffect(() => {
-    return () => {
-      if (previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
 
   return (
     <div

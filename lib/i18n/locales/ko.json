@@ -338,9 +338,10 @@
     "close": "닫기",
     "attach": "첨부",
     "permissionDenied": "마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.",
-    "dummyLine1": "입력한 값이 보이는 곳",
-    "dummyLine2": "입력한 값이 보이는 곳",
-    "dummyLine3": "새로 입력 될 수록 진함"
+    "connecting": "연결 중...",
+    "listening": "말씀하세요",
+    "tapToSpeak": "마이크를 눌러 시작하세요",
+    "error": "연결 오류가 발생했습니다"
   },
   "my": {
     "greetingName": "{{name}}님",
@@ -454,7 +455,7 @@
     "password": {
       "minLength": "비밀번호는 8자 이상이어야 합니다",
       "korean": "비밀번호에는 한글을 사용할 수 없습니다",
-      "rule": "8~16자리 / 영문 대소문자, 숫자, 특수문자로 조합해주세요"
+      "rule": "8~16자리 / 영문, 숫자, 특수문자로 조합해주세요"
     },
     "passwordConfirm": {
       "empty": "비밀번호를 다시 입력해주세요",

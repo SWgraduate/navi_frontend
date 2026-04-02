@@ -1,14 +1,21 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useHeaderBackground } from "@/hooks/use-header-background";
 import { HistoryItemPopover } from "@/components/history/history-item-popover";
 import { HistoryRow } from "@/components/history/history-row";
-import { getPinnedMap, togglePinned } from "@/lib/history-storage";
+import {
+  type Conversation,
+  listConversations,
+  deleteConversation,
+  pinConversation,
+  renameConversation,
+} from "@/lib/api/chat";
+import { useChat } from "@/contexts/chat-context";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
-/* 목데이터 – API 연동 시 제거 후 실제 데이터로 교체 */
 interface HistoryItem {
   id: string;
   title: string;
@@ -17,40 +24,20 @@ interface HistoryItem {
   pinned: boolean;
 }
 
-const MOCK_HISTORY: HistoryItem[] = [
-  {
-    id: "1",
-    title: "example 1",
-    date: "xxxx-xx-xx",
-    time: "00:00",
-    pinned: false,
-  },
-  {
-    id: "2",
-    title: "example 2",
-    date: "xxxx-xx-xx",
-    time: "00:00",
-    pinned: false,
-  },
-  {
-    id: "3",
-    title: "example 3",
-    date: "xxxx-xx-xx",
-    time: "00:00",
-    pinned: false,
-  },
-];
+function toHistoryItem(conv: Conversation): HistoryItem {
+  const d = new Date(conv.createdAt);
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const time = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return { id: conv.id, title: conv.title, date, time, pinned: conv.pinned };
+}
 
 export default function HistoryPage() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { loadConversation } = useChat();
   const [searchQuery, setSearchQuery] = useState("");
-  const [items, setItems] = useState<HistoryItem[]>(() => {
-    const pinnedMap = getPinnedMap();
-    return MOCK_HISTORY.map((item) => ({
-      ...item,
-      pinned: !!pinnedMap[item.id],
-    }));
-  });
+  const [items, setItems] = useState<HistoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [popover, setPopover] = useState<{
     item: HistoryItem;
     x: number;
@@ -58,6 +45,13 @@ export default function HistoryPage() {
   } | null>(null);
 
   useHeaderBackground("white");
+
+  useEffect(() => {
+    listConversations()
+      .then((res) => setItems(res.conversations.map(toHistoryItem)))
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const filteredHistory = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -84,23 +78,44 @@ export default function HistoryPage() {
 
   const handlePin = useCallback(() => {
     if (!popover) return;
-    const { id } = popover.item;
-
-    setItems((prev) => {
-      const current = prev.find((item) => item.id === id);
-      const isPinned = current?.pinned ?? false;
-      togglePinned(id, isPinned);
-      return prev.map((item) =>
-        item.id === id ? { ...item, pinned: !isPinned } : item
+    const { id, pinned } = popover.item;
+    const next = !pinned;
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, pinned: next } : item))
+    );
+    pinConversation(id, next).catch(() => {
+      setItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, pinned } : item))
       );
     });
   }, [popover]);
+
   const handleRename = useCallback(() => {
-    // TODO: 이름 변경
-  }, []);
+    if (!popover) return;
+    const { id, title } = popover.item;
+    const newTitle = window.prompt(t("historyMenu.rename"), title);
+    if (!newTitle || newTitle.trim() === "" || newTitle === title) return;
+    const trimmed = newTitle.trim();
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, title: trimmed } : item))
+    );
+    renameConversation(id, trimmed).catch(() => {
+      setItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, title } : item))
+      );
+    });
+  }, [popover, t]);
+
   const handleDelete = useCallback(() => {
-    // TODO: 삭제 API
-  }, []);
+    if (!popover) return;
+    const { id } = popover.item;
+    setItems((prev) => prev.filter((item) => item.id !== id));
+    deleteConversation(id).catch(() => {
+      listConversations()
+        .then((res) => setItems(res.conversations.map(toHistoryItem)))
+        .catch(() => {});
+    });
+  }, [popover]);
 
   return (
     <div className="min-h-full bg-white">
@@ -144,7 +159,30 @@ export default function HistoryPage() {
 
       {/* 기록 목록 */}
       <div className="px-4">
-        {filteredHistory.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <svg
+              className="h-8 w-8 animate-spin text-ds-brand"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="3"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          </div>
+        ) : filteredHistory.length === 0 ? (
           <div className="py-8 text-center">
             <p className="text-ds-body-16-r leading-ds-body-16-r text-ds-gray-50">
               {t("history.noResults")}
@@ -157,9 +195,10 @@ export default function HistoryPage() {
                 key={item.id}
                 item={item}
                 onLongPress={handleLongPress}
-                onClick={() => {
+                onClick={async () => {
                   if (popover?.item.id === item.id) return;
-                  // TODO: 기록 상세 페이지로 이동 또는 채팅 재개
+                  await loadConversation(item.id);
+                  router.push("/home");
                 }}
               />
             ))}

@@ -1,16 +1,17 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { withViewTransition } from "@/lib/view-transition";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { ScrollFade } from "@/components/ui/scroll-fade";
 import { AttachmentMenu } from "@/components/ui/attachment-menu";
 import { AttachmentFileCard, AttachmentImageCard } from "@/components/ui/attachment-card";
 import { useVoiceAnalyser } from "@/hooks/use-voice-analyser";
+import { useVoiceSession } from "@/hooks/use-voice-session";
+import { useChat } from "@/contexts/chat-context";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 
@@ -96,23 +97,44 @@ const btnBase =
 export default function SpeakPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { conversationId, ensureConversation } = useChat();
+  const [chatId, setChatId] = useState<string | null>(conversationId);
+  const [chatIdError, setChatIdError] = useState<string | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [attachments, setAttachments] = useState<
     { id: string; file: File; previewUrl?: string }[]
   >([]);
   const clipButtonRef = useRef<HTMLButtonElement>(null);
+  const subtitleEndRef = useRef<HTMLDivElement>(null);
 
-  const { wavePulse, waveHeights, permissionState, errorMessage } =
-    useVoiceAnalyser(micOn);
-  const dummySpeechLines = useMemo(
-    () => [
-      { text: t("speak.dummyLine1"), color: "text-ds-tertiary" },
-      { text: t("speak.dummyLine2"), color: "text-ds-secondary" },
-      { text: t("speak.dummyLine3"), color: "text-ds-primary" },
-    ],
-    [t]
-  );
+  // 페이지 진입 시 conversationId 확보
+  useEffect(() => {
+    if (!chatId) {
+      ensureConversation()
+        .then(setChatId)
+        .catch((err) =>
+          setChatIdError(err instanceof Error ? err.message : "대화를 시작할 수 없습니다.")
+        );
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 마이크 시각화는 항상 micOn에 연동 (세션과 독립적으로 파동 표시)
+  const { bandLevels, permissionState, errorMessage } = useVoiceAnalyser(micOn);
+
+  const {
+    status: sessionStatus,
+    sttTranscript,
+    sttIsFinal,
+    ttsText,
+    pastLines,
+    error: sessionError,
+  } = useVoiceSession(chatId, micOn && !!chatId);
+
+  // 새 자막 추가 시 하단으로 스크롤
+  useEffect(() => {
+    subtitleEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [pastLines]);
 
   const handleFileSelect = (files: File[]) => {
     setAttachments((prev) => [
@@ -155,62 +177,101 @@ export default function SpeakPage() {
         data-name="VoiceVisualizer"
       >
         <div className="flex h-8 items-center justify-center gap-1" aria-hidden>
-          {waveHeights.map((h, i) => (
-            <motion.div
-              key={
-                micOn && wavePulse > 0 ? `pulse-${wavePulse}-${i}` : `idle-${i}`
-              }
-              className="w-0.5 shrink-0 rounded-[10px] bg-primary/50 origin-center"
-              initial={{ scaleY: 0.15, opacity: 1 }}
-              animate={
-                micOn && wavePulse > 0
-                  ? {
-                      scaleY: [0.15, 1, 1, 0.15],
-                      opacity: [1, 1, 1, 1],
-                    }
-                  : { scaleY: 0.15, opacity: 1 }
-              }
-              transition={{
-                duration: micOn ? 0.85 : 0.2,
-                times: micOn ? [0, 0.22, 0.55, 0.85] : undefined,
-                ease: "easeOut",
-              }}
-              style={{ height: h }}
-              data-name="VoiceVisualizer/el"
-            />
-          ))}
+          {bandLevels.map((level, i) => {
+            const normalized = micOn ? level / 100 : 0;
+            const centerIndex = (bandLevels.length - 1) / 2;
+            const distFromCenter = Math.abs(i - centerIndex);
+            const t = distFromCenter / centerIndex; // 0(중앙) ~ 1(끝)
+            const centerWeight = 1 - t * t; // 중앙 1, 양 끝 0로 부드럽게 감소
+            const emphasis = 0.3 + centerWeight * 0.9; // 0.3~1.2 사이 가중치
+            const scaleY = 0.2 + normalized * emphasis * 2.0;
+
+            return (
+              <motion.div
+                key={`bar-${i}`}
+                className="w-0.5 shrink-0 rounded-[10px] bg-primary/50 origin-center"
+                initial={{ scaleY: 0.15, opacity: 1 }}
+                animate={{
+                  scaleY: micOn ? scaleY : 0.15,
+                  opacity: 1,
+                }}
+                transition={{
+                  duration: 0.08,
+                  ease: "linear",
+                }}
+                style={{ height: 32 }}
+                data-name="VoiceVisualizer/el"
+              />
+            );
+          })}
         </div>
       </div>
 
-      {/* 음성 인식 텍스트: 비주얼라이저·원 중간(절대 위치), 3줄만 노출 */}
+      {/* 음성 인식 텍스트: 비주얼라이저·원 중간(절대 위치), STT/TTS 실시간 표시 */}
       <div
         className="absolute left-0 right-0 z-1 flex justify-center px-4"
         style={{
-          top: "calc(3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem + (50vh - (3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem)) * 0.2)",
+          top: "calc(3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem + (50vh - (3rem + 1rem + var(--safe-area-inset-top) + 2rem + 1rem)) * 0.3)",
           transform: "translateY(-50%)",
         }}
       >
-        <ScrollFade
-          axis="y"
-          fadeSize={24}
-          fadeColor="white"
-          showBottom={false}
-          className="relative flex max-h-18 w-full max-w-(--app-max-width) flex-col items-center justify-center overflow-hidden"
-        >
-          <div className="flex flex-col items-center justify-center gap-0">
-            {dummySpeechLines.map((line, i) => (
-              <p
-                key={i}
-                className={cn(
-                  "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
-                  line.color
-                )}
-              >
-                {line.text}
-              </p>
-            ))}
-          </div>
-        </ScrollFade>
+        <div className="relative flex w-full max-w-(--app-max-width) flex-col items-center gap-1">
+          {/* 과거 자막: 위쪽 fade, 스크롤 */}
+          {pastLines.length > 0 && (
+            <div className="relative w-full overflow-hidden" style={{ maxHeight: "8rem" }}>
+              <div
+                className="pointer-events-none absolute left-0 right-0 top-0 z-10"
+                style={{
+                  height: 32,
+                  background: "linear-gradient(to bottom, white, transparent)",
+                }}
+                aria-hidden
+              />
+              <div className="flex flex-col items-center gap-0.5 overflow-y-auto" style={{ maxHeight: "8rem" }}>
+                {pastLines.map((line, i) => (
+                  <p
+                    key={i}
+                    className={cn(
+                      "w-full text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
+                      line.type === "tts" ? "text-ds-brand" : "text-ds-tertiary"
+                    )}
+                  >
+                    {line.text}
+                  </p>
+                ))}
+                <div ref={subtitleEndRef} />
+              </div>
+            </div>
+          )}
+
+          {/* 현재 자막: 페이드 없이 항상 선명하게 */}
+          {chatIdError ? (
+            <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-destructive">
+              {chatIdError}
+            </p>
+          ) : sttTranscript && !sttIsFinal ? (
+            <p className="shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px] text-ds-primary">
+              {sttTranscript}
+            </p>
+          ) : !sttTranscript && pastLines.length === 0 ? (
+            <p
+              className={cn(
+                "shrink-0 text-center text-ds-body-16-r leading-ds-body-16-r tracking-[-0.4px]",
+                sessionStatus === "error" ? "text-destructive" : "text-ds-tertiary"
+              )}
+            >
+              {!chatId
+                ? t("speak.connecting")
+                : sessionStatus === "connecting"
+                  ? t("speak.connecting")
+                  : sessionStatus === "connected"
+                    ? t("speak.listening")
+                    : sessionStatus === "error"
+                      ? (sessionError ?? t("speak.error"))
+                      : t("speak.tapToSpeak")}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {/* 화면 중앙 원: mic On일 때만 144→192→144 크기 반복, Off일 때 정지 */}
@@ -234,7 +295,7 @@ export default function SpeakPage() {
         />
       </div>
 
-      {/* 마이크 권한 에러/거부 시 안내 (필요 시 노출) */}
+      {/* 마이크 권한 에러/거부 시 안내 */}
       {permissionState === "denied" && (
         <p className="absolute left-4 right-4 top-1/2 z-10 -translate-y-1/2 text-center text-sm text-ds-tertiary">
           {t("speak.permissionDenied")}

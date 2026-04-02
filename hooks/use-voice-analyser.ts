@@ -20,6 +20,7 @@ const WAVE_HEIGHTS = [4, 8, 16, 24, 16, 12, 8, 4, 4];
 export function useVoiceAnalyser(active: boolean) {
   const [wavePulse, setWavePulse] = useState(0); // 음성 감지 시마다 증가 → 1회 나타났다 사라지는 애니메이션 트리거
   const [audioLevel, setAudioLevel] = useState(0);
+  const [bandLevels, setBandLevels] = useState<number[]>(() => Array(16).fill(0));
   const [permissionState, setPermissionState] = useState<
     "idle" | "requesting" | "granted" | "denied" | "error"
   >("idle");
@@ -125,6 +126,25 @@ export function useVoiceAnalyser(active: boolean) {
 
           setAudioLevel(Math.min(100, Math.round((maxLevel / 255) * 100)));
 
+          // 시각화용 16개 대역별 평균값 계산 (실제 스펙트럼 느낌 유지)
+          const bands = 16;
+          const bandSize = Math.max(1, Math.floor(speechBinCount / bands));
+          const nextBandLevels: number[] = [];
+          for (let b = 0; b < bands; b++) {
+            const start = b * bandSize;
+            const end = Math.min(speechBinCount, start + bandSize);
+            let sum = 0;
+            let count = 0;
+            for (let i = start; i < end; i++) {
+              sum += data[i];
+              count += 1;
+            }
+            const avg = count > 0 ? sum / count : 0;
+            const normalized = Math.min(100, Math.round((avg / 255) * 100));
+            nextBandLevels.push(normalized);
+          }
+          setBandLevels(nextBandLevels);
+
           // 음성 "시작" 시점에만 1회 트리거 (아래→위로 넘을 때만, 연속 감지 시 반복 방지)
           const isAbove = maxLevel > VOICE_THRESHOLD;
           if (isAbove && !wasAboveThresholdRef.current) {
@@ -171,6 +191,7 @@ export function useVoiceAnalyser(active: boolean) {
     wavePulse,
     waveHeights: WAVE_HEIGHTS,
     audioLevel,
+    bandLevels,
     permissionState,
     errorMessage,
   };
