@@ -82,10 +82,22 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
       const ctx = playContextRef.current;
       if (!ctx) return;
 
+      // suspended 상태면 resume 후 진행 (autoplay 정책 대응)
+      if (ctx.state === "suspended") {
+        try {
+          await ctx.resume();
+        } catch (e) {
+          console.warn("[VoiceSession] AudioContext resume failed", e);
+          return;
+        }
+      }
+
       const totalLen = chunks.reduce((s, c) => s + c.length, 0);
       const combined = new Uint8Array(totalLen);
       let offset = 0;
       for (const c of chunks) { combined.set(c, offset); offset += c.length; }
+
+      console.log(`[VoiceSession] flush ${chunks.length} chunks, ${totalLen} bytes, ctx.state=${ctx.state}`);
 
       try {
         const audioBuffer = await ctx.decodeAudioData(combined.buffer.slice(0));
@@ -176,6 +188,7 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
 
         ws.onmessage = (event) => {
           if (event.data instanceof ArrayBuffer) {
+            console.log(`[VoiceSession] binary chunk received: ${event.data.byteLength} bytes`);
             ttsChunksRef.current.push(new Uint8Array(event.data));
             scheduleTtsPlay();
           } else if (typeof event.data === "string") {
@@ -238,10 +251,14 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
       }
     }
 
-    start();
+    // StrictMode 이중 실행 방지: cleanup이 먼저 실행되면 타이머 취소로 연결 차단
+    const startTimer = setTimeout(() => {
+      if (!cancelled) start();
+    }, 0);
 
     return () => {
       cancelled = true;
+      clearTimeout(startTimer);
       cleanup();
     };
   }, [active, chatId]);
