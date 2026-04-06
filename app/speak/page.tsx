@@ -100,7 +100,7 @@ export default function SpeakPage() {
   const { conversationId, ensureConversation } = useChat();
   const [chatId, setChatId] = useState<string | null>(conversationId);
   const [chatIdError, setChatIdError] = useState<string | null>(null);
-  const [micOn, setMicOn] = useState(true);
+  const [micOn, setMicOn] = useState(false);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [attachments, setAttachments] = useState<
     { id: string; file: File; previewUrl?: string }[]

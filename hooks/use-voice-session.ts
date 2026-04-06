@@ -71,6 +71,15 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
   // TTS 재생 중 마이크 음소거용: 재생 인스턴스 카운터로 마지막 소스만 unmute 트리거
   const isTtsActiveRef = useRef<boolean>(false);
   const ttsPlayCountRef = useRef<number>(0);
+  const cachedVoicesRef = useRef<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const sync = () => { cachedVoicesRef.current = window.speechSynthesis.getVoices(); };
+    sync();
+    window.speechSynthesis.onvoiceschanged = sync;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
 
   useEffect(() => {
     if (!active || !chatId) {
@@ -253,7 +262,9 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
                     "en-US": ["Samantha", "Karen", "Moira", "Google US English"], // iOS / Android
                     "zh-CN": ["Ting-Ting", "Google 普通话（中国大陆）"],            // iOS / Android
                   };
-                  const voices = window.speechSynthesis.getVoices();
+                  const voices = cachedVoicesRef.current.length > 0
+                    ? cachedVoicesRef.current
+                    : window.speechSynthesis.getVoices();
                   // lang 완전 일치 우선, 없으면 언어 코드 앞부분(예: "en")만 맞는 음성 포함
                   const candidates = voices.filter(v => v.lang === lang || v.lang.startsWith(lang.split("-")[0]));
                   const picked = (preferred[lang] ?? [])
