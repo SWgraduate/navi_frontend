@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createVoiceSession } from "@/lib/api/chat";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
@@ -44,7 +44,11 @@ export interface VoiceSessionState {
  * - 수신 binary(MP3): 청크 누적 → 300ms 무음 후 AudioContext로 디코딩 재생
  * - 수신 JSON: stt/tts 이벤트 상태 반환
  */
-export function useVoiceSession(chatId: string | null, active: boolean): VoiceSessionState {
+export interface VoiceSessionReturn extends VoiceSessionState {
+  unlockAudio: () => void;
+}
+
+export function useVoiceSession(chatId: string | null, active: boolean): VoiceSessionReturn {
   const [state, setState] = useState<VoiceSessionState>({
     status: "idle",
     sttTranscript: "",
@@ -64,6 +68,9 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
   const ttsChunksRef = useRef<Uint8Array[]>([]);
   const playTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nextPlayTimeRef = useRef<number>(0);
+  // TTS 재생 중 마이크 음소거용: 재생 인스턴스 카운터로 마지막 소스만 unmute 트리거
+  const isTtsActiveRef = useRef<boolean>(false);
+  const ttsPlayCountRef = useRef<number>(0);
 
   useEffect(() => {
     if (!active || !chatId) {
@@ -109,6 +116,16 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
         const startAt = Math.max(ctx.currentTime, nextPlayTimeRef.current);
         source.start(startAt);
         nextPlayTimeRef.current = startAt + audioBuffer.duration;
+
+        // TTS 재생 중 마이크 음소거
+        isTtsActiveRef.current = true;
+        ttsPlayCountRef.current++;
+        const thisCount = ttsPlayCountRef.current;
+        source.onended = () => {
+          if (ttsPlayCountRef.current === thisCount) {
+            isTtsActiveRef.current = false;
+          }
+        };
       } catch (e) {
         console.warn("[VoiceSession] TTS decode failed", e);
       }
@@ -139,6 +156,7 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
 
       processor.onaudioprocess = (e) => {
         if (wsRef.current?.readyState !== WebSocket.OPEN) return;
+        if (isTtsActiveRef.current) return; // TTS 재생 중 마이크 음소거
         const input = e.inputBuffer.getChannelData(0);
         const inputRate = ctx.sampleRate;
         let samples: Float32Array;
@@ -160,8 +178,10 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
     async function start() {
       setState((s) => ({ ...s, status: "connecting", error: null }));
 
-      // 재생용 AudioContext 미리 생성
-      playContextRef.current = new AudioContext();
+      // 재생용 AudioContext: unlockAudio()로 미리 생성된 경우 재사용, 없으면 새로 생성
+      if (!playContextRef.current) {
+        playContextRef.current = new AudioContext();
+      }
       nextPlayTimeRef.current = 0;
 
       try {
@@ -240,6 +260,8 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
                     .map(name => candidates.find(v => v.name === name))
                     .find(Boolean) ?? candidates[0];
                   if (picked) utter.voice = picked;
+                  utter.onstart = () => { isTtsActiveRef.current = true; };
+                  utter.onend = () => { isTtsActiveRef.current = false; };
                   window.speechSynthesis.speak(utter);
                 }
               }
@@ -292,11 +314,35 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
     };
   }, [active, chatId]);
 
+  /** 마이크 버튼 탭 직후(사용자 제스처 컨텍스트)에서 호출해 AudioContext + speechSynthesis 잠금 해제 */
+  const unlockAudio = useCallback(() => {
+    if (!playContextRef.current) {
+      playContextRef.current = new AudioContext();
+      nextPlayTimeRef.current = 0;
+    }
+    const ctx = playContextRef.current;
+    ctx.resume().catch(() => {});
+
+    // 무음 버퍼 재생 → 모바일 브라우저 AudioContext 완전 unlock
+    const silentBuf = ctx.createBuffer(1, 1, 22050);
+    const silentSrc = ctx.createBufferSource();
+    silentSrc.buffer = silentBuf;
+    silentSrc.connect(ctx.destination);
+    silentSrc.start();
+
+    // speechSynthesis unlock (iOS Safari 포함)
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
+    }
+  }, []);
+
   function cleanup() {
     if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
     if (playTimerRef.current) { clearTimeout(playTimerRef.current); playTimerRef.current = null; }
     ttsChunksRef.current = [];
     nextPlayTimeRef.current = 0;
+    isTtsActiveRef.current = false;
+    ttsPlayCountRef.current = 0;
 
     wsRef.current?.close();
     wsRef.current = null;
@@ -314,5 +360,5 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
     playContextRef.current = null;
   }
 
-  return state;
+  return { ...state, unlockAudio };
 }
