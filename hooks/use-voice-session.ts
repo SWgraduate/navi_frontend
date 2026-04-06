@@ -82,10 +82,22 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
       const ctx = playContextRef.current;
       if (!ctx) return;
 
+      // suspended 상태면 resume 후 진행 (autoplay 정책 대응)
+      if (ctx.state === "suspended") {
+        try {
+          await ctx.resume();
+        } catch (e) {
+          console.warn("[VoiceSession] AudioContext resume failed", e);
+          return;
+        }
+      }
+
       const totalLen = chunks.reduce((s, c) => s + c.length, 0);
       const combined = new Uint8Array(totalLen);
       let offset = 0;
       for (const c of chunks) { combined.set(c, offset); offset += c.length; }
+
+      console.log(`[VoiceSession] flush ${chunks.length} chunks, ${totalLen} bytes, ctx.state=${ctx.state}`);
 
       try {
         const audioBuffer = await ctx.decodeAudioData(combined.buffer.slice(0));
@@ -176,6 +188,7 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
 
         ws.onmessage = (event) => {
           if (event.data instanceof ArrayBuffer) {
+            console.log(`[VoiceSession] binary chunk received: ${event.data.byteLength} bytes`);
             ttsChunksRef.current.push(new Uint8Array(event.data));
             scheduleTtsPlay();
           } else if (typeof event.data === "string") {
@@ -200,6 +213,35 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
                 // tts 이벤트 수신 즉시 타이머 해제 후 바로 재생 시도
                 if (playTimerRef.current) clearTimeout(playTimerRef.current);
                 flushTtsChunks();
+                // Web Speech API fallback: 서버 바이너리 오디오가 없을 때 브라우저 TTS로 대체
+                if (typeof window !== "undefined" && window.speechSynthesis) {
+                  window.speechSynthesis.cancel();
+                  // 텍스트에 포함된 문자로 언어 감지
+                  // \uAC00-\uD7A3: 한글 음절(가~힣), \u4E00-\u9FFF\u3400-\u4DBF: CJK 한자(중국어)
+                  const lang = /[\uAC00-\uD7A3]/.test(msg.text)
+                    ? "ko-KR"
+                    : /[\u4E00-\u9FFF\u3400-\u4DBF]/.test(msg.text)
+                      ? "zh-CN"
+                      : "en-US";
+                  const utter = new SpeechSynthesisUtterance(msg.text);
+                  utter.lang = lang;
+                  utter.rate = 1.1;
+                  // 언어별 선호 음성 목록 (자연스러운 여성 음성 우선)
+                  // 목록 순서대로 시도하며, 없으면 해당 언어의 첫 번째 음성으로 폴백
+                  const preferred: Record<string, string[]> = {
+                    "ko-KR": ["Yuna"],                                          // iOS
+                    "en-US": ["Samantha", "Karen", "Moira", "Google US English"], // iOS / Android
+                    "zh-CN": ["Ting-Ting", "Google 普通话（中国大陆）"],            // iOS / Android
+                  };
+                  const voices = window.speechSynthesis.getVoices();
+                  // lang 완전 일치 우선, 없으면 언어 코드 앞부분(예: "en")만 맞는 음성 포함
+                  const candidates = voices.filter(v => v.lang === lang || v.lang.startsWith(lang.split("-")[0]));
+                  const picked = (preferred[lang] ?? [])
+                    .map(name => candidates.find(v => v.name === name))
+                    .find(Boolean) ?? candidates[0];
+                  if (picked) utter.voice = picked;
+                  window.speechSynthesis.speak(utter);
+                }
               }
             } catch { /* 파싱 불가 무시 */ }
           }
@@ -238,15 +280,20 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
       }
     }
 
-    start();
+    // StrictMode 이중 실행 방지: cleanup이 먼저 실행되면 타이머 취소로 연결 차단
+    const startTimer = setTimeout(() => {
+      if (!cancelled) start();
+    }, 0);
 
     return () => {
       cancelled = true;
+      clearTimeout(startTimer);
       cleanup();
     };
   }, [active, chatId]);
 
   function cleanup() {
+    if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
     if (playTimerRef.current) { clearTimeout(playTimerRef.current); playTimerRef.current = null; }
     ttsChunksRef.current = [];
     nextPlayTimeRef.current = 0;
