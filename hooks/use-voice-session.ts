@@ -71,15 +71,16 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
   // TTS 재생 중 마이크 음소거용: 재생 인스턴스 카운터로 마지막 소스만 unmute 트리거
   const isTtsActiveRef = useRef<boolean>(false);
   const ttsPlayCountRef = useRef<number>(0);
-  const cachedVoicesRef = useRef<SpeechSynthesisVoice[]>([]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    const sync = () => { cachedVoicesRef.current = window.speechSynthesis.getVoices(); };
-    sync();
-    window.speechSynthesis.onvoiceschanged = sync;
-    return () => { window.speechSynthesis.onvoiceschanged = null; };
-  }, []);
+  // 임시 Web Speech API(TTS 폴백) 비활성화 — 서버 TTS만 사용
+  // const cachedVoicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  //
+  // useEffect(() => {
+  //   if (typeof window === "undefined" || !window.speechSynthesis) return;
+  //   const sync = () => { cachedVoicesRef.current = window.speechSynthesis.getVoices(); };
+  //   sync();
+  //   window.speechSynthesis.onvoiceschanged = sync;
+  //   return () => { window.speechSynthesis.onvoiceschanged = null; };
+  // }, []);
 
   useEffect(() => {
     if (!active || !chatId) {
@@ -242,39 +243,34 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
                 // tts 이벤트 수신 즉시 타이머 해제 후 바로 재생 시도
                 if (playTimerRef.current) clearTimeout(playTimerRef.current);
                 flushTtsChunks();
-                // Web Speech API fallback: 서버 바이너리 오디오가 없을 때 브라우저 TTS로 대체
-                if (typeof window !== "undefined" && window.speechSynthesis) {
-                  window.speechSynthesis.cancel();
-                  // 텍스트에 포함된 문자로 언어 감지
-                  // \uAC00-\uD7A3: 한글 음절(가~힣), \u4E00-\u9FFF\u3400-\u4DBF: CJK 한자(중국어)
-                  const lang = /[\uAC00-\uD7A3]/.test(msg.text)
-                    ? "ko-KR"
-                    : /[\u4E00-\u9FFF\u3400-\u4DBF]/.test(msg.text)
-                      ? "zh-CN"
-                      : "en-US";
-                  const utter = new SpeechSynthesisUtterance(msg.text);
-                  utter.lang = lang;
-                  utter.rate = 1.1;
-                  // 언어별 선호 음성 목록 (자연스러운 여성 음성 우선)
-                  // 목록 순서대로 시도하며, 없으면 해당 언어의 첫 번째 음성으로 폴백
-                  const preferred: Record<string, string[]> = {
-                    "ko-KR": ["Yuna"],                                          // iOS
-                    "en-US": ["Samantha", "Karen", "Moira", "Google US English"], // iOS / Android
-                    "zh-CN": ["Ting-Ting", "Google 普通话（中国大陆）"],            // iOS / Android
-                  };
-                  const voices = cachedVoicesRef.current.length > 0
-                    ? cachedVoicesRef.current
-                    : window.speechSynthesis.getVoices();
-                  // lang 완전 일치 우선, 없으면 언어 코드 앞부분(예: "en")만 맞는 음성 포함
-                  const candidates = voices.filter(v => v.lang === lang || v.lang.startsWith(lang.split("-")[0]));
-                  const picked = (preferred[lang] ?? [])
-                    .map(name => candidates.find(v => v.name === name))
-                    .find(Boolean) ?? candidates[0];
-                  if (picked) utter.voice = picked;
-                  utter.onstart = () => { isTtsActiveRef.current = true; };
-                  utter.onend = () => { isTtsActiveRef.current = false; };
-                  window.speechSynthesis.speak(utter);
-                }
+                // Web Speech API fallback (임시 비활성화 — 서버 MP3 TTS만 사용)
+                // if (typeof window !== "undefined" && window.speechSynthesis) {
+                //   window.speechSynthesis.cancel();
+                //   const lang = /[\uAC00-\uD7A3]/.test(msg.text)
+                //     ? "ko-KR"
+                //     : /[\u4E00-\u9FFF\u3400-\u4DBF]/.test(msg.text)
+                //       ? "zh-CN"
+                //       : "en-US";
+                //   const utter = new SpeechSynthesisUtterance(msg.text);
+                //   utter.lang = lang;
+                //   utter.rate = 1.1;
+                //   const preferred: Record<string, string[]> = {
+                //     "ko-KR": ["Yuna"],
+                //     "en-US": ["Samantha", "Karen", "Moira", "Google US English"],
+                //     "zh-CN": ["Ting-Ting", "Google 普通话（中国大陆）"],
+                //   };
+                //   const voices = cachedVoicesRef.current.length > 0
+                //     ? cachedVoicesRef.current
+                //     : window.speechSynthesis.getVoices();
+                //   const candidates = voices.filter(v => v.lang === lang || v.lang.startsWith(lang.split("-")[0]));
+                //   const picked = (preferred[lang] ?? [])
+                //     .map(name => candidates.find(v => v.name === name))
+                //     .find(Boolean) ?? candidates[0];
+                //   if (picked) utter.voice = picked;
+                //   utter.onstart = () => { isTtsActiveRef.current = true; };
+                //   utter.onend = () => { isTtsActiveRef.current = false; };
+                //   window.speechSynthesis.speak(utter);
+                // }
               }
             } catch { /* 파싱 불가 무시 */ }
           }
@@ -325,7 +321,7 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
     };
   }, [active, chatId]);
 
-  /** 마이크 버튼 탭 직후(사용자 제스처 컨텍스트)에서 호출해 AudioContext + speechSynthesis 잠금 해제 */
+  /** 마이크 버튼 탭 직후(사용자 제스처 컨텍스트)에서 호출해 AudioContext 잠금 해제 */
   const unlockAudio = useCallback(() => {
     if (!playContextRef.current) {
       playContextRef.current = new AudioContext();
@@ -341,14 +337,14 @@ export function useVoiceSession(chatId: string | null, active: boolean): VoiceSe
     silentSrc.connect(ctx.destination);
     silentSrc.start();
 
-    // speechSynthesis unlock (iOS Safari 포함)
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
-    }
+    // Web Speech 임시 비활성화 시 iOS Safari 등에서 브라우저 TTS unlock 불필요
+    // if (typeof window !== "undefined" && window.speechSynthesis) {
+    //   window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
+    // }
   }, []);
 
   function cleanup() {
-    if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
+    // if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
     if (playTimerRef.current) { clearTimeout(playTimerRef.current); playTimerRef.current = null; }
     ttsChunksRef.current = [];
     nextPlayTimeRef.current = 0;
