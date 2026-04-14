@@ -163,7 +163,7 @@ export default function SpeakPage() {
 
   const handleMicToggle = () => {
     if (!micOn) {
-      // 사용자 제스처 컨텍스트에서 AudioContext + speechSynthesis 잠금 해제
+      // 사용자 제스처 컨텍스트에서 AudioContext 잠금 해제
       unlockAudio();
     }
     setMicOn((prev) => !prev);
