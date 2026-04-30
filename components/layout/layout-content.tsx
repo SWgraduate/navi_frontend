@@ -35,6 +35,7 @@ const HEADER_TITLE_KEYS: Record<string, string> = {
   "/my/personal/second-major": "header.myPersonalSecondMajor",
   "/my/personal/academic-status": "header.myPersonalAcademicStatus",
   "/my/personal/year-semester": "header.myPersonalYearSemester",
+  "/my/personal/transfer": "header.myPersonalTransfer",
   "/history": "header.history",
 };
 

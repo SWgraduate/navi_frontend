@@ -38,6 +38,7 @@ export type StudentResponse = {
   secondMajor?: string;
   academicStatus: AcademicStatus;
   completedSemesters: number;
+  isTransfer?: boolean;
 };
 
 export type UpsertProfileRequest = {
@@ -49,6 +50,7 @@ export type UpsertProfileRequest = {
   secondMajor?: string;
   academicStatus: AcademicStatus;
   completedSemesters: number;
+  isTransfer?: boolean;
 };
 
 export type EarnedCredits = {

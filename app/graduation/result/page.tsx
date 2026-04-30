@@ -14,6 +14,7 @@ import {
   getMyProfile,
   type AcademicRecordResponse,
 } from "@/lib/api/student";
+import { getGraduationRequirements, type GraduationRequirements } from "@/lib/api/major";
 import { withViewTransition } from "@/lib/view-transition";
 import { useTranslation } from "react-i18next";
 
@@ -68,47 +69,61 @@ function calculateCompletion(creditValue: string, allocation: string | number): 
   return creditNum >= allocationNum ? "Y" : "N";
 }
 
-function getAllocation(majorType: MajorType, fieldKey: CreditKey): string | number {
+function buildAllocationMap(
+  majorType: MajorType,
+  req: GraduationRequirements
+): Record<string, string | number> {
+  const { requiredCredits: rc, requiredConditions: cond, requiredSecondMajorCredits: smc } = req;
+  const base: Record<string, string | number> = {
+    graduation: rc.total,
+    major: rc.majorTotal,
+    coreMajor: rc.majorCore,
+    advancedMajor: rc.majorAdvanced,
+    industryCooperation: rc.industry,
+    generalElective: rc.generalElective,
+    socialService: rc.socialService,
+    graduationGpa: String(rc.gpa),
+    englishOnly: cond.englishCourses,
+    pbl: cond.pblTotal,
+    majorIcPbl: cond.pblMajor,
+    prerequisite: cond.hasPrerequisite ? "Y" : "",
+    uncompleted: cond.hasMandatoryCourse ? "Y" : "",
+    thesis: cond.hasThesis ? "Y" : "",
+    enrollment: "Y",
+    microMajor: "Y",
+  };
+  if (majorType === MAJOR_TYPE.DOUBLE && smc) {
+    base.secondMajor = smc.majorTotal;
+    base.secondCoreMajor = smc.majorCore;
+    base.secondPrerequisite = "Y";
+    base.secondUncompleted = "Y";
+  }
+  return base;
+}
+
+function getAllocation(
+  majorType: MajorType,
+  fieldKey: CreditKey,
+  allocationMap?: Record<string, string | number>
+): string | number {
+  if (allocationMap) return allocationMap[fieldKey] ?? "";
+
+  // 폴백: API 응답 없을 때 기존 하드코드 값 사용
   if (majorType === MAJOR_TYPE.BASIC || majorType === MAJOR_TYPE.MICRO) {
     const map: Record<string, string | number> = {
-      graduation: 140,
-      major: 75,
-      coreMajor: 36,
-      advancedMajor: 30,
-      industryCooperation: 6,
-      generalElective: 10,
-      prerequisite: "Y",
-      uncompleted: "Y",
-      thesis: "Y",
-      englishOnly: 2,
-      graduationGpa: "1.75",
-      socialService: 1,
-      pbl: 4,
-      majorIcPbl: 1,
-      enrollment: "Y",
-      microMajor: "Y",
+      graduation: 140, major: 75, coreMajor: 36, advancedMajor: 30,
+      industryCooperation: 6, generalElective: 10, prerequisite: "Y",
+      uncompleted: "Y", thesis: "Y", englishOnly: 2, graduationGpa: "1.75",
+      socialService: 1, pbl: 4, majorIcPbl: 1, enrollment: "Y", microMajor: "Y",
     };
     return map[fieldKey] ?? "";
   }
   const map: Record<string, string | number> = {
-    graduation: 140,
-    major: 45,
-    coreMajor: 34,
-    advancedMajor: "",
-    industryCooperation: 6,
-    generalElective: 10,
-    prerequisite: "Y",
-    uncompleted: "Y",
-    thesis: "Y",
-    englishOnly: 2,
-    graduationGpa: "1.25",
-    socialService: 1,
-    pbl: 4,
-    majorIcPbl: 1,
-    secondMajor: 36,
-    secondCoreMajor: 18,
-    secondPrerequisite: "Y",
-    secondUncompleted: "Y",
+    graduation: 140, major: 45, coreMajor: 34, advancedMajor: "",
+    industryCooperation: 6, generalElective: 10, prerequisite: "Y",
+    uncompleted: "Y", thesis: "Y", englishOnly: 2, graduationGpa: "1.25",
+    socialService: 1, pbl: 4, majorIcPbl: 1,
+    secondMajor: 36, secondCoreMajor: 18, secondPrerequisite: "Y", secondUncompleted: "Y",
   };
   return map[fieldKey] ?? "";
 }
@@ -127,6 +142,7 @@ export default function GraduationResultPage() {
 
   const [majorType, setMajorType] = useState<MajorType>(MAJOR_TYPE.BASIC);
   const [credits, setCredits] = useState<Credits | null>(null);
+  const [allocationMap, setAllocationMap] = useState<Record<string, string | number> | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -136,7 +152,22 @@ export default function GraduationResultPage() {
           setCredits(mapAcademicRecordToCredits(record as AcademicRecordResponse));
         }
         if ("secondMajorType" in profile) {
-          setMajorType(getMajorTypeFromSecondMajorType(profile.secondMajorType));
+          const mType = getMajorTypeFromSecondMajorType(profile.secondMajorType);
+          setMajorType(mType);
+
+          const p = profile as import("@/lib/api/student").StudentResponse;
+          if (p.major && p.admissionYear) {
+            getGraduationRequirements({
+              major: p.major,
+              admissionYear: p.admissionYear,
+              isTransfer: p.isTransfer,
+              secondMajorType: p.secondMajorType !== "없음" ? p.secondMajorType : undefined,
+            })
+              .then((req) => setAllocationMap(buildAllocationMap(mType, req)))
+              .catch(() => {
+                // API 실패 시 하드코드 폴백 유지
+              });
+          }
         }
       })
       .catch(() => {
@@ -182,6 +213,8 @@ export default function GraduationResultPage() {
       </div>
     );
   }
+
+  const ga = (key: CreditKey) => getAllocation(majorType, key, allocationMap);
 
   const renderRow = (
     label: string,
@@ -267,15 +300,15 @@ export default function GraduationResultPage() {
               </thead>
               <tbody>
                 {majorType === MAJOR_TYPE.MICRO &&
-                  renderRow(rowLabel("enrollment"), "enrollment", getAllocation(majorType, "enrollment"))}
-                {renderRow(rowLabel("graduation"), "graduation", getAllocation(majorType, "graduation"), true)}
-                {renderRow(rowLabel("major"), "major", getAllocation(majorType, "major"))}
-                {renderRow(rowLabel("coreMajor"), "coreMajor", getAllocation(majorType, "coreMajor"))}
-                {renderRow(rowLabel("advancedMajor"), "advancedMajor", getAllocation(majorType, "advancedMajor"))}
-                {renderRow(rowLabel("industryCooperation"), "industryCooperation", getAllocation(majorType, "industryCooperation"))}
-                {renderRow(rowLabel("generalElective"), "generalElective", getAllocation(majorType, "generalElective"))}
+                  renderRow(rowLabel("enrollment"), "enrollment", ga("enrollment"))}
+                {renderRow(rowLabel("graduation"), "graduation", ga("graduation"), true)}
+                {renderRow(rowLabel("major"), "major", ga("major"))}
+                {renderRow(rowLabel("coreMajor"), "coreMajor", ga("coreMajor"))}
+                {renderRow(rowLabel("advancedMajor"), "advancedMajor", ga("advancedMajor"))}
+                {renderRow(rowLabel("industryCooperation"), "industryCooperation", ga("industryCooperation"))}
+                {renderRow(rowLabel("generalElective"), "generalElective", ga("generalElective"))}
                 {majorType === MAJOR_TYPE.MICRO &&
-                  renderRow(rowLabel("microMajor"), "microMajor", getAllocation(majorType, "microMajor"))}
+                  renderRow(rowLabel("microMajor"), "microMajor", ga("microMajor"))}
               </tbody>
             </table>
           </div>
@@ -306,10 +339,10 @@ export default function GraduationResultPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {renderRow(rowLabel("secondMajor"), "secondMajor", getAllocation(majorType, "secondMajor"))}
-                  {renderRow(rowLabel("secondCoreMajor"), "secondCoreMajor", getAllocation(majorType, "secondCoreMajor"))}
-                  {renderRow(rowLabel("secondPrerequisite"), "secondPrerequisite", getAllocation(majorType, "secondPrerequisite"))}
-                  {renderRow(rowLabel("secondUncompleted"), "secondUncompleted", getAllocation(majorType, "secondUncompleted"))}
+                  {renderRow(rowLabel("secondMajor"), "secondMajor", ga("secondMajor"))}
+                  {renderRow(rowLabel("secondCoreMajor"), "secondCoreMajor", ga("secondCoreMajor"))}
+                  {renderRow(rowLabel("secondPrerequisite"), "secondPrerequisite", ga("secondPrerequisite"))}
+                  {renderRow(rowLabel("secondUncompleted"), "secondUncompleted", ga("secondUncompleted"))}
                 </tbody>
               </table>
             </div>
@@ -340,14 +373,14 @@ export default function GraduationResultPage() {
                 </tr>
               </thead>
               <tbody>
-                {renderRow(rowLabel("prerequisite"), "prerequisite", getAllocation(majorType, "prerequisite"))}
-                {renderRow(rowLabel("uncompleted"), "uncompleted", getAllocation(majorType, "uncompleted"))}
-                {renderRow(rowLabel("thesis"), "thesis", getAllocation(majorType, "thesis"))}
-                {renderRow(rowLabel("englishOnly"), "englishOnly", getAllocation(majorType, "englishOnly"))}
-                {renderRow(rowLabel("graduationGpa"), "graduationGpa", getAllocation(majorType, "graduationGpa"))}
-                {renderRow(rowLabel("socialService"), "socialService", getAllocation(majorType, "socialService"))}
-                {renderRow(rowLabel("pbl"), "pbl", getAllocation(majorType, "pbl"))}
-                {renderRow(rowLabel("majorIcPbl"), "majorIcPbl", getAllocation(majorType, "majorIcPbl"))}
+                {renderRow(rowLabel("prerequisite"), "prerequisite", ga("prerequisite"))}
+                {renderRow(rowLabel("uncompleted"), "uncompleted", ga("uncompleted"))}
+                {renderRow(rowLabel("thesis"), "thesis", ga("thesis"))}
+                {renderRow(rowLabel("englishOnly"), "englishOnly", ga("englishOnly"))}
+                {renderRow(rowLabel("graduationGpa"), "graduationGpa", ga("graduationGpa"))}
+                {renderRow(rowLabel("socialService"), "socialService", ga("socialService"))}
+                {renderRow(rowLabel("pbl"), "pbl", ga("pbl"))}
+                {renderRow(rowLabel("majorIcPbl"), "majorIcPbl", ga("majorIcPbl"))}
               </tbody>
             </table>
           </div>

@@ -25,7 +25,8 @@
     "termsAi": "AI Service Disclaimer",
     "termsMarketing": "Marketing Consent",
     "termsAgree": "Terms Agreement",
-    "edit": "Edit"
+    "edit": "Edit",
+    "myPersonalTransfer": "Transfer Student"
   },
   "bottomBar": {
     "graduation": "Graduation",
@@ -183,7 +184,10 @@
       "year": "Year {{n}}",
       "semester": "Sem {{n}}",
       "yearSemesterDisplay": "Year {{y}} Sem {{s}}",
-      "submit": "Done"
+      "submit": "Done",
+      "isTransferLabel": "Transfer Student",
+      "isTransferNo": "Regular",
+      "isTransferYes": "Transfer"
     },
     "welcome": {
       "title": "Welcome!",
@@ -426,6 +430,14 @@
         "placeholder": "Select year / semester",
         "error": "Please select year / semester.",
         "display": "Year {{y}} Sem {{s}}",
+        "submit": "Save"
+      },
+      "isTransfer": "Transfer Student",
+      "transferPage": {
+        "title": "Are you a transfer student?",
+        "label": "Transfer Student",
+        "no": "Regular",
+        "yes": "Transfer",
         "submit": "Save"
       }
     }

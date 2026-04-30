@@ -25,7 +25,8 @@
     "termsAi": "AI 서비스 결과 면책 동의",
     "termsMarketing": "마케팅 정보 수신",
     "termsAgree": "약관 동의",
-    "edit": "수정"
+    "edit": "수정",
+    "myPersonalTransfer": "편입생 여부"
   },
   "bottomBar": {
     "graduation": "졸업 관리",
@@ -183,7 +184,10 @@
       "year": "{{n}}학년",
       "semester": "{{n}}학기",
       "yearSemesterDisplay": "{{y}}학년 {{s}}학기",
-      "submit": "완료"
+      "submit": "완료",
+      "isTransferLabel": "편입생 여부",
+      "isTransferNo": "일반 입학",
+      "isTransferYes": "편입생"
     },
     "welcome": {
       "title": "환영합니다!",
@@ -427,6 +431,14 @@
         "placeholder": "학년/학기를 선택해주세요",
         "error": "학년/학기를 선택해주세요.",
         "display": "{{y}}학년 / {{s}}학기",
+        "submit": "수정"
+      },
+      "isTransfer": "편입생 여부",
+      "transferPage": {
+        "title": "편입생 여부를 선택해주세요",
+        "label": "편입생 여부",
+        "no": "일반 입학",
+        "yes": "편입생",
         "submit": "수정"
       }
     }

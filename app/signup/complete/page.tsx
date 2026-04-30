@@ -214,6 +214,7 @@ export default function SignupCompletePage() {
   const [yearSemesterSheetOpen, setYearSemesterSheetOpen] = useState(false);
   const [sheetYear, setSheetYear] = useState<number | null>(null);
   const [sheetSemester, setSheetSemester] = useState<number | null>(null);
+  const [isTransfer, setIsTransfer] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -375,6 +376,7 @@ export default function SignupCompletePage() {
         secondMajor: result.data.secondMajor.trim() || undefined,
         academicStatus: mapAcademicStatus(result.data.academicStatus as AcademicStatusCode),
         completedSemesters: toCompletedSemesters(result.data.yearSemester),
+        isTransfer,
       });
 
       saveEmail(registerRes.user.email);
@@ -738,6 +740,38 @@ export default function SignupCompletePage() {
             {formErrors.academicStatus && (
               <p className="text-ds-caption-14-r text-destructive">{t(formErrors.academicStatus)}</p>
             )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-ds-caption-14-m leading-ds-caption-14-m font-medium text-ds-tertiary">
+              {t("signup.complete.isTransferLabel")}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsTransfer(false)}
+                className={cn(
+                  "flex-1 rounded-md border-2 py-3 text-ds-body-16-r leading-ds-body-16-r",
+                  !isTransfer
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-transparent bg-secondary text-ds-tertiary"
+                )}
+              >
+                {t("signup.complete.isTransferNo")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsTransfer(true)}
+                className={cn(
+                  "flex-1 rounded-md border-2 py-3 text-ds-body-16-r leading-ds-body-16-r",
+                  isTransfer
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-transparent bg-secondary text-ds-tertiary"
+                )}
+              >
+                {t("signup.complete.isTransferYes")}
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">
