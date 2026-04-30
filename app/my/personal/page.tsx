@@ -62,6 +62,13 @@ export default function MyPersonalPage() {
       value: yearSemesterValue,
       href: "/my/personal/year-semester",
     },
+    {
+      label: t("my.personal.isTransfer"),
+      value: profile
+        ? (profile.isTransfer ? t("my.personal.transferPage.yes") : t("my.personal.transferPage.no"))
+        : "",
+      href: "/my/personal/transfer",
+    },
   ];
 
   return (

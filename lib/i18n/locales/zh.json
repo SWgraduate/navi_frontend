@@ -25,7 +25,8 @@
     "termsAi": "AI服务免责声明",
     "termsMarketing": "营销同意",
     "termsAgree": "条款同意",
-    "edit": "修改"
+    "edit": "修改",
+    "myPersonalTransfer": "是否为插班生"
   },
   "bottomBar": {
     "graduation": "毕业管理",
@@ -183,7 +184,10 @@
       "year": "{{n}}年级",
       "semester": "第{{n}}学期",
       "yearSemesterDisplay": "{{y}}年级 第{{s}}学期",
-      "submit": "完成"
+      "submit": "完成",
+      "isTransferLabel": "是否为插班生",
+      "isTransferNo": "普通入学",
+      "isTransferYes": "插班生"
     },
     "welcome": {
       "title": "欢迎！",
@@ -427,6 +431,14 @@
         "error": "请选择年级 / 学期。",
         "display": "{{y}}年级 第{{s}}学期",
         "submit": "保存"
+      },
+      "isTransfer": "是否为插班生",
+      "transferPage": {
+        "title": "请选择是否为插班生",
+        "label": "是否为插班生",
+        "no": "普通入学",
+        "yes": "插班生",
+        "submit": "修改"
       }
     }
   },

@@ -33,6 +33,7 @@ export function useProfileUpdate() {
         secondMajor: profile.secondMajor,
         academicStatus: profile.academicStatus,
         completedSemesters: profile.completedSemesters,
+        isTransfer: profile.isTransfer,
         ...overrides,
       });
       updateProfileCache(result as StudentResponse);

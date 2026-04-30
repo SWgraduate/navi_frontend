@@ -52,3 +52,6 @@ export type {
 
 export { uploadRagPdf } from "./rag";
 export type { UploadPdfRequest, IngestPdfResult, IngestionStatus } from "./rag";
+
+export { getGraduationRequirements } from "./major";
+export type { GraduationRequirements, GetGraduationRequirementsParams } from "./major";
