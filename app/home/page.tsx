@@ -49,6 +49,7 @@ export default function Home() {
               key={message.id}
               message={message.text}
               isUser={message.isUser}
+              menuImages={message.menuImages}
             />
           ))}
           {isLoading && <ChatLoading />}

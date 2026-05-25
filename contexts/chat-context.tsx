@@ -14,6 +14,8 @@ interface Message {
   id: string;
   text: string;
   isUser: boolean;
+  /** 메뉴 쿼리 응답일 때 첨부되는 한양대 학식 이미지 URL 배열 */
+  menuImages?: string[];
 }
 
 interface ChatContextType {
@@ -101,12 +103,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 ? status.result
                 : status.result?.answer ?? "";
             const answer = resultAnswer.trim();
+            const menuImages =
+              typeof status.result === "object" && status.result !== null
+                ? status.result.menuImages?.filter((url) => typeof url === "string" && url.length > 0)
+                : undefined;
             setMessages((prev) => [
               ...prev,
               {
                 id: `assistant-${taskId}`,
                 text: answer || "처리가 완료되었습니다.",
                 isUser: false,
+                ...(menuImages && menuImages.length > 0 ? { menuImages } : {}),
               },
             ]);
             setIsLoading(false);
