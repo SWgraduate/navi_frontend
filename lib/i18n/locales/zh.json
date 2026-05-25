@@ -89,7 +89,9 @@
     }
   },
   "chat": {
-    "loading": "正在生成回复"
+    "loading": "正在生成回复",
+    "menuImagesLabel": "菜单图片",
+    "menuImageAlt": "菜单图片 {{index}}"
   },
   "splash": {
     "loading": "正在加载 Navi"

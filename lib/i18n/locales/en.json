@@ -89,7 +89,9 @@
     }
   },
   "chat": {
-    "loading": "Generating reply"
+    "loading": "Generating reply",
+    "menuImagesLabel": "Menu images",
+    "menuImageAlt": "Menu image {{index}}"
   },
   "splash": {
     "loading": "Loading Navi"

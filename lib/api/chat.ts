@@ -42,7 +42,15 @@ export type ChatStatusResponse = {
   status?: "queued" | "processing" | "completed" | "failed";
   progress?: string;
   displayMessage?: string;
-  result?: { answer?: string; sources?: unknown[]; retrievalMeta?: unknown } | string;
+  result?:
+    | {
+        answer?: string;
+        sources?: unknown[];
+        retrievalMeta?: unknown;
+        /** 메뉴 관련 질문일 때만 포함되는 한양대 서버의 메뉴 이미지 절대경로 배열 */
+        menuImages?: string[];
+      }
+    | string;
   error?: string;
 };
 
